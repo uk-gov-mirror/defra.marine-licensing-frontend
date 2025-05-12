@@ -29,7 +29,9 @@ describe('#taskListController', () => {
   })
 
   afterAll(async () => {
-    await server.stop({ timeout: 0 })
+    if (server && typeof server.stop === 'function') {
+      await server.stop({ timeout: 0 })
+    }
   })
 
   test('Should provide expected response when loading page', async () => {

@@ -15,6 +15,9 @@ export const projectNameRoutes = [
   {
     method: 'GET',
     path: '/exemption/project-name',
+    options: {
+      auth: 'defra-id'
+    },
     ...projectNameController
   },
   {

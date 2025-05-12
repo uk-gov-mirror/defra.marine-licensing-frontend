@@ -122,6 +122,17 @@ describe('buildRedisClient', () => {
       expect(client.__nodes).toEqual([{ host: '127.0.0.1', port: 6379 }])
     })
 
+    it('should include a dnsLookup that calls back with (null, address)', () => {
+      const clusterOptions = Cluster.mock.calls[0][1]
+      const { dnsLookup } = clusterOptions
+
+      expect(typeof dnsLookup).toBe('function')
+
+      const cb = jest.fn()
+      dnsLookup('some-host', cb)
+      expect(cb).toHaveBeenCalledWith(null, 'some-host')
+    })
+
     it('should call logger.info on connect event for cluster', () => {
       const connectCallback = mockClusterEventHandlers.get('connect')
       expect(connectCallback).toBeDefined()

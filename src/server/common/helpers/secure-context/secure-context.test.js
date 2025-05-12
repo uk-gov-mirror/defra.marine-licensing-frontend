@@ -35,7 +35,9 @@ describe('#secureContext', () => {
 
     afterEach(async () => {
       config.set('isSecureContextEnabled', false)
-      await server.stop({ timeout: 0 })
+      if (server && typeof server.stop === 'function') {
+        await server.stop({ timeout: 0 })
+      }
     })
 
     test('secureContext decorator should not be available', () => {
@@ -65,7 +67,9 @@ describe('#secureContext', () => {
 
     afterEach(async () => {
       config.set('isSecureContextEnabled', false)
-      await server.stop({ timeout: 0 })
+      if (server && typeof server.stop === 'function') {
+        await server.stop({ timeout: 0 })
+      }
     })
 
     afterAll(() => {
@@ -96,7 +100,9 @@ describe('#secureContext', () => {
 
     afterEach(async () => {
       config.set('isSecureContextEnabled', false)
-      await server.stop({ timeout: 0 })
+      if (server && typeof server.stop === 'function') {
+        await server.stop({ timeout: 0 })
+      }
     })
 
     test('Should log about not finding any TRUSTSTORE_ certs', () => {

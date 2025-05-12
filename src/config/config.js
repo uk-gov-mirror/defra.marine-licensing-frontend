@@ -95,6 +95,38 @@ export const config = convict({
         : []
     }
   },
+  defraIdOidcConfigurationUrl: {
+    doc: 'DEFRA ID discovery URL',
+    format: String,
+    env: 'DEFRA_ID_OIDC_CONFIGURATION_URL',
+    default:
+      'http://localhost:3200/cdp-defra-id-stub/.well-known/openid-configuration'
+  },
+  defraIdServiceId: {
+    doc: 'DEFRA ID service GUID',
+    format: String,
+    env: 'DEFRA_ID_SERVICE_ID',
+    default: '<demo-service-id>'
+  },
+  defraIdClientId: {
+    doc: 'DEFRA ID client ID',
+    format: String,
+    env: 'DEFRA_ID_CLIENT_ID',
+    default: '<demo-client-id>'
+  },
+  defraIdClientSecret: {
+    doc: 'DEFRA ID client secret',
+    format: String,
+    sensitive: true,
+    env: 'DEFRA_ID_CLIENT_SECRET',
+    default: 'test_value'
+  },
+  appBaseUrl: {
+    doc: 'Application base URL for after we login',
+    format: String,
+    default: 'http://localhost:3000',
+    env: 'APP_BASE_URL'
+  },
   httpProxy: /** @type {SchemaObj<string | null>} */ ({
     doc: 'HTTP Proxy',
     format: String,

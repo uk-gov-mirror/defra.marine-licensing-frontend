@@ -1,5 +1,4 @@
 services:
-
   marine-licensing-frontend:
     build: ./
     ports:

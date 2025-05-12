@@ -2,7 +2,10 @@ import path from 'path'
 import hapi from '@hapi/hapi'
 
 import { config } from '~/src/config/config.js'
+import { defraId } from './common/helpers/auth/defra-id.js'
 import { nunjucksConfig } from '~/src/config/nunjucks/nunjucks.js'
+import { auth } from './auth/index.js'
+import { login } from './login/index.js'
 import { router } from './router.js'
 import { requestLogger } from '~/src/server/common/helpers/logging/request-logger.js'
 import { catchAll } from '~/src/server/common/helpers/errors.js'
@@ -19,27 +22,19 @@ export async function createServer() {
     port: config.get('port'),
     routes: {
       validate: {
-        options: {
-          abortEarly: false
-        }
+        options: { abortEarly: false }
       },
       files: {
         relativeTo: path.resolve(config.get('root'), '.public')
       },
       security: {
-        hsts: {
-          maxAge: 31536000,
-          includeSubDomains: true,
-          preload: false
-        },
+        hsts: { maxAge: 31536000, includeSubDomains: true, preload: false },
         xss: 'enabled',
         noSniff: true,
         xframe: true
       }
     },
-    router: {
-      stripTrailingSlash: true
-    },
+    router: { stripTrailingSlash: true },
     cache: [
       {
         name: config.get('session.cache.name'),
@@ -48,20 +43,44 @@ export async function createServer() {
         )
       }
     ],
-    state: {
-      strictHeader: false
-    }
+    state: { strictHeader: false }
   })
-  await server.register([
+
+  const isTest = config.get('env') === 'test'
+
+  if (isTest) {
+    server.auth.scheme('dummy', () => ({
+      authenticate(request, h) {
+        return h.authenticated({
+          credentials: {
+            profile: {
+              email: 'dimitri@alpha.com',
+              roles: [],
+              relationships: []
+            },
+            expiresIn: 3600
+          }
+        })
+      }
+    }))
+    server.auth.strategy('defra-id', 'dummy', {})
+    server.auth.default('defra-id')
+  }
+
+  const plugins = [
+    ...(isTest ? [] : [defraId]),
     requestLogger,
     requestTracing,
     secureContext,
     pulse,
     sessionCache,
     nunjucksConfig,
-    router // Register all the controllers/routes defined in src/server/router.js
-  ])
+    auth,
+    login,
+    router
+  ]
 
+  await server.register(plugins)
   server.ext('onPreResponse', catchAll)
 
   return server
