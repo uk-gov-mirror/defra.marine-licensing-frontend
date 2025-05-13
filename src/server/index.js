@@ -50,7 +50,7 @@ export async function createServer() {
 
   if (isTest) {
     server.auth.scheme('dummy', () => ({
-      authenticate(request, h) {
+      authenticate(_request, h) {
         return h.authenticated({
           credentials: {
             profile: {
