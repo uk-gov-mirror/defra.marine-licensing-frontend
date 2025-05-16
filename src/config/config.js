@@ -121,6 +121,12 @@ export const config = convict({
     env: 'DEFRA_ID_CLIENT_SECRET',
     default: 'test_value'
   },
+  redirectUrl: {
+    doc: 'The Defra Identity redirect URl.',
+    format: String,
+    default: '',
+    env: 'DEFRA_ID_REDIRECT_URL'
+  },
   appBaseUrl: {
     doc: 'Application base URL for after we login',
     format: String,

@@ -66,6 +66,7 @@ describe('buildRedisClient', () => {
         port: 6379,
         host: '127.0.0.1',
         db: 0,
+        enableReadyCheck: false,
         keyPrefix: 'marine-licensing-frontend:'
       })
       expect(client.__options).toMatchObject({
@@ -116,7 +117,14 @@ describe('buildRedisClient', () => {
           keyPrefix: 'marine-licensing-frontend:',
           slotsRefreshTimeout: 10000,
           dnsLookup: expect.any(Function),
-          redisOptions: { db: 0, username: 'user', password: 'pass', tls: {} }
+          enableReadyCheck: false,
+          redisOptions: {
+            db: 0,
+            username: 'user',
+            password: 'pass',
+            tls: {},
+            enableReadyCheck: false
+          }
         }
       )
       expect(client.__nodes).toEqual([{ host: '127.0.0.1', port: 6379 }])

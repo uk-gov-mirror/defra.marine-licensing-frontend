@@ -37,11 +37,13 @@ export function buildRedisClient(redisConfig) {
         }
   const tls = redisConfig.useTLS ? { tls: {} } : {}
 
+  const enableReadyCheck = false
   if (redisConfig.useSingleInstanceCache) {
     redisClient = new Redis({
       port,
       host,
       db,
+      enableReadyCheck,
       keyPrefix,
       ...credentials,
       ...tls
@@ -55,11 +57,13 @@ export function buildRedisClient(redisConfig) {
         }
       ],
       {
+        enableReadyCheck: false,
         keyPrefix,
         slotsRefreshTimeout: 10000,
         dnsLookup: (address, callback) => callback(null, address),
         redisOptions: {
           db,
+          enableReadyCheck,
           ...credentials,
           ...tls
         }

@@ -125,6 +125,14 @@ const defraId = {
       const clientSecret = config.get('defraIdClientSecret')
       const authCallbackUrl = config.get('appBaseUrl') + '/auth/callback'
 
+      if (!oidcConfigurationUrl) {
+        server.log(
+          ['warn', 'auth'],
+          'Skipping defra-id plugin, no URL configured'
+        )
+        return
+      }
+
       await server.register(bell)
       const oidcConf = await getOidcConfig(oidcConfigurationUrl)
 
