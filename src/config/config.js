@@ -106,13 +106,13 @@ export const config = convict({
     doc: 'DEFRA ID service GUID',
     format: String,
     env: 'DEFRA_ID_SERVICE_ID',
-    default: '63983fc2-cfff-45bb-8ec2-959e21062b9a'
+    default: ''
   },
   defraIdClientId: {
     doc: 'DEFRA ID client ID',
     format: String,
     env: 'DEFRA_ID_CLIENT_ID',
-    default: '63983fc2-cfff-45bb-8ec2-959e21062b9a'
+    default: ''
   },
   defraIdClientSecret: {
     doc: 'DEFRA ID client secret',

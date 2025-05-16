@@ -68,7 +68,7 @@ export async function createServer() {
   }
 
   const plugins = [
-    ...(isTest ? [] : [defraId]),
+    ...(!isTest ? [defraId] : []),
     requestLogger,
     requestTracing,
     secureContext,
@@ -81,6 +81,15 @@ export async function createServer() {
   ]
 
   await server.register(plugins)
+
+  server.ext('onPreResponse', (request, h) => {
+    const resp = request.response
+    if (resp.isBoom) {
+      request.logger.error(resp.stack || resp.message)
+    }
+    return h.continue
+  })
+
   server.ext('onPreResponse', catchAll)
 
   return server

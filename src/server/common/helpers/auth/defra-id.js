@@ -1,8 +1,10 @@
 import fetch from 'node-fetch'
 import jwt from '@hapi/jwt'
 import bell from '@hapi/bell'
+import cookie from '@hapi/cookie'
 
 import { config } from '~/src/config/config.js'
+import { refreshTokens } from './refresh-tokens.js'
 
 const defraId = {
   plugin: {
@@ -82,6 +84,43 @@ const defraId = {
         }
         return h.continue
       })
+
+      await server.register(cookie)
+      server.auth.strategy('session', 'cookie', {
+        cookie: {
+          name: 'sess-defra-id',
+          password: config.get('session.cookie.password'),
+          isSecure: false, // set via config in prod
+          path: '/'
+        },
+        redirectTo: false, // we’ll handle redirects manually
+        validate: async (request, session) => {
+          const data = await request.server.app.cache.get(session.sessionId)
+          if (!data) {
+            return { isValid: false }
+          }
+          try {
+            jwt.token.verifyTime(jwt.token.decode(data.accessToken))
+            return { isValid: true, credentials: data }
+          } catch (err) {
+            if (!config.get('defraIdRefreshTokens')) {
+              return { isValid: false }
+            }
+            const {
+              access_token: accessToken,
+              refresh_token: refreshToken,
+              expires_in: expiresIn
+            } = await refreshTokens(data.refreshToken)
+            data.accessToken = accessToken
+            data.refreshToken = refreshToken
+            data.expiresIn = expiresIn
+            await request.server.app.cache.set(session.sessionId, data)
+            return { isValid: true, credentials: data }
+          }
+        }
+      })
+
+      server.auth.default('session')
     }
   }
 }

@@ -6,24 +6,12 @@ import { serveStaticFiles } from '~/src/server/common/helpers/serve-static-files
 import { about } from '~/src/server/about/index.js'
 import { exemption } from '~/src/server/exemption/index.js'
 
-/**
- * @satisfies {ServerRegisterPluginObject<void>}
- */
 export const router = {
   plugin: {
     name: 'router',
     async register(server) {
       await server.register([inert])
-
-      await server.register([health])
-
-      await server.register([exemption, about, home])
-
-      await server.register([serveStaticFiles])
+      await server.register([health, home, exemption, about, serveStaticFiles])
     }
   }
 }
-
-/**
- * @import { ServerRegisterPluginObject } from '@hapi/hapi'
- */
