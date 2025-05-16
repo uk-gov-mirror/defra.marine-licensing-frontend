@@ -2,14 +2,15 @@ import fetch from 'node-fetch'
 import { config } from '~/src/config/config.js'
 
 export async function refreshTokens(refreshToken) {
-  const discovery = config.get('defraIdOidcConfigurationUrl')
-  let issuer = discovery.replace(/\.well-known\/.+$/, '')
-  issuer = issuer.replace(/\/+$/, '')
-  const tokenEndpoint = `${issuer}/token`
-
-  // const tokenEndpoint =
-  //   config.get('defraIdOidcConfigurationUrl').replace(/\.well-known\/.+$/, '') +
-  //   '/token'
+  let issuer = config.get('defraIdOidcConfigurationUrl')
+  const idx = issuer.indexOf('/.well-known/')
+  if (idx !== -1) {
+    issuer = issuer.slice(0, idx)
+  }
+  while (issuer.endsWith('/')) {
+    issuer = issuer.slice(0, -1)
+  }
+  const tokenEndpoint = issuer + '/token'
 
   const resp = await fetch(tokenEndpoint, {
     method: 'POST',
