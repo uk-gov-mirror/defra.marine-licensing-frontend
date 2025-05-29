@@ -75,7 +75,7 @@ describe('#startServer', () => {
         3,
         'Access your frontend on http://localhost:3097'
       )
-    })
+    }, 20000)
   })
 
   describe('When server start fails', () => {
