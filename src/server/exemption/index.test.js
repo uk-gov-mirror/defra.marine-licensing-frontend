@@ -32,6 +32,30 @@ describe('exemption route', () => {
       }),
       expect.objectContaining({
         method: 'GET',
+        path: '/exemption/how-do-you-want-to-provide-the-coordinates'
+      }),
+      expect.objectContaining({
+        method: 'POST',
+        path: '/exemption/how-do-you-want-to-provide-the-coordinates'
+      }),
+      expect.objectContaining({
+        method: 'GET',
+        path: '/exemption/how-do-you-want-to-enter-the-coordinates'
+      }),
+      expect.objectContaining({
+        method: 'POST',
+        path: '/exemption/how-do-you-want-to-enter-the-coordinates'
+      }),
+      expect.objectContaining({
+        method: 'GET',
+        path: '/exemption/what-coordinate-system'
+      }),
+      expect.objectContaining({
+        method: 'POST',
+        path: '/exemption/what-coordinate-system'
+      }),
+      expect.objectContaining({
+        method: 'GET',
         path: '/exemption'
       })
     ])
@@ -48,7 +72,7 @@ describe('exemption route', () => {
 
     const routes = server.route.mock.calls[0][0]
 
-    const handler = routes[5].handler
+    const handler = routes.at(-1).handler
 
     const redirectSpy = jest.fn().mockReturnValue('redirected')
 

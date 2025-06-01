@@ -1,4 +1,4 @@
-import fetch from 'node-fetch'
+import Wreck from '@hapi/wreck'
 import jwt from '@hapi/jwt'
 import bell from '@hapi/bell'
 import cookiePlugin from '@hapi/cookie'
@@ -7,7 +7,7 @@ import { config } from '~/src/config/config.js'
 import { defraId } from './defra-id.js'
 import { refreshTokens } from './refresh-tokens.js'
 
-jest.mock('node-fetch')
+jest.mock('@hapi/wreck')
 jest.mock('./refresh-tokens.js')
 
 describe('defraId plugin', () => {
@@ -38,7 +38,9 @@ describe('defraId plugin', () => {
       token_endpoint: 'https://token/',
       end_session_endpoint: 'https://logout/'
     }
-    fetch.mockResolvedValue({ json: () => Promise.resolve(fakeOidc) })
+    Wreck.get.mockResolvedValue({
+      payload: fakeOidc
+    })
 
     // stub JWT decode
     jwt.token.decode = jest.fn().mockReturnValue({
@@ -86,7 +88,7 @@ describe('defraId plugin', () => {
 
     expect(server.register).toHaveBeenCalledWith(bell)
     expect(server.register).toHaveBeenCalledWith(cookiePlugin)
-    expect(fetch).toHaveBeenCalledWith(discoveryUrl)
+    expect(Wreck.get).toHaveBeenCalledWith(discoveryUrl, { json: true })
 
     const bellCall = server.auth.strategy.mock.calls.find(
       (c) => c[0] === 'defra-id'

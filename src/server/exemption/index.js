@@ -1,6 +1,8 @@
 import { projectNameRoutes } from '~/src/server/exemption/project-name/index.js'
 import { publicRegisterRoutes } from '~/src/server/exemption/public-register/index.js'
 import { taskListRoutes } from '~/src/server/exemption/task-list/index.js'
+import { siteDetailsRoutes } from '~/src/server/exemption/site-details/index.js'
+import { routes } from '~/src/server/common/constants/routes.js'
 
 /**
  * Sets up the routes used in the exemption home page.
@@ -18,11 +20,12 @@ export const exemption = {
         ...projectNameRoutes,
         ...publicRegisterRoutes,
         ...taskListRoutes,
+        ...siteDetailsRoutes,
         {
           method: 'GET',
           path: '/exemption',
           handler: (_request, h) => {
-            return h.redirect('/exemption/project-name')
+            return h.redirect(routes.PROJECT_NAME)
           }
         }
       ])

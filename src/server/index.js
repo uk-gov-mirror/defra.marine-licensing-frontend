@@ -15,9 +15,11 @@ import { getCacheEngine } from '~/src/server/common/helpers/session-cache/cache-
 import { pulse } from '~/src/server/common/helpers/pulse.js'
 import { requestTracing } from '~/src/server/common/helpers/request-tracing.js'
 import { setupProxy } from '~/src/server/common/helpers/proxy/setup-proxy.js'
+import { csrf } from '~/src/server/common/helpers/csrf.js'
 
 export async function createServer() {
   setupProxy()
+
   const server = hapi.server({
     port: config.get('port'),
     routes: {
@@ -50,7 +52,15 @@ export async function createServer() {
 
   if (isTest) {
     server.auth.scheme('dummy', () => ({
-      authenticate(_request, h) {
+      authenticate(request, h) {
+        // Set up user session for api-client
+        request.yar.set('user', {
+          idToken: 'test-jwt-token',
+          email: 'dimitri@alpha.com',
+          roles: [],
+          relationships: []
+        })
+
         return h.authenticated({
           credentials: {
             profile: {
@@ -75,6 +85,7 @@ export async function createServer() {
     pulse,
     sessionCache,
     nunjucksConfig,
+    csrf,
     auth,
     login,
     router

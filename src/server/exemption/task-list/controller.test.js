@@ -3,14 +3,15 @@ import { statusCodes } from '~/src/server/common/constants/status-codes.js'
 import { config } from '~/src/config/config.js'
 import { JSDOM } from 'jsdom'
 import * as cacheUtils from '~/src/server/common/helpers/session-cache/utils.js'
+import * as apiClient from '~/src/server/common/helpers/api-client.js'
 import {
   taskListController,
-  TASK_LIST_ROUTE,
   TASK_LIST_VIEW_ROUTE
 } from '~/src/server/exemption/task-list/controller.js'
 import { mockExemption } from '~/src/server/test-helpers/mocks.js'
+import { routes } from '~/src/server/common/constants/routes.js'
 
-import Wreck from '@hapi/wreck'
+jest.mock('~/src/server/common/helpers/api-client.js')
 
 describe('#taskListController', () => {
   /** @type {Server} */
@@ -28,8 +29,8 @@ describe('#taskListController', () => {
     jest.resetAllMocks()
 
     jest
-      .spyOn(Wreck, 'get')
-      .mockReturnValue({ payload: { value: mockExemption } })
+      .spyOn(apiClient, 'getFromBackend')
+      .mockResolvedValue({ payload: { value: mockExemption } })
 
     getExemptionCacheSpy = jest
       .spyOn(cacheUtils, 'getExemptionCache')
@@ -45,7 +46,7 @@ describe('#taskListController', () => {
   test('Should provide expected response when loading page', async () => {
     const { result, statusCode } = await server.inject({
       method: 'GET',
-      url: TASK_LIST_ROUTE
+      url: routes.TASK_LIST
     })
 
     expect(result).toEqual(
@@ -77,12 +78,23 @@ describe('#taskListController', () => {
 
   test('taskListController handler should render with correct context', async () => {
     const h = { view: jest.fn() }
+    const mockRequest = {
+      yar: {
+        get: jest.fn().mockReturnValue({
+          idToken: 'test-jwt-token'
+        })
+      }
+    }
 
-    await taskListController.handler({}, h)
+    await taskListController.handler(mockRequest, h)
 
-    expect(Wreck.get).toHaveBeenCalledWith(
-      `${config.get('backend').apiUrl}/exemption/${mockExemption.id}`,
-      { json: true }
+    expect(apiClient.getFromBackend).toHaveBeenCalledWith(
+      expect.objectContaining({
+        yar: expect.objectContaining({
+          get: expect.any(Function)
+        })
+      }),
+      `/exemption/${mockExemption.id}`
     )
 
     expect(h.view).toHaveBeenCalledWith(TASK_LIST_VIEW_ROUTE, {
@@ -91,7 +103,7 @@ describe('#taskListController', () => {
       projectName: 'Test Project',
       taskList: [
         {
-          href: '/exemption/project-name',
+          href: routes.PROJECT_NAME,
           status: {
             text: 'Completed'
           },
@@ -100,7 +112,19 @@ describe('#taskListController', () => {
           }
         },
         {
-          href: '/exemption/public-register',
+          href: routes.COORDINATES_TYPE_CHOICE,
+          status: {
+            tag: {
+              classes: 'govuk-tag--blue',
+              text: 'Incomplete'
+            }
+          },
+          title: {
+            text: 'Site details'
+          }
+        },
+        {
+          href: routes.PUBLIC_REGISTER,
           status: {
             text: 'Completed'
           },
@@ -112,15 +136,53 @@ describe('#taskListController', () => {
     })
   })
 
+  test('taskListController handler should correctly handle request to clear cache and redirect', async () => {
+    const resetExemptionSiteDetailsSpy = jest.spyOn(
+      cacheUtils,
+      'resetExemptionSiteDetails'
+    )
+
+    const { statusCode, headers } = await server.inject({
+      method: 'GET',
+      url: `${routes.TASK_LIST}?cancel=site-details`
+    })
+
+    expect(resetExemptionSiteDetailsSpy).toHaveBeenCalled()
+    expect(statusCode).toBe(302)
+    expect(headers.location).toBe(routes.TASK_LIST)
+  })
+
+  test('taskListController should redirect when cancel query parameter is provided but does not match', async () => {
+    const resetExemptionSiteDetailsSpy = jest.spyOn(
+      cacheUtils,
+      'resetExemptionSiteDetails'
+    )
+
+    const { statusCode, headers } = await server.inject({
+      method: 'GET',
+      url: `${routes.TASK_LIST}?cancel=does-not-exist`
+    })
+
+    expect(resetExemptionSiteDetailsSpy).not.toHaveBeenCalled()
+    expect(statusCode).toBe(302)
+    expect(headers.location).toBe(routes.TASK_LIST)
+  })
+
   test('taskListController handler should throw a 404 if exemption is not found', async () => {
     const h = { view: jest.fn() }
+    const mockRequest = {
+      yar: {
+        get: jest.fn().mockReturnValue({
+          idToken: 'test-jwt-token'
+        })
+      }
+    }
 
     getExemptionCacheSpy.mockResolvedValueOnce(null)
 
-    await expect(() => taskListController.handler({}, h)).rejects.toThrow(
-      `Exemption not found`,
-      mockExemption.id
-    )
+    await expect(() =>
+      taskListController.handler(mockRequest, h)
+    ).rejects.toThrow(`Exemption not found`, mockExemption.id)
   })
 })
 

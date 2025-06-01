@@ -1,4 +1,4 @@
-import fetch from 'node-fetch'
+import Wreck from '@hapi/wreck'
 import { config } from '~/src/config/config.js'
 
 export async function refreshTokens(refreshToken) {
@@ -12,20 +12,21 @@ export async function refreshTokens(refreshToken) {
   }
   const tokenEndpoint = issuer + '/token'
 
-  const resp = await fetch(tokenEndpoint, {
-    method: 'POST',
+  const body = new URLSearchParams({
+    grant_type: 'refresh_token',
+    client_id: config.get('defraIdClientId'),
+    client_secret: config.get('defraIdClientSecret'),
+    refresh_token: refreshToken
+  }).toString()
+
+  const { res, payload } = await Wreck.post(tokenEndpoint, {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      grant_type: 'refresh_token',
-      client_id: config.get('defraIdClientId'),
-      client_secret: config.get('defraIdClientSecret'),
-      refresh_token: refreshToken
-    })
+    payload: body
   })
 
-  if (!resp.ok) {
-    throw new Error(`refresh failed: ${resp.status}`)
+  if (res.statusCode >= 400) {
+    throw new Error(`refresh failed: ${res.statusCode}`)
   }
 
-  return resp.json()
+  return JSON.parse(payload.toString())
 }

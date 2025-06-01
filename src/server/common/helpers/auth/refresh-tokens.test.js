@@ -1,7 +1,8 @@
-import fetch from 'node-fetch'
+import Wreck from '@hapi/wreck'
 import { refreshTokens } from './refresh-tokens.js'
 import { config } from '~/src/config/config.js'
 
+jest.mock('@hapi/wreck')
 jest.mock('~/src/config/config.js', () => ({
   config: {
     get: jest.fn()
@@ -17,25 +18,23 @@ describe('refreshTokens', () => {
     config.get.mockReturnValueOnce(
       'https://oidc/.well-known/openid-configuration'
     )
-    fetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => {
-        const response = await Promise.resolve({
+    Wreck.post.mockResolvedValueOnce({
+      res: { statusCode: 200 },
+      payload: Buffer.from(
+        JSON.stringify({
           access_token: 'new-access',
           refresh_token: 'new-refresh',
           expires_in: 3600
         })
-        return response
-      }
+      )
     })
 
     const result = await refreshTokens('old-refresh')
-    expect(fetch).toHaveBeenCalledWith(
+    expect(Wreck.post).toHaveBeenCalledWith(
       'https://oidc/token',
       expect.objectContaining({
-        method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: expect.any(URLSearchParams)
+        payload: expect.any(String)
       })
     )
     expect(result).toEqual({
@@ -49,7 +48,10 @@ describe('refreshTokens', () => {
     config.get.mockReturnValueOnce(
       'https://oidc/.well-known/openid-configuration'
     )
-    fetch.mockResolvedValueOnce({ ok: false, status: 502 })
+    Wreck.post.mockResolvedValueOnce({
+      res: { statusCode: 502 },
+      payload: Buffer.from('{}')
+    })
     await expect(refreshTokens('r')).rejects.toThrow('refresh failed: 502')
   })
 })

@@ -1,4 +1,4 @@
-import fetch from 'node-fetch'
+import Wreck from '@hapi/wreck'
 import jwt from '@hapi/jwt'
 import bell from '@hapi/bell'
 import cookie from '@hapi/cookie'
@@ -7,8 +7,8 @@ import { config } from '~/src/config/config.js'
 import { refreshTokens } from './refresh-tokens.js'
 
 async function getOidcConfig(url) {
-  const res = await fetch(url)
-  return res.json()
+  const { payload } = await Wreck.get(url, { json: true })
+  return payload
 }
 
 function registerBellStrategy(
