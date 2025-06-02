@@ -107,6 +107,7 @@ export default {
           {
             loader: 'sass-loader',
             options: {
+              implementation: require('sass-embedded'),
               sassOptions: {
                 loadPaths: [
                   path.join(dirname, 'src/client/stylesheets'),
