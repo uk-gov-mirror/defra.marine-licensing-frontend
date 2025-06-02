@@ -106,13 +106,13 @@ export const config = convict({
     doc: 'DEFRA ID service GUID',
     format: String,
     env: 'DEFRA_ID_SERVICE_ID',
-    default: ''
+    default: 'test-service-id'
   },
   defraIdClientId: {
     doc: 'DEFRA ID client ID',
     format: String,
     env: 'DEFRA_ID_CLIENT_ID',
-    default: ''
+    default: 'test-client-id'
   },
   defraIdClientSecret: {
     doc: 'DEFRA ID client secret',
@@ -124,7 +124,7 @@ export const config = convict({
   redirectUrl: {
     doc: 'The Defra Identity redirect URl.',
     format: String,
-    default: '',
+    default: 'http://localhost:3000/auth/callback',
     env: 'DEFRA_ID_REDIRECT_URL'
   },
   appBaseUrl: {
