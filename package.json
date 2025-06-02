@@ -109,6 +109,7 @@
     "postcss-load-config": "^6.0.1",
     "postcss-loader": "^8.1.1",
     "prettier": "^3.3.3",
+    "sass": "^1.80.6",
     "sass-embedded": "^1.80.6",
     "sass-loader": "^16.0.3",
     "source-map-loader": "^5.0.0",
@@ -120,5 +121,11 @@
     "webpack": "^5.96.1",
     "webpack-assets-manifest": "^5.2.1",
     "webpack-cli": "^5.1.4"
+  },
+  "optionalDependencies": {
+    "sass-embedded-linux-x64": "^1.80.6",
+    "sass-embedded-darwin-x64": "^1.80.6",
+    "sass-embedded-darwin-arm64": "^1.80.6",
+    "sass-embedded-win32-x64": "^1.80.6"
   }
 }

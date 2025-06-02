@@ -106,6 +106,20 @@ export default {
           {
             loader: 'sass-loader',
             options: {
+              implementation: (() => {
+                try {
+                  // Try sass-embedded first (preferred)
+                  return require('sass-embedded')
+                } catch {
+                  try {
+                    // Fallback to regular sass if sass-embedded fails
+                    return require('sass')
+                  } catch {
+                    // Final fallback to node-sass if available
+                    return require('node-sass')
+                  }
+                }
+              })(),
               sassOptions: {
                 loadPaths: [
                   path.join(dirname, 'src/client/stylesheets'),
