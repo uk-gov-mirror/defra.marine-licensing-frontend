@@ -175,7 +175,17 @@ export default {
   },
   plugins: [
     new CleanWebpackPlugin(),
-    new WebpackAssetsManifest(),
+    new WebpackAssetsManifest({
+      output: 'manifest.json',
+      publicPath: '/public/',
+      writeToDisk: true,
+      customize: (entry) => {
+        if (!entry?.key) {
+          return false
+        }
+        return entry
+      }
+    }),
     new CopyPlugin({
       patterns: [
         {
