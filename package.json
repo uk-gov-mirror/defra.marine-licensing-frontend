@@ -12,6 +12,7 @@
     "build": "run-s build:frontend build:server",
     "build:frontend": "NODE_ENV=production webpack && node -e \"const fs=require('fs'),path=require('path');const dir='.public';const manifest={};try{const files=fs.readdirSync(dir,{recursive:true});files.forEach(f=>{if(typeof f==='string'&&(f.endsWith('.js')||f.endsWith('.css'))){const simple=f.replace(/\\.[a-f0-9]{7}\\.min\\./,'.');manifest[simple]=f}});fs.writeFileSync(path.join(dir,'assets-manifest.json'),JSON.stringify(manifest,null,2));console.log('Generated assets-manifest.json')}catch(e){console.error('Manifest generation failed:',e.message)}\"",
     "build:server": "NODE_ENV=production babel --delete-dir-on-start --ignore \"**/*.test.js\" --ignore \"**/test-helpers\" --copy-files --no-copy-ignored --out-dir ./.server ./src",
+    "ci:install": "npm ci --include=optional",
     "dev": "run-p frontend:watch server:watch",
     "dev:debug": "run-p frontend:watch server:debug",
     "format": "prettier --write \"src/**/*.js\" \"**/*.{js,cjs,md,json,config.js,test.js}\"",
