@@ -4,6 +4,7 @@ import path from 'path'
 import CopyPlugin from 'copy-webpack-plugin'
 import { CleanWebpackPlugin } from 'clean-webpack-plugin'
 import TerserPlugin from 'terser-webpack-plugin'
+import WebpackAssetsManifest from 'webpack-assets-manifest'
 
 const { NODE_ENV = 'development' } = process.env
 
@@ -106,7 +107,6 @@ export default {
           {
             loader: 'sass-loader',
             options: {
-              implementation: require('sass'),
               sassOptions: {
                 loadPaths: [
                   path.join(dirname, 'src/client/stylesheets'),
@@ -175,6 +175,7 @@ export default {
   },
   plugins: [
     new CleanWebpackPlugin(),
+    new WebpackAssetsManifest(),
     new CopyPlugin({
       patterns: [
         {
