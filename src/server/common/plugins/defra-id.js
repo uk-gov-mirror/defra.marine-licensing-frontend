@@ -17,7 +17,6 @@ export const defraId = {
         return
       }
 
-      // Original auth setup when enabled
       const oidcConfig = await getOidcConfig()
       const defra = openIdProvider('defraId', oidcConfig)
       const { cookie } = config.get('session')
