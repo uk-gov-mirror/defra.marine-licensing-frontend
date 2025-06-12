@@ -11,5 +11,6 @@ export const routes = {
   TASK_LIST: '/exemption/task-list',
   ACTIVITY_DESCRIPTION: '/exemption/activity-description',
   AUTH_DEFRA_ID_CALLBACK: '/signin-oidc',
-  LOGIN: '/login'
+  LOGIN: '/login',
+  WIDTH_OF_SITE: '/exemption/width-of-site'
 }
