@@ -1,4 +1,10 @@
-import { getUserSession } from '~/src/server/common/plugins/auth/utils.js'
+import {
+  getUserSession,
+  removeUserSession,
+  refreshAccessToken,
+  updateUserSession
+} from '~/src/server/common/plugins/auth/utils.js'
+import { isPast, parseISO, subMinutes } from 'date-fns'
 
 export const validateUserSession = async (request, session) => {
   const userSession = await getUserSession(request, session)
@@ -7,29 +13,27 @@ export const validateUserSession = async (request, session) => {
     return { isValid: false }
   }
 
-  // TODO IN NEXT COMMIT
+  const tokenHasExpired = isPast(subMinutes(parseISO(userSession.expiresAt), 1))
 
-  //   const tokenHasExpired = isPast(subMinutes(parseISO(userSession.expiresAt), 1))
+  if (tokenHasExpired) {
+    const response = await refreshAccessToken(request, session)
 
-  //   if (tokenHasExpired) {
-  //     const response = await refreshAccessToken(request)
+    if (!response.ok) {
+      removeUserSession(request, session)
+      return { isValid: false }
+    }
 
-  //     if (!response.ok) {
-  //       removeUserSession(request, session)
-  //       return { isValid: false }
-  //     }
+    const refreshAccessTokenJson = await response.json
+    const updatedSession = await updateUserSession(
+      request,
+      refreshAccessTokenJson
+    )
 
-  //     const refreshAccessTokenJson = await response.json
-  //     // const updatedSession = await updateUserSession(
-  //     //   request,
-  //     //   refreshAccessTokenJson
-  //     // )
-
-  //     // return {
-  //     //   isValid: true,
-  //     //   credentials: updatedSession
-  //     // }
-  //   }
+    return {
+      isValid: true,
+      credentials: updatedSession
+    }
+  }
 
   return { isValid: true, credentials: userSession }
 }

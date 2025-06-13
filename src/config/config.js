@@ -276,6 +276,12 @@ export const config = convict({
       format: String,
       default: 'http://localhost:3000',
       env: 'APP_BASE_URL'
+    },
+    refreshTokens: {
+      doc: 'True if Defra Identity refresh tokens are enabled.',
+      format: Boolean,
+      default: true,
+      env: 'DEFRA_ID_REFRESH_TOKENS'
     }
   }
 })
