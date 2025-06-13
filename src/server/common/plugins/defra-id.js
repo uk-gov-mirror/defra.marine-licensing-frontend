@@ -55,10 +55,6 @@ export const defraId = {
       })
 
       server.auth.default('session')
-      server.log(
-        ['auth', 'info'],
-        'Authentication is enabled - using defra-id and session strategies'
-      )
     }
   }
 }

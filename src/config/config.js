@@ -275,7 +275,7 @@ export const config = convict({
       doc: 'The Defra Identity redirect URl.',
       format: String,
       default: 'http://localhost:3000',
-      env: 'DEFRA_ID_REDIRECT_URL'
+      env: 'APP_BASE_URL'
     }
   }
 })
