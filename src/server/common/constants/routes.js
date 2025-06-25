@@ -15,5 +15,7 @@ export const routes = {
   SIGN_OUT: '/sign-out',
   WIDTH_OF_SITE: '/exemption/width-of-site',
   ACTIVITY_DATES: '/exemption/activity-dates',
-  CHOOSE_FILE_UPLOAD_TYPE: '/exemption/choose-file-type-to-upload'
+  CHOOSE_FILE_UPLOAD_TYPE: '/exemption/choose-file-type-to-upload',
+  CHECK_YOUR_ANSWERS: '/exemption/check-your-answers',
+  CONFIRMATION: '/exemption/confirmation'
 }
