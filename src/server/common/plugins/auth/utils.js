@@ -5,7 +5,7 @@ import jwt from '@hapi/jwt'
 import { addSeconds } from 'date-fns'
 
 export const getUserSession = async (request, session) => {
-  if (session.sessionId) {
+  if (session?.sessionId) {
     const sessionId = await request.server.app.cache.get(session.sessionId)
     return sessionId
   }
@@ -23,10 +23,10 @@ export const refreshAccessToken = async (request, session) => {
   request.logger.setBindings({ refreshingAccessToken: authedUser.strategy })
 
   const authConfig = config.get('defraId')
-  const { clientId, clientSecret, scopes } = authConfig
+  const { clientId, clientSecret, scopes, redirectUrl } = authConfig
 
   const refreshToken = authedUser?.refreshToken ?? null
-  const redirectUri = `${config.get('defraId.redirectUrl')}${routes.AUTH_DEFRA_ID_CALLBACK}`
+  const redirectUri = `${redirectUrl}${routes.AUTH_DEFRA_ID_CALLBACK}`
 
   const params = {
     client_id: clientId,
@@ -47,13 +47,14 @@ export const updateUserSession = async (request, refreshedSession) => {
   const expiresInSeconds = refreshedSession.expires_in
   const expiresInMilliSeconds = expiresInSeconds * 1000
   const expiresAt = addSeconds(new Date(), expiresInSeconds)
-  const authedUser = await getUserSession(request)
+
+  const authedUser = await getUserSession(request, request.state.session)
   const displayName = [payload.firstName, payload.lastName]
     .filter((part) => part)
     .join(' ')
 
   await request.server.app.cache.set(
-    request.state.userSession.sessionId,
+    request.state.session.sessionId,
     {
       ...authedUser,
       id: payload.sub,
@@ -83,5 +84,5 @@ export const updateUserSession = async (request, refreshedSession) => {
     expiresInMilliSeconds
   )
 
-  return getUserSession(request)
+  return getUserSession(request, request.state.session)
 }
