@@ -13,5 +13,7 @@ export const routes = {
   AUTH_DEFRA_ID_CALLBACK: '/signin-oidc',
   LOGIN: '/login',
   SIGN_OUT: '/sign-out',
-  WIDTH_OF_SITE: '/exemption/width-of-site'
+  WIDTH_OF_SITE: '/exemption/width-of-site',
+  ACTIVITY_DATES: '/exemption/activity-dates',
+  CHOOSE_FILE_UPLOAD_TYPE: '/exemption/choose-file-type-to-upload'
 }
