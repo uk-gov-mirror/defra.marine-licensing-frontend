@@ -20,13 +20,13 @@ export const defraId = {
       const oidcConfig = await getOidcConfig()
       const defra = openIdProvider('defraId', oidcConfig)
       const { cookie } = config.get('session')
-      const { clientId, clientSecret, serviceId } = config.get('defraId')
+      const { clientId, clientSecret, serviceId, redirectUrl } =
+        config.get('defraId')
 
       server.auth.strategy('defra-id', 'bell', {
         location: (request) => {
           request.yar.flash('referrer', routes.PROJECT_NAME)
-
-          return `${config.get('defraId.redirectUrl')}${routes.AUTH_DEFRA_ID_CALLBACK}`
+          return `${redirectUrl}${routes.AUTH_DEFRA_ID_CALLBACK}`
         },
         provider: defra,
         password: cookie.password,

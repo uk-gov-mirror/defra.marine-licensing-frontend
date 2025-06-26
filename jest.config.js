@@ -18,8 +18,7 @@ export default {
     '<rootDir>/.public',
     '<rootDir>/src/server/test-helpers',
     '<rootDir>/src/client/javascripts/application.js',
-    '<rootDir>/src/index.js',
-    '<rootDir>/src/server/common/plugins/defra-id.js'
+    '<rootDir>/src/index.js'
   ],
   coverageDirectory: '<rootDir>/coverage',
   transform: {

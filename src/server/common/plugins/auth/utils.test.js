@@ -10,7 +10,6 @@ import jwt from '@hapi/jwt'
 import { addSeconds } from 'date-fns'
 
 jest.mock('~/src/config/config.js')
-jest.mock('~/src/server/common/constants/routes.js')
 jest.mock('./get-oidc-config.js')
 jest.mock('@hapi/jwt')
 jest.mock('date-fns', () => ({
