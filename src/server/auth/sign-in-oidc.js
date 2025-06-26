@@ -6,7 +6,7 @@ export const signInOidcController = {
   method: ['GET', 'POST'],
   path: routes.AUTH_DEFRA_ID_CALLBACK,
   options: {
-    auth: 'defra-id'
+    auth: { strategy: 'defra-id', mode: 'try' }
   },
   handler: async (request, h) => {
     const { authEnabled } = config.get('defraId')
