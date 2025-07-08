@@ -46,14 +46,14 @@ export const updateUserSession = async (request, refreshedSession) => {
     .payload
 
   const logger = createLogger()
-  logger.info(payload, 'DEFRA ID LOG (updateUserSession): payload')
+  logger.info('DEFRA ID LOG (updateUserSession): payload', { payload })
 
   const expiresInSeconds = refreshedSession.expires_in
   const expiresInMilliSeconds = expiresInSeconds * 1000
   const expiresAt = addSeconds(new Date(), expiresInSeconds)
 
   const authedUser = await getUserSession(request, request.state.session)
-  logger.info(authedUser, 'DEFRA ID LOG (updateUserSession): authedUser')
+  logger.info('DEFRA ID LOG (updateUserSession): authedUser', { authedUser })
 
   const displayName = [payload.firstName, payload.lastName]
     .filter((part) => part)

@@ -20,12 +20,13 @@ export const defraId = {
       const logger = createLogger()
       logger.info('DEFRA ID LOG (get-oidc-config): Requesting Config')
       const oidcConfig = await getOidcConfig()
-      logger.info(oidcConfig, 'DEFRA ID LOG (get-oidc-config): Config returned')
+      logger.info('DEFRA ID LOG (get-oidc-config): Config returned', {
+        oidcConfig
+      })
       const defra = openIdProvider('defraId', oidcConfig)
-      logger.info(
-        defra,
-        'DEFRA ID LOG (openIdProvider): defra provider config: '
-      )
+      logger.info('DEFRA ID LOG (openIdProvider): defra provider config: ', {
+        defra
+      })
       const { cookie } = config.get('session')
       const { clientId, clientSecret, serviceId, redirectUrl } =
         config.get('defraId')
