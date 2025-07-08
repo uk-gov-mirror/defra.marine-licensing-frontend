@@ -10,17 +10,17 @@ import { createLogger } from '~/src/server/common/helpers/logging/logger.js'
 export const validateUserSession = async (request, session) => {
   const userSession = await getUserSession(request, session)
   const logger = createLogger()
-  logger.info('DEFRA ID LOG (validateUserSession): userSession', {
-    userSession
-  })
+  logger.info(
+    `DEFRA ID LOG (validateUserSession): userSession ${JSON.stringify(userSession)}`
+  )
   if (!userSession) {
     return { isValid: false }
   }
 
   const tokenHasExpired = isPast(subMinutes(parseISO(userSession.expiresAt), 1))
-  logger.info('DEFRA ID LOG (validateUserSession): tokenHasExpired', {
-    tokenHasExpired
-  })
+  logger.info(
+    `DEFRA ID LOG (validateUserSession): tokenHasExpired ${JSON.stringify(tokenHasExpired)}`
+  )
 
   if (tokenHasExpired) {
     const response = await refreshAccessToken(request, session)
@@ -36,9 +36,9 @@ export const validateUserSession = async (request, session) => {
       refreshAccessTokenJson
     )
 
-    logger.info('DEFRA ID LOG (validateUserSession): updatedSession', {
-      updatedSession
-    })
+    logger.info(
+      `DEFRA ID LOG (validateUserSession): updatedSession ${JSON.stringify(updatedSession)}`
+    )
 
     return {
       isValid: true,

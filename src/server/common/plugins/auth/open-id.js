@@ -15,13 +15,13 @@ export const openIdProvider = (name, oidcConf) => {
     profile: (credentials, params) => {
       const logger = createLogger()
 
-      logger.info('DEFRA ID LOG (openIdProvider - profile - credentials): ', {
-        credentials
-      })
+      logger.info(
+        `DEFRA ID LOG (openIdProvider - profile - credentials): ${JSON.stringify(credentials)}`
+      )
 
-      logger.info('DEFRA ID LOG (openIdProvider - profile - params): ', {
-        params
-      })
+      logger.info(
+        `DEFRA ID LOG (openIdProvider - profile - params): ${JSON.stringify(params)}`
+      )
       if (!credentials?.token) {
         throw new Error(
           `${name} Auth Access Token not present. Unable to retrieve profile.`
@@ -33,8 +33,7 @@ export const openIdProvider = (name, oidcConf) => {
         .filter((part) => part)
         .join(' ')
       logger.info(
-        'DEFRA ID LOG (openIdProvider - profile - Jwt.token.decode): ',
-        { payload }
+        `DEFRA ID LOG (openIdProvider - profile - Jwt.token.decode): ${JSON.stringify(payload)}`
       )
 
       credentials.profile = {
