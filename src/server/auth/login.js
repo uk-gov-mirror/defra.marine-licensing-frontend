@@ -1,4 +1,5 @@
 import { routes } from '~/src/server/common/constants/routes.js'
+import { createLogger } from '~/src/server/common/helpers/logging/logger.js'
 
 export const loginController = {
   method: 'GET',
@@ -10,6 +11,8 @@ export const loginController = {
     }
   },
   handler: (_request, h) => {
+    const logger = createLogger()
+    logger.info('DEFRA ID LOG (login controller): Request', _request)
     return h.redirect(routes.PROJECT_NAME)
   }
 }

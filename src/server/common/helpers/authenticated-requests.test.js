@@ -11,6 +11,14 @@ import { getUserSession } from '~/src/server/common/plugins/auth/utils.js'
 jest.mock('~/src/server/common/plugins/auth/utils.js')
 jest.mock('@hapi/wreck')
 jest.mock('~/src/config/config.js')
+jest.mock('~/src/server/common/helpers/logging/logger.js', () => ({
+  createLogger: jest.fn(() => ({
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn()
+  }))
+}))
 
 describe('#authenticated-requests', () => {
   let mockRequest
@@ -46,8 +54,19 @@ describe('#authenticated-requests', () => {
       Authorization: 'Bearer test-token'
     }
 
-    config.get.mockImplementation(() => {
-      return { apiUrl: 'http://localhost:3001' }
+    config.get.mockImplementation((key) => {
+      if (key === 'backend') {
+        return { apiUrl: 'http://localhost:3001' }
+      }
+      if (key === 'log') {
+        return {
+          enabled: true,
+          level: 'info',
+          format: 'pino-pretty',
+          redact: []
+        }
+      }
+      return undefined
     })
   })
 

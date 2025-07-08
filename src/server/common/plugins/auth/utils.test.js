@@ -15,6 +15,14 @@ jest.mock('@hapi/jwt')
 jest.mock('date-fns', () => ({
   addSeconds: jest.fn()
 }))
+jest.mock('~/src/server/common/helpers/logging/logger.js', () => ({
+  createLogger: jest.fn(() => ({
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn()
+  }))
+}))
 
 describe('#utils', () => {
   let mockRequest
@@ -27,12 +35,26 @@ describe('#utils', () => {
   beforeEach(() => {
     jest.clearAllMocks()
 
-    config.get.mockImplementation(() => ({
-      clientId: 'test-client-id',
-      clientSecret: 'test-client-secret',
-      scopes: 'test-scopes',
-      redirectUrl: 'http://test-redirect-url'
-    }))
+    config.get.mockImplementation((key) => {
+      if (key === 'defraId') {
+        return {
+          clientId: 'test-client-id',
+          clientSecret: 'test-client-secret',
+          scopes: 'test-scopes',
+          redirectUrl: 'http://test-redirect-url',
+          enabled: true
+        }
+      }
+      if (key === 'log') {
+        return {
+          enabled: true,
+          level: 'info',
+          format: 'pino-pretty',
+          redact: []
+        }
+      }
+      return undefined
+    })
 
     mockRequest = {
       server: {
@@ -48,6 +70,7 @@ describe('#utils', () => {
         clear: jest.fn()
       },
       logger: {
+        info: jest.fn(),
         setBindings: jest.fn()
       },
       state: {

@@ -3,6 +3,7 @@ import { config } from '~/src/config/config.js'
 import { openIdProvider } from '~/src/server/common/plugins/auth/open-id.js'
 import { routes } from '~/src/server/common/constants/routes.js'
 import { validateUserSession } from '~/src/server/common/plugins/auth/validate.js'
+import { createLogger } from '~/src/server/common/helpers/logging/logger.js'
 
 export const defraId = {
   plugin: {
@@ -16,9 +17,17 @@ export const defraId = {
         })
         return
       }
-
+      const logger = createLogger()
+      logger.info('DEFRA ID LOG (get-oidc-config): Requesting Config')
       const oidcConfig = await getOidcConfig()
+      logger.info('DEFRA ID LOG (get-oidc-config): Config returned', {
+        oidcConfig
+      })
       const defra = openIdProvider('defraId', oidcConfig)
+      logger.info(
+        'DEFRA ID LOG (openIdProvider): defra provider config: ',
+        defra
+      )
       const { cookie } = config.get('session')
       const { clientId, clientSecret, serviceId, redirectUrl } =
         config.get('defraId')

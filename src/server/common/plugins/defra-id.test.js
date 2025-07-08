@@ -9,7 +9,20 @@ jest.mock('~/src/config/config.js')
 jest.mock('~/src/server/common/plugins/auth/get-oidc-config.js')
 jest.mock('~/src/server/common/plugins/auth/open-id.js')
 jest.mock('~/src/server/common/plugins/auth/validate.js')
-jest.mock('~/src/server/common/constants/routes.js')
+jest.mock('~/src/server/common/constants/routes.js', () => ({
+  routes: {
+    PROJECT_NAME: '/project-name',
+    AUTH_DEFRA_ID_CALLBACK: '/signin-oidc'
+  }
+}))
+jest.mock('~/src/server/common/helpers/logging/logger.js', () => ({
+  createLogger: jest.fn(() => ({
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn()
+  }))
+}))
 
 const mockedGetOidcConfig = jest.mocked(getOidcConfig)
 const mockedOpenIdProvider = jest.mocked(openIdProvider)
@@ -54,19 +67,36 @@ describe('defraId plugin', () => {
       }
     }
 
-    config.get.mockImplementation(() => ({
-      authEnabled: true,
-      clientId: 'test-client-id',
-      clientSecret: 'test-client-secret',
-      serviceId: 'test-service-id',
-      redirectUrl: 'https://test.defra.gov.uk',
-      scopes: 'openid offline_access',
-      cookie: {
-        password: 'test-cookie-password',
-        secure: true,
-        ttl: 3600000
+    config.get.mockImplementation((key) => {
+      if (key === 'defraId') {
+        return {
+          authEnabled: true,
+          clientId: 'test-client-id',
+          clientSecret: 'test-client-secret',
+          serviceId: 'test-service-id',
+          redirectUrl: 'https://test.defra.gov.uk',
+          scopes: 'openid offline_access'
+        }
       }
-    }))
+      if (key === 'session') {
+        return {
+          cookie: {
+            password: 'test-cookie-password',
+            secure: true,
+            ttl: 3600000
+          }
+        }
+      }
+      if (key === 'log') {
+        return {
+          enabled: true,
+          level: 'info',
+          format: 'pino-pretty',
+          redact: []
+        }
+      }
+      return undefined
+    })
 
     mockedGetOidcConfig.mockResolvedValue(mockOidcConfig)
     mockedOpenIdProvider.mockReturnValue(mockDefraProvider)

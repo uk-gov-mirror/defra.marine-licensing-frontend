@@ -58,6 +58,7 @@ describe('#signInOidcController', () => {
 
     const mockRequest = {
       auth: { isAuthenticated: false },
+      logger: { info: jest.fn() },
       yar: { flash: jest.fn().mockReturnValue([customRedirectRoute]) }
     }
 
@@ -72,6 +73,7 @@ describe('#signInOidcController', () => {
   test('should fall back to PROJECT_NAME route when no referrer in flash', async () => {
     const mockRequest = {
       auth: { isAuthenticated: false },
+      logger: { info: jest.fn() },
       yar: { flash: jest.fn().mockReturnValue([]) }
     }
 

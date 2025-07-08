@@ -3,6 +3,7 @@ import { routes } from '~/src/server/common/constants/routes.js'
 import { getOpenIdRefreshToken } from './get-oidc-config.js'
 import jwt from '@hapi/jwt'
 import { addSeconds } from 'date-fns'
+import { createLogger } from '~/src/server/common/helpers/logging/logger.js'
 
 export const getUserSession = async (request, session) => {
   if (session?.sessionId) {
@@ -44,11 +45,16 @@ export const updateUserSession = async (request, refreshedSession) => {
   const payload = jwt.token.decode(refreshedSession.access_token).decoded
     .payload
 
+  const logger = createLogger()
+  logger.info('DEFRA ID LOG (updateUserSession): payload', payload)
+
   const expiresInSeconds = refreshedSession.expires_in
   const expiresInMilliSeconds = expiresInSeconds * 1000
   const expiresAt = addSeconds(new Date(), expiresInSeconds)
 
   const authedUser = await getUserSession(request, request.state.session)
+  logger.info('DEFRA ID LOG (updateUserSession): authedUser', authedUser)
+
   const displayName = [payload.firstName, payload.lastName]
     .filter((part) => part)
     .join(' ')

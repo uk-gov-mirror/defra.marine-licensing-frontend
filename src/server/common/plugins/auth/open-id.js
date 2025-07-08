@@ -1,5 +1,6 @@
 import Jwt from '@hapi/jwt'
 import { config } from '~/src/config/config.js'
+import { createLogger } from '~/src/server/common/helpers/logging/logger.js'
 
 export const openIdProvider = (name, oidcConf) => {
   const authConfig = config.get('defraId')
@@ -12,6 +13,14 @@ export const openIdProvider = (name, oidcConf) => {
     pkce: 'S256',
     scope: authConfig.scopes,
     profile: (credentials, params) => {
+      const logger = createLogger()
+
+      logger.info(
+        'DEFRA ID LOG (openIdProvider - profile - credentials): ',
+        credentials
+      )
+
+      logger.info('DEFRA ID LOG (openIdProvider - profile - params): ', params)
       if (!credentials?.token) {
         throw new Error(
           `${name} Auth Access Token not present. Unable to retrieve profile.`
@@ -22,6 +31,10 @@ export const openIdProvider = (name, oidcConf) => {
       const displayName = [payload.firstName, payload.lastName]
         .filter((part) => part)
         .join(' ')
+      logger.info(
+        'DEFRA ID LOG (openIdProvider - profile - Jwt.token.decode): ',
+        payload
+      )
 
       credentials.profile = {
         id: payload.sub,
