@@ -12,7 +12,7 @@ export const loginController = {
   },
   handler: (_request, h) => {
     const logger = createLogger()
-    logger.info('DEFRA ID LOG (login controller): Request', _request)
+    logger.info(_request, 'DEFRA ID LOG (login controller): Request')
     return h.redirect(routes.PROJECT_NAME)
   }
 }

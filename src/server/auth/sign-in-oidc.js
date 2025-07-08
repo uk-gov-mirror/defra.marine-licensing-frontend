@@ -11,8 +11,8 @@ export const signInOidcController = {
   handler: async (request, h) => {
     const { authEnabled } = config.get('defraId')
     request.logger.info(
-      'DEFRA ID LOG (sign-in-oidc controller): ',
-      request.auth
+      request.auth,
+      'DEFRA ID LOG (sign-in-oidc controller): '
     )
     if (authEnabled && request.auth?.isAuthenticated) {
       await setUserSession(request)

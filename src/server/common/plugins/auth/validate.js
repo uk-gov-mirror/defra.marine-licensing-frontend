@@ -10,15 +10,15 @@ import { createLogger } from '~/src/server/common/helpers/logging/logger.js'
 export const validateUserSession = async (request, session) => {
   const userSession = await getUserSession(request, session)
   const logger = createLogger()
-  logger.info('DEFRA ID LOG (validateUserSession): userSession', userSession)
+  logger.info(userSession, 'DEFRA ID LOG (validateUserSession): userSession')
   if (!userSession) {
     return { isValid: false }
   }
 
   const tokenHasExpired = isPast(subMinutes(parseISO(userSession.expiresAt), 1))
   logger.info(
-    'DEFRA ID LOG (validateUserSession): tokenHasExpired',
-    tokenHasExpired
+    tokenHasExpired,
+    'DEFRA ID LOG (validateUserSession): tokenHasExpired'
   )
 
   if (tokenHasExpired) {
@@ -36,8 +36,8 @@ export const validateUserSession = async (request, session) => {
     )
 
     logger.info(
-      'DEFRA ID LOG (validateUserSession): updatedSession',
-      updatedSession
+      updatedSession,
+      'DEFRA ID LOG (validateUserSession): updatedSession'
     )
 
     return {
