@@ -4,6 +4,10 @@ import { createLogger } from '~/src/server/common/helpers/logging/logger.js'
 
 export const openIdProvider = (name, oidcConf) => {
   const authConfig = config.get('defraId')
+
+  // TODO - For testing only, should go in config
+  const scopes = [...authConfig.scopes, authConfig.clientId]
+
   return {
     name,
     protocol: 'oauth2',
@@ -11,7 +15,7 @@ export const openIdProvider = (name, oidcConf) => {
     auth: oidcConf.authorization_endpoint,
     token: oidcConf.token_endpoint,
     pkce: 'S256',
-    scope: authConfig.scopes,
+    scope: scopes,
     profile: (credentials, params) => {
       const logger = createLogger()
 
