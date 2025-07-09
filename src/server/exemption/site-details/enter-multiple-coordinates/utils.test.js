@@ -125,7 +125,7 @@ describe('enter-multiple-coordinates utils', () => {
           expect(result).toEqual(sampleCoordinates)
         })
 
-        it('should truncate to 3 coordinates when more than 3 provided', () => {
+        it('should return all coordinates when more than 3 provided (no truncation)', () => {
           const extraCoordinates = [
             ...sampleCoordinates,
             sampleCoordinates[0],
@@ -135,8 +135,8 @@ describe('enter-multiple-coordinates utils', () => {
             extraCoordinates,
             system
           )
-          expect(result).toHaveLength(3)
-          expect(result).toEqual(sampleCoordinates)
+          expect(result).toHaveLength(extraCoordinates.length)
+          expect(result).toEqual(extraCoordinates)
         })
       }
     )

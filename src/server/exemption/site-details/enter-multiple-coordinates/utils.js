@@ -56,10 +56,10 @@ const createDefaultCoordinates = (coordinateSystem) => {
 }
 
 /**
- * Normalise coordinates for display - ensures exactly 3 coordinates with empty defaults
+ * Normalise coordinates for display - ensures minimum 3 coordinates with empty defaults
  * @param {Array} coordinates - Coordinate data
  * @param {string} coordinateSystem - Coordinate system type
- * @returns {Array} Array of exactly 3 coordinates
+ * @returns {Array} Array of all coordinates
  */
 export const normaliseCoordinatesForDisplay = (
   coordinates,
@@ -75,7 +75,7 @@ export const normaliseCoordinatesForDisplay = (
     displayCoordinates.push(createEmptyCoordinate(coordinateSystem))
   }
 
-  return displayCoordinates.slice(0, REQUIRED_COORDINATES_COUNT)
+  return displayCoordinates
 }
 
 export const extractCoordinateIndexFromFieldName = (fieldName) => {

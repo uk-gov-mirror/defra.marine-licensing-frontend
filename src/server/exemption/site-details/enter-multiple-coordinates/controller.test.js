@@ -308,5 +308,83 @@ describe('#multipleCoordinates', () => {
         COORDINATE_SYSTEMS.WGS84
       )
     })
+
+    test('should re-render the page with an added wgs84 point when the add point button is clicked', () => {
+      const payload = {
+        'coordinates[0][latitude]': '51.5074',
+        'coordinates[0][longitude]': '-0.1278',
+        'coordinates[1][latitude]': '51.5175',
+        'coordinates[1][longitude]': '-0.1376',
+        'coordinates[2][latitude]': '51.5276',
+        'coordinates[2][longitude]': '-0.1477',
+        add: 'add'
+      }
+      const request = { payload }
+
+      const existingCoordinates = [
+        { latitude: '51.5074', longitude: '-0.1278' },
+        { latitude: '51.5175', longitude: '-0.1376' },
+        { latitude: '51.5276', longitude: '-0.1477' }
+      ]
+      const expectedCoordinates = [
+        ...existingCoordinates,
+        { latitude: '', longitude: '' }
+      ]
+      getCoordinateSystemSpy.mockReturnValueOnce({
+        coordinateSystem: COORDINATE_SYSTEMS.WGS84
+      })
+      convertPayloadToCoordinatesArray.mockReturnValueOnce(existingCoordinates)
+      normaliseCoordinatesForDisplay.mockReturnValueOnce(expectedCoordinates)
+
+      multipleCoordinatesSubmitController.handler(request, mockH)
+
+      expect(mockH.view).toHaveBeenCalledWith(
+        MULTIPLE_COORDINATES_VIEW_ROUTES[COORDINATE_SYSTEMS.WGS84],
+        expect.objectContaining({
+          ...multipleCoordinatesPageData,
+          coordinates: expectedCoordinates,
+          projectName: 'Test Project'
+        })
+      )
+    })
+
+    test('should re-render the page with an added osgb36 point when the add point button is clicked', () => {
+      const payload = {
+        'coordinates[0][eastings]': '530000',
+        'coordinates[0][northings]': '181000',
+        'coordinates[1][eastings]': '530100',
+        'coordinates[1][northings]': '181100',
+        'coordinates[2][eastings]': '530200',
+        'coordinates[2][northings]': '181200',
+        add: 'add'
+      }
+      const request = { payload }
+
+      const existingCoordinates = [
+        { eastings: '530000', northings: '181000' },
+        { eastings: '530100', northings: '181100' },
+        { eastings: '530200', northings: '181200' }
+      ]
+      const expectedCoordinates = [
+        ...existingCoordinates,
+        { eastings: '', northings: '' }
+      ]
+      getCoordinateSystemSpy.mockReturnValueOnce({
+        coordinateSystem: COORDINATE_SYSTEMS.OSGB36
+      })
+      convertPayloadToCoordinatesArray.mockReturnValueOnce(existingCoordinates)
+      normaliseCoordinatesForDisplay.mockReturnValueOnce(expectedCoordinates)
+
+      multipleCoordinatesSubmitController.handler(request, mockH)
+
+      expect(mockH.view).toHaveBeenCalledWith(
+        MULTIPLE_COORDINATES_VIEW_ROUTES[COORDINATE_SYSTEMS.OSGB36],
+        expect.objectContaining({
+          ...multipleCoordinatesPageData,
+          coordinates: expectedCoordinates,
+          projectName: 'Test Project'
+        })
+      )
+    })
   })
 })

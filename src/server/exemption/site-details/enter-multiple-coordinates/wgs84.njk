@@ -51,8 +51,11 @@
       }) }}
       <form method="POST">
         <input type="hidden" name="csrfToken" value="{{ csrfToken }}">
-          {% for i in range(0, 3) %}
-            {% set coordinate = coordinates[i] or { latitude: '', longitude: '' } %}
+          {% set minCoords = 3 %}
+          {% set coords = coordinates | default([]) %}
+          {% set paddedCoords = coords + ([{latitude:'', longitude:''}] * (minCoords - coords | length)) if (coords | length) < minCoords else coords %}
+          {% for coordinate in paddedCoords %}
+            {% set i = loop.index0 %}
             {% set pointNumber = i + 1 %}
             {% set legendText %}
             {% if i == 0 %}Start and end point{% else %}Point {{ pointNumber }}
@@ -63,31 +66,43 @@
             {% endif %}
             {% endset %}
             {% call govukFieldset({
-            legend: {
-              text: legendText,
-              classes: "govuk-fieldset__legend--s"
-            }
-          }) %}
+              legend: {
+                text: legendText,
+                classes: "govuk-fieldset__legend--s"
+              }
+            }) %}
             {{ govukInput({
               id: "coordinates[" + i + "][latitude]",
               name: "coordinates[" + i + "][latitude]",
               value: coordinate.latitude,
               errorMessage: errors["coordinates" + i + "latitude"] if errors,
               label: {
-                text: "Latitude " + labelText
-              }, classes: "govuk-!-width-one-half" }) }}
+                text: "Latitude " ~ labelText
+              },
+              classes: "govuk-!-width-one-half" }) }}
             {{ govukInput({
               id: "coordinates[" + i + "][longitude]",
               name: "coordinates[" + i + "][longitude]",
               value: coordinate.longitude,
               errorMessage: errors["coordinates" + i + "longitude"] if errors,
               label: {
-                text: "Longitude " + labelText
+                text: "Longitude " ~ labelText
               },
               classes: "govuk-!-width-one-half"
             }) }}
             {% endcall %}
           {% endfor %}
+          <div class="govuk-button-group govuk-!-margin-top-8">
+            {{ govukButton({
+              text: "Add another point",
+              classes: "govuk-button--secondary",
+              attributes: {
+                id: "add-point",
+                name: "add",
+                value: "add"
+              }
+            }) }}
+          </div>
           <div class="govuk-button-group govuk-!-margin-top-8">
             {{ govukButton({
             text: "Continue",

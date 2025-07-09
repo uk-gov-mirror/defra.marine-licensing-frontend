@@ -38,6 +38,23 @@ export const multipleCoordinatesController = {
   }
 }
 
+function renderMultipleCoordinatesView(
+  h,
+  coordinates,
+  coordinateSystem,
+  projectName
+) {
+  const coordinatesForDisplay = normaliseCoordinatesForDisplay(
+    coordinates,
+    coordinateSystem
+  )
+  return h.view(MULTIPLE_COORDINATES_VIEW_ROUTES[coordinateSystem], {
+    ...multipleCoordinatesPageData,
+    coordinates: coordinatesForDisplay,
+    projectName
+  })
+}
+
 export const multipleCoordinatesSubmitController = {
   options: {},
   handler(request, h) {
@@ -68,17 +85,29 @@ export const multipleCoordinatesSubmitController = {
       )
     }
 
+    if (payload.add) {
+      let emptyCoordinate
+      if (coordinateSystem === COORDINATE_SYSTEMS.OSGB36) {
+        emptyCoordinate = { eastings: '', northings: '' }
+      } else {
+        emptyCoordinate = { latitude: '', longitude: '' }
+      }
+      const coordinatesWithEmpty = [...coordinates, emptyCoordinate]
+      return renderMultipleCoordinatesView(
+        h,
+        coordinatesWithEmpty,
+        coordinateSystem,
+        exemption?.projectName
+      )
+    }
+
     saveCoordinatesToSession(request, coordinates, coordinateSystem)
 
-    const coordinatesForDisplay = normaliseCoordinatesForDisplay(
+    return renderMultipleCoordinatesView(
+      h,
       coordinates,
-      coordinateSystem
+      coordinateSystem,
+      exemption?.projectName
     )
-
-    return h.view(MULTIPLE_COORDINATES_VIEW_ROUTES[coordinateSystem], {
-      ...multipleCoordinatesPageData,
-      coordinates: coordinatesForDisplay,
-      projectName: exemption?.projectName
-    })
   }
 }
