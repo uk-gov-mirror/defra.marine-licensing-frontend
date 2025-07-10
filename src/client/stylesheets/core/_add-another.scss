@@ -2,6 +2,10 @@
   position: relative;
 }
 
+.add-another .govuk-form-group {
+  clear: both;
+}
+
 .add-another .govuk-fieldset .govuk-fieldset__legend {
   position: relative;
   float: left;
