@@ -8,9 +8,9 @@ function mockRequest(options) {
 }
 
 describe('#buildNavigation', () => {
-  test('Should provide expected navigation details', () => {
+  test('Should provide expected navigation details', async () => {
     expect(
-      buildNavigation(mockRequest({ path: '/non-existent-path' }))
+      await buildNavigation(mockRequest({ path: '/non-existent-path' }))
     ).toEqual([
       {
         isActive: false,
@@ -20,8 +20,8 @@ describe('#buildNavigation', () => {
     ])
   })
 
-  test('Should provide expected highlighted navigation details', () => {
-    expect(buildNavigation(mockRequest({ path: '/' }))).toEqual([
+  test('Should provide expected highlighted navigation details', async () => {
+    expect(await buildNavigation(mockRequest({ path: '/' }))).toEqual([
       {
         isActive: true,
         text: 'Home',
