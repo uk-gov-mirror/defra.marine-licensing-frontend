@@ -53,6 +53,9 @@ describe('#utils', () => {
           redact: []
         }
       }
+      if (key === 'session.cache.ttl') {
+        return 3600000
+      }
       return undefined
     })
 

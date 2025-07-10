@@ -1,4 +1,5 @@
 import { addSeconds } from 'date-fns'
+import { config } from '~/src/config/config.js'
 
 export const setUserSession = async (request) => {
   const { profile } = request.auth.credentials
@@ -17,7 +18,7 @@ export const setUserSession = async (request) => {
       expiresIn: expiresInMilliSeconds,
       expiresAt: expiresAt.toISOString()
     },
-    expiresInMilliSeconds
+    config.get('session.cache.ttl')
   )
 
   request.cookieAuth.set({ sessionId: profile.sessionId })

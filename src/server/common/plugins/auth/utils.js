@@ -91,7 +91,7 @@ export const updateUserSession = async (request, refreshedSession) => {
       expiresIn: expiresInMilliSeconds,
       expiresAt: expiresAt.toISOString()
     },
-    expiresInMilliSeconds
+    config.get('session.cache.ttl')
   )
 
   return getUserSession(request, request.state.session)
