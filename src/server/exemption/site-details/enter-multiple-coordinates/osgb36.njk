@@ -52,7 +52,7 @@
         summaryText: detailsSummary,
         html: detailsHTML
       }) }}
-      <form method="POST">
+      <form method="POST" class="govuk-grid-column-two-thirds add-another">
         <input type="hidden" name="csrfToken" value="{{ csrfToken }}">
           {% set minCoords = 3 %}
           {% set coords = coordinates | default([]) %}
@@ -89,8 +89,7 @@
                 errorMessage: errors["coordinates" + i + "eastings"] if errors,
                 label: {
                   text: "Eastings" ~ labelText
-                },
-                classes: "govuk-!-width-one-half"
+                }
               }) }}
             {{ govukInput({
                 id: "coordinates[" + i + "][northings]",
@@ -99,8 +98,7 @@
                 errorMessage: errors["coordinates" + i + "northings"] if errors,
                 label: {
                   text: "Northings" ~ labelText
-                },
-                classes: "govuk-!-width-one-half"
+                }
               }) }}
             {% endcall %}
           {% endfor %}

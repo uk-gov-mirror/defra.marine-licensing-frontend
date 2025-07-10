@@ -63,27 +63,15 @@ export const multipleCoordinatesSubmitController = {
     const exemption = getExemptionCache(request)
     const { coordinateSystem } = getCoordinateSystem(request)
 
-    const coordinates = convertPayloadToCoordinatesArray(
+    let coordinates = convertPayloadToCoordinatesArray(
       payload,
       coordinateSystem
     )
 
     if (payload.remove) {
-      const coordinatesWithRemoved = removeCoordinateAtIndex(
+      coordinates = removeCoordinateAtIndex(
         coordinates,
         parseInt(payload.remove)
-      )
-      saveCoordinatesToSession(
-        request,
-        coordinatesWithRemoved,
-        coordinateSystem
-      )
-
-      return renderMultipleCoordinatesView(
-        h,
-        coordinatesWithRemoved,
-        coordinateSystem,
-        exemption?.projectName
       )
     }
 
@@ -113,13 +101,7 @@ export const multipleCoordinatesSubmitController = {
           ? { eastings: '', northings: '' }
           : { latitude: '', longitude: '' }
 
-      const coordinatesWithEmpty = [...coordinates, emptyCoordinate]
-      return renderMultipleCoordinatesView(
-        h,
-        coordinatesWithEmpty,
-        coordinateSystem,
-        exemption?.projectName
-      )
+      coordinates = [...coordinates, emptyCoordinate]
     }
 
     return renderMultipleCoordinatesView(
