@@ -17,6 +17,9 @@ export const validateUserSession = async (request, session) => {
     return { isValid: false }
   }
 
+  logger.info(
+    `DEFRA ID LOG (validateUserSession): userSession.expiresAt ${userSession.expiresAt}`
+  )
   const tokenHasExpired = isPast(subMinutes(parseISO(userSession.expiresAt), 1))
   logger.info(
     `DEFRA ID LOG (validateUserSession): tokenHasExpired ${JSON.stringify(tokenHasExpired)}`
@@ -24,6 +27,10 @@ export const validateUserSession = async (request, session) => {
 
   if (tokenHasExpired) {
     const response = await refreshAccessToken(request, session)
+
+    logger.info(
+      `DEFRA ID LOG (refreshAccessToken): refreshAccessToken response:  ${JSON.stringify(response)}`
+    )
 
     if (!response.ok) {
       removeUserSession(request, session)
