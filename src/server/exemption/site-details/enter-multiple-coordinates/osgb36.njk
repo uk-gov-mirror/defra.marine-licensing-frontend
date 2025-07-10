@@ -52,66 +52,88 @@
         summaryText: detailsSummary,
         html: detailsHTML
       }) }}
-      <form method="POST" class="govuk-grid-column-two-thirds add-another">
-        <input type="hidden" name="csrfToken" value="{{ csrfToken }}">
-          {% set minCoords = 3 %}
-          {% set coords = coordinates | default([]) %}
-          {% set paddedCoords = coords + ([{eastings:'', northings:''}] * (minCoords - coords | length)) if (coords | length) < minCoords else coords %}
-          {% for coordinate in paddedCoords %}
-            {% set i = loop.index0 %}
-            {% set pointNumber = i + 1 %}
-            {% set legendText %}
-            {% if i == 0 %}Start and end point{% else %}Point {{ pointNumber }}
+      <form method="POST" class="govuk-grid-column-two-thirds">
+        <div class="moj-add-another" data-module="moj-add-another" data-min-items="3" data-field-names="eastings,northings">
+          <input type="hidden" name="csrfToken" value="{{ csrfToken }}">
+            <h2 class="govuk-heading-m moj-add-another__heading" tabindex="-1">
+              Coordinate points
+            </h2>
+            {% set minCoords = 3 %}
+            {% set coords = coordinates | default([]) %}
+            {% set paddedCoords = coords %}
+            {% if coords | length < minCoords %}
+              {% set paddedCoords = coords + ([{eastings:'', northings:''}] * (minCoords - coords | length)) %}
             {% endif %}
-            {% endset %}
-            {% set labelText %}
-            {% if i == 0 %}
-              of start and end point
-            {% else %}
-              of point {{ pointNumber }}
-            {% endif %}
-            {% endset %}
-            {% call govukFieldset({
-              legend: {
-                text: legendText,
-                classes: "govuk-fieldset__legend--s"
-              }
-            }) %}
-            {% if i >= 3 %}
-              <button class="govuk-button govuk-button--secondary" name="remove" value="{{ i }}" type="submit">
-                Remove
-              </button>
-            {% endif %}
-            {{ govukInput({
-                id: "coordinates[" + i + "][eastings]",
-                name: "coordinates[" + i + "][eastings]",
-                value: coordinate.eastings,
-                errorMessage: errors["coordinates" + i + "eastings"] if errors,
-                label: {
-                  text: "Eastings" ~ labelText
+            {% for coordinate in paddedCoords %}
+              {% set i = loop.index0 %}
+              {% set pointNumber = i + 1 %}
+              {% set legendText %}
+              {% if i == 0 %}Start and end point{% else %}Point {{ pointNumber }}
+              {% endif %}
+              {% endset %}
+              {% set labelText %}
+              {% if i == 0 %}
+                of start and end point
+              {% else %}
+                of point {{ pointNumber }}
+              {% endif %}
+              {% endset %}
+              <div class="moj-add-another__item">
+                {% call govukFieldset({
+                legend: {
+                  text: legendText,
+                  classes: "govuk-fieldset__legend--s"
                 }
-              }) }}
-            {{ govukInput({
-                id: "coordinates[" + i + "][northings]",
-                name: "coordinates[" + i + "][northings]",
-                value: coordinate.northings,
-                errorMessage: errors["coordinates" + i + "northings"] if errors,
-                label: {
-                  text: "Northings" ~ labelText
-                }
-              }) }}
-            {% endcall %}
-          {% endfor %}
-          <div class="govuk-button-group">
+              }) %}
+                {% if i >= minCoords and loop.length > minCoords %}
+                  {{ govukButton({
+                    text: "Remove",
+                    classes: "govuk-button--secondary moj-add-another__remove-button",
+                    attributes: {
+                      name: "remove",
+                      value: i,
+                      type: "submit"
+                    }
+                  }) }}
+                {% endif %}
+                {{ govukInput({
+                  id: "coordinates-" + i + "-eastings",
+                  name: "coordinates[" + i + "][eastings]",
+                  value: coordinate.eastings,
+                  errorMessage: errors["coordinates" + i + "eastings"] if errors,
+                  label: {
+                    text: "Eastings " ~ labelText
+                  },
+                  attributes: {
+                    "data-name": "coordinates[%index%][eastings]",
+                    "data-id": "coordinates-%index%-eastings"
+                  }
+                }) }}
+                {{ govukInput({
+                  id: "coordinates-" + i + "-northings",
+                  name: "coordinates[" + i + "][northings]",
+                  value: coordinate.northings,
+                  errorMessage: errors["coordinates" + i + "northings"] if errors,
+                  label: {
+                    text: "Northings " ~ labelText
+                  },
+                  attributes: {
+                    "data-name": "coordinates[%index%][northings]",
+                    "data-id": "coordinates-%index%-northings"
+                  }
+                }) }}
+                {% endcall %}
+              </div>
+            {% endfor %}
             {{ govukButton({
-              text: "Add another point",
-              classes: "govuk-button--secondary",
-              attributes: {
-                id: "add-point",
-                name: "add",
-                value: "add"
-              }
-            }) }}
+            text: "Add another point",
+            classes: "govuk-button--secondary moj-add-another__add-button",
+            attributes: {
+              name: "add",
+              value: "add",
+              type: "submit"
+            }
+          }) }}
           </div>
           <div class="govuk-button-group govuk-!-margin-top-8">
             {{ govukButton({
