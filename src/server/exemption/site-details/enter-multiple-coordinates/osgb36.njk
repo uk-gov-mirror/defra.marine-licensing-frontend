@@ -77,6 +77,11 @@
                 classes: "govuk-fieldset__legend--s"
               }
             }) %}
+            {% if i >= 3 %}
+              <button class="govuk-button govuk-button--secondary" name="remove" value="{{ i }}" type="submit">
+                Remove
+              </button>
+            {% endif %}
             {{ govukInput({
                 id: "coordinates[" + i + "][eastings]",
                 name: "coordinates[" + i + "][eastings]",
@@ -99,7 +104,7 @@
               }) }}
             {% endcall %}
           {% endfor %}
-          <div class="govuk-button-group govuk-!-margin-top-8">
+          <div class="govuk-button-group">
             {{ govukButton({
               text: "Add another point",
               classes: "govuk-button--secondary",

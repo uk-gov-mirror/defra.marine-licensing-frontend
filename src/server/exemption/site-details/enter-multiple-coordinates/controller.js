@@ -11,7 +11,8 @@ import {
   validateCoordinates,
   convertArrayErrorsToFlattenedErrors,
   handleValidationFailure,
-  saveCoordinatesToSession
+  saveCoordinatesToSession,
+  removeCoordinateAtIndex
 } from './utils.js'
 
 export const multipleCoordinatesController = {
@@ -67,6 +68,25 @@ export const multipleCoordinatesSubmitController = {
       coordinateSystem
     )
 
+    if (payload.remove) {
+      const coordinatesWithRemoved = removeCoordinateAtIndex(
+        coordinates,
+        parseInt(payload.remove)
+      )
+      saveCoordinatesToSession(
+        request,
+        coordinatesWithRemoved,
+        coordinateSystem
+      )
+
+      return renderMultipleCoordinatesView(
+        h,
+        coordinatesWithRemoved,
+        coordinateSystem,
+        exemption?.projectName
+      )
+    }
+
     const validationResult = validateCoordinates(
       coordinates,
       exemption.id,
@@ -85,13 +105,14 @@ export const multipleCoordinatesSubmitController = {
       )
     }
 
+    saveCoordinatesToSession(request, coordinates, coordinateSystem)
+
     if (payload.add) {
-      let emptyCoordinate
-      if (coordinateSystem === COORDINATE_SYSTEMS.OSGB36) {
-        emptyCoordinate = { eastings: '', northings: '' }
-      } else {
-        emptyCoordinate = { latitude: '', longitude: '' }
-      }
+      const emptyCoordinate =
+        coordinateSystem === COORDINATE_SYSTEMS.OSGB36
+          ? { eastings: '', northings: '' }
+          : { latitude: '', longitude: '' }
+
       const coordinatesWithEmpty = [...coordinates, emptyCoordinate]
       return renderMultipleCoordinatesView(
         h,
@@ -100,8 +121,6 @@ export const multipleCoordinatesSubmitController = {
         exemption?.projectName
       )
     }
-
-    saveCoordinatesToSession(request, coordinates, coordinateSystem)
 
     return renderMultipleCoordinatesView(
       h,

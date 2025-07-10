@@ -21,24 +21,31 @@ import {
 jest.mock('~/src/server/common/helpers/session-cache/utils.js')
 jest.mock(
   '~/src/server/exemption/site-details/enter-multiple-coordinates/utils.js',
-  () => ({
-    MULTIPLE_COORDINATES_VIEW_ROUTES: {
-      WGS84: 'wgs84.njk',
-      OSGB36: 'osgb36.njk'
-    },
-    normaliseCoordinatesForDisplay: jest.fn(),
-    isWGS84: jest.fn(),
-    multipleCoordinatesPageData: {
-      heading:
-        'Enter multiple sets of coordinates to mark the boundary of the site',
-      backLink: '/exemption/what-coordinate-system'
-    },
-    convertPayloadToCoordinatesArray: jest.fn(),
-    validateCoordinates: jest.fn(),
-    convertArrayErrorsToFlattenedErrors: jest.fn(),
-    handleValidationFailure: jest.fn(),
-    saveCoordinatesToSession: jest.fn()
-  })
+  () => {
+    const actualUtils = jest.requireActual(
+      '~/src/server/exemption/site-details/enter-multiple-coordinates/utils.js'
+    )
+    return {
+      MULTIPLE_COORDINATES_VIEW_ROUTES: {
+        WGS84: 'wgs84.njk',
+        OSGB36: 'osgb36.njk'
+      },
+      normaliseCoordinatesForDisplay: jest.fn(),
+      isWGS84: jest.fn(),
+      multipleCoordinatesPageData: {
+        heading:
+          'Enter multiple sets of coordinates to mark the boundary of the site',
+        backLink: '/exemption/what-coordinate-system'
+      },
+      convertPayloadToCoordinatesArray: jest.fn(),
+      validateCoordinates: jest.fn(),
+      convertArrayErrorsToFlattenedErrors: jest.fn(),
+      handleValidationFailure: jest.fn(),
+      saveCoordinatesToSession: jest.fn(),
+      removeCoordinateAtIndex: actualUtils.removeCoordinateAtIndex,
+      REQUIRED_COORDINATES_COUNT: actualUtils.REQUIRED_COORDINATES_COUNT
+    }
+  }
 )
 
 describe('#multipleCoordinates', () => {
@@ -368,6 +375,45 @@ describe('#multipleCoordinates', () => {
       const expectedCoordinates = [
         ...existingCoordinates,
         { eastings: '', northings: '' }
+      ]
+      getCoordinateSystemSpy.mockReturnValueOnce({
+        coordinateSystem: COORDINATE_SYSTEMS.OSGB36
+      })
+      convertPayloadToCoordinatesArray.mockReturnValueOnce(existingCoordinates)
+      normaliseCoordinatesForDisplay.mockReturnValueOnce(expectedCoordinates)
+
+      multipleCoordinatesSubmitController.handler(request, mockH)
+
+      expect(mockH.view).toHaveBeenCalledWith(
+        MULTIPLE_COORDINATES_VIEW_ROUTES[COORDINATE_SYSTEMS.OSGB36],
+        expect.objectContaining({
+          ...multipleCoordinatesPageData,
+          coordinates: expectedCoordinates,
+          projectName: 'Test Project'
+        })
+      )
+    })
+
+    test('should re-render the page with a removed point when the remove button is clicked', () => {
+      const payload = {
+        'coordinates[0][eastings]': '530000',
+        'coordinates[0][northings]': '181000',
+        'coordinates[1][eastings]': '530100',
+        'coordinates[1][northings]': '181100',
+        'coordinates[2][eastings]': '530200',
+        'coordinates[2][northings]': '181200',
+        remove: '3'
+      }
+      const request = { payload }
+
+      const existingCoordinates = [
+        { eastings: '530000', northings: '181000' },
+        { eastings: '530100', northings: '181100' },
+        { eastings: '530200', northings: '181200' }
+      ]
+      const expectedCoordinates = [
+        { eastings: '530100', northings: '181100' },
+        { eastings: '530200', northings: '181200' }
       ]
       getCoordinateSystemSpy.mockReturnValueOnce({
         coordinateSystem: COORDINATE_SYSTEMS.OSGB36

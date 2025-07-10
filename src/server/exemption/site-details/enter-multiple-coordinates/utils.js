@@ -8,7 +8,7 @@ import { generatePointSpecificErrorMessage } from '~/src/server/common/helpers/s
 import { createOsgb36MultipleCoordinatesSchema } from '~/src/server/common/schemas/osgb36.js'
 import { createWgs84MultipleCoordinatesSchema } from '~/src/server/common/schemas/wgs84.js'
 
-const REQUIRED_COORDINATES_COUNT = 3
+export const REQUIRED_COORDINATES_COUNT = 3
 
 export const PATTERNS = {
   FIELD_BRACKETS: /[[\]]/g
@@ -237,4 +237,21 @@ export const validateCoordinates = (
   const schema = getValidationSchema(coordinateSystem)
 
   return schema.validate(validationPayload, { abortEarly: false })
+}
+
+/**
+ * Remove a coordinate at a given index, but only if index >= 3 and at least 3 remain after removal
+ * @param {Array} coordinates - Array of coordinates
+ * @param {number} index - Index to remove
+ * @returns {Array} New array with coordinate removed if allowed, else original array
+ */
+export const removeCoordinateAtIndex = (coordinates, index) => {
+  if (
+    index >= REQUIRED_COORDINATES_COUNT &&
+    index < coordinates.length &&
+    coordinates.length > REQUIRED_COORDINATES_COUNT
+  ) {
+    return coordinates.slice(0, index).concat(coordinates.slice(index + 1))
+  }
+  return coordinates
 }

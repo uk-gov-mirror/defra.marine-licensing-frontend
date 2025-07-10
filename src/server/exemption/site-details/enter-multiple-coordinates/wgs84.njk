@@ -71,6 +71,11 @@
                 classes: "govuk-fieldset__legend--s"
               }
             }) %}
+            {% if i >= 3 %}
+              <button class="govuk-button govuk-button--secondary" name="remove" value="{{ i }}" type="submit">
+                Remove
+              </button>
+            {% endif %}
             {{ govukInput({
               id: "coordinates[" + i + "][latitude]",
               name: "coordinates[" + i + "][latitude]",

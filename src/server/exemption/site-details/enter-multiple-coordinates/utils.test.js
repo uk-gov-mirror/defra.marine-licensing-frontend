@@ -24,7 +24,8 @@ import {
   createFieldErrors,
   handleValidationFailure,
   saveCoordinatesToSession,
-  validateCoordinates
+  validateCoordinates,
+  removeCoordinateAtIndex
 } from './utils.js'
 
 jest.mock('~/src/server/common/helpers/session-cache/utils.js')
@@ -637,6 +638,77 @@ describe('enter-multiple-coordinates utils', () => {
       const coordinates = [{ eastings: '529090', northings: '181680' }]
       validateCoordinates(coordinates, 'test-id', COORDINATE_SYSTEMS.OSGB36)
       expect(createOsgb36MultipleCoordinatesSchema).toHaveBeenCalled()
+    })
+  })
+
+  describe('removeCoordinateAtIndex', () => {
+    const baseCoords = [
+      { latitude: '1', longitude: '1' },
+      { latitude: '2', longitude: '2' },
+      { latitude: '3', longitude: '3' },
+      { latitude: '4', longitude: '4' },
+      { latitude: '5', longitude: '5' }
+    ]
+
+    it('should not remove if index is less than 3', () => {
+      expect(removeCoordinateAtIndex(baseCoords, 0)).toEqual(baseCoords)
+      expect(removeCoordinateAtIndex(baseCoords, 2)).toEqual(baseCoords)
+    })
+
+    it('should not remove if removing would leave fewer than 3 coordinates', () => {
+      const coords = [
+        { latitude: '1', longitude: '1' },
+        { latitude: '2', longitude: '2' },
+        { latitude: '3', longitude: '3' },
+        { latitude: '4', longitude: '4' }
+      ]
+
+      expect(removeCoordinateAtIndex(coords, 3)).toEqual([
+        { latitude: '1', longitude: '1' },
+        { latitude: '2', longitude: '2' },
+        { latitude: '3', longitude: '3' }
+      ])
+
+      expect(
+        removeCoordinateAtIndex(
+          [
+            { latitude: '1', longitude: '1' },
+            { latitude: '2', longitude: '2' },
+            { latitude: '3', longitude: '3' }
+          ],
+          3
+        )
+      ).toEqual([
+        { latitude: '1', longitude: '1' },
+        { latitude: '2', longitude: '2' },
+        { latitude: '3', longitude: '3' }
+      ])
+    })
+
+    it('should remove the coordinate at index 3 or greater if more than REQUIRED_COORDINATES_COUNT remain after removal', () => {
+      expect(removeCoordinateAtIndex(baseCoords, 3)).toEqual([
+        { latitude: '1', longitude: '1' },
+        { latitude: '2', longitude: '2' },
+        { latitude: '3', longitude: '3' },
+        { latitude: '5', longitude: '5' }
+      ])
+      expect(removeCoordinateAtIndex(baseCoords, 4)).toEqual([
+        { latitude: '1', longitude: '1' },
+        { latitude: '2', longitude: '2' },
+        { latitude: '3', longitude: '3' },
+        { latitude: '4', longitude: '4' }
+      ])
+    })
+
+    it('should return the same array if index is out of bounds', () => {
+      expect(removeCoordinateAtIndex(baseCoords, 10)).toEqual(baseCoords)
+      expect(removeCoordinateAtIndex([], 3)).toEqual([])
+    })
+
+    it('should not mutate the original array', () => {
+      const coordsCopy = [...baseCoords]
+      removeCoordinateAtIndex(coordsCopy, 3)
+      expect(coordsCopy).toEqual(baseCoords)
     })
   })
 })
