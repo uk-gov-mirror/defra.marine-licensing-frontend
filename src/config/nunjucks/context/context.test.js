@@ -90,7 +90,7 @@ describe('#context', () => {
             href: '/home'
           },
           {
-            text: 'Manage account',
+            text: 'Defra account',
             href: '#'
           }
         ])

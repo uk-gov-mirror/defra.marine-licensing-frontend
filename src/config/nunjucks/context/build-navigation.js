@@ -19,7 +19,7 @@ export const buildNavigation = async (request) => {
 
   if (authedUser?.strategy === 'defraId') {
     navigation.push({
-      text: 'Manage account',
+      text: 'Defra account',
       href: accountManagementUrl
     })
   }
