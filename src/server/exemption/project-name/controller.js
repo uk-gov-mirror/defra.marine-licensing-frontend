@@ -11,6 +11,7 @@ import {
   authenticatedPatchRequest
 } from '~/src/server/common/helpers/authenticated-requests.js'
 import { routes } from '~/src/server/common/constants/routes.js'
+import { createLogger } from '~/src/server/common/helpers/logging/logger.js'
 
 import joi from 'joi'
 
@@ -34,6 +35,9 @@ export const projectNameController = {
   handler(request, h) {
     const exemption = getExemptionCache(request)
 
+    const referrer = request.headers?.referer
+    const logger = createLogger()
+    logger.info(`DEFRA ID REFERRER: ${referrer}`)
     return h.view(PROJECT_NAME_VIEW_ROUTE, {
       ...projectNameViewSettings,
       payload: { projectName: exemption.projectName }
