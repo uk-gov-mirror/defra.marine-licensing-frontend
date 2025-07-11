@@ -45,9 +45,9 @@ describe('#context', () => {
         getAssetPath: expect.any(Function),
         navigation: [
           {
-            isActive: true,
-            text: 'Home',
-            url: '/'
+            active: false,
+            text: 'Projects home',
+            href: '/home'
           }
         ],
         serviceName: 'Apply for a marine licence',
@@ -85,13 +85,13 @@ describe('#context', () => {
       test('Should include account management link in navigation', () => {
         expect(contextResult.navigation).toEqual([
           {
-            isActive: true,
-            text: 'Home',
-            url: '/'
+            active: false,
+            text: 'Projects home',
+            href: '/home'
           },
           {
             text: 'Manage account',
-            url: '#'
+            href: '#'
           }
         ])
       })
@@ -110,9 +110,9 @@ describe('#context', () => {
       test('Should not include account management link in navigation', () => {
         expect(contextResult.navigation).toEqual([
           {
-            isActive: true,
-            text: 'Home',
-            url: '/'
+            active: false,
+            text: 'Projects home',
+            href: '/home'
           }
         ])
       })
@@ -176,9 +176,9 @@ describe('#context cache', () => {
         getAssetPath: expect.any(Function),
         navigation: [
           {
-            isActive: true,
-            text: 'Home',
-            url: '/'
+            active: false,
+            text: 'Projects home',
+            href: '/home'
           }
         ],
         serviceName: 'Apply for a marine licence',

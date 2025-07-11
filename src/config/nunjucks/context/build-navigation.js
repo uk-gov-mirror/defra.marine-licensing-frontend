@@ -1,5 +1,6 @@
 import { getUserSession } from '~/src/server/common/plugins/auth/utils.js'
 import { config } from '~/src/config/config.js'
+import { routes } from '~/src/server/common/constants/routes.js'
 
 /**
  * @param {Partial<Request> | null} request
@@ -10,16 +11,16 @@ export const buildNavigation = async (request) => {
 
   const navigation = [
     {
-      text: 'Home',
-      url: '/',
-      isActive: request?.path === '/'
+      text: 'Projects home',
+      href: routes.DASHBOARD,
+      active: request?.path === routes.DASHBOARD
     }
   ]
 
   if (authedUser?.strategy === 'defraId') {
     navigation.push({
       text: 'Manage account',
-      url: accountManagementUrl
+      href: accountManagementUrl
     })
   }
 
