@@ -53,9 +53,13 @@
         html: detailsHTML
       }) }}
       <form method="POST" class="govuk-grid-column-two-thirds">
-        <div class="moj-add-another" data-module="moj-add-another" data-min-items="3" data-field-names="eastings,northings">
+        <div
+          class="polygon-add-another"
+          data-module="polygon-add-another"
+          data-min-items="3"
+          data-field-names="eastings,northings">
           <input type="hidden" name="csrfToken" value="{{ csrfToken }}">
-            <h2 class="govuk-heading-m moj-add-another__heading" tabindex="-1">
+            <h2 class="govuk-heading-m polygon-add-another__heading" tabindex="-1">
               Coordinate points
             </h2>
             {% set minCoords = 3 %}
@@ -78,7 +82,7 @@
                 of point {{ pointNumber }}
               {% endif %}
               {% endset %}
-              <div class="moj-add-another__item">
+              <div class="polygon-add-another__item">
                 {% call govukFieldset({
                 legend: {
                   text: legendText,
@@ -88,7 +92,7 @@
                 {% if i >= minCoords and loop.length > minCoords %}
                   {{ govukButton({
                     text: "Remove",
-                    classes: "govuk-button--secondary moj-add-another__remove-button",
+                    classes: "govuk-button--secondary polygon-add-another__remove-button",
                     attributes: {
                       name: "remove",
                       value: i,
@@ -127,7 +131,7 @@
             {% endfor %}
             {{ govukButton({
             text: "Add another point",
-            classes: "govuk-button--secondary moj-add-another__add-button",
+            classes: "govuk-button--secondary polygon-add-another__add-button",
             attributes: {
               name: "add",
               value: "add",

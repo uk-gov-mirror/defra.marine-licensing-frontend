@@ -8,7 +8,7 @@ import {
   SkipLink
 } from 'govuk-frontend'
 
-import { AddAnother } from './add-another.js'
+import { AddAnotherPolygon } from './add-another-polygon/index.js'
 
 createAll(Button)
 createAll(Checkboxes)
@@ -19,10 +19,10 @@ createAll(SkipLink)
 
 document.addEventListener('DOMContentLoaded', () => {
   const addAnotherElements = document.querySelectorAll(
-    '[data-module="moj-add-another"]'
+    '[data-module="polygon-add-another"]'
   )
   addAnotherElements.forEach((element) => {
     // eslint-disable-next-line no-new
-    new AddAnother(element)
+    new AddAnotherPolygon(element)
   })
 })

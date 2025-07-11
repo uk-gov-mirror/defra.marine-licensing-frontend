@@ -1,22 +1,17 @@
 import { Component } from 'govuk-frontend'
 
-export class AddAnother extends Component {
-  /**
-   * @param {Element | null} $root - HTML element to use for add another
-   */
+const REMOVE_BUTTON_CLASS = 'polygon-add-another__remove-button'
+
+export class AddAnotherPolygon extends Component {
   constructor($root) {
     super($root)
 
     this.minItems = parseInt($root.getAttribute('data-min-items') ?? '1', 10)
-    this.fieldNames = ($root.getAttribute('data-field-names') ?? '')
-      .split(',')
-      .map((name) => name.trim().toLowerCase())
-
     this.$root.addEventListener('click', this.onRemoveButtonClick.bind(this))
     this.$root.addEventListener('click', this.onAddButtonClick.bind(this))
 
     const $buttons = this.$root.querySelectorAll(
-      '.moj-add-another__add-button, .moj-add-another__remove-button'
+      '.polygon-add-another__add-button, .polygon-add-another__remove-button'
     )
 
     $buttons.forEach(($button) => {
@@ -29,9 +24,6 @@ export class AddAnother extends Component {
     this.initializeItems()
   }
 
-  /**
-   * Initialize items to meet minimum requirements and apply JS control
-   */
   initializeItems() {
     const $items = this.getItems()
 
@@ -55,67 +47,59 @@ export class AddAnother extends Component {
     })
   }
 
-  /**
-   * @param {MouseEvent} event - Click event
-   */
   onAddButtonClick(event) {
     const $button = event.target
 
     if (
       !$button ||
       !($button instanceof HTMLButtonElement) ||
-      !$button.classList.contains('moj-add-another__add-button')
+      !$button.classList.contains('polygon-add-another__add-button')
     ) {
       return
     }
 
     const $items = this.getItems()
-    const $item = this.getNewItem()
+    const $newItem = this.getNewItem()
 
-    if (!$item || !($item instanceof HTMLElement)) {
+    if (!$newItem || !($newItem instanceof HTMLElement)) {
       return
     }
 
-    this.updateAttributes($item, $items.length)
-    this.resetItem($item)
+    this.updateAttributes($newItem, $items.length)
+    this.resetItem($newItem)
 
-    $items[$items.length - 1].after($item)
+    $items[$items.length - 1].after($newItem)
 
     this.updateRemoveButtonsVisibility()
     this.getItems().forEach(($item, index) => {
       this.updateAttributes($item, index)
     })
 
-    const $input = $item.querySelector('input, textarea, select')
+    const $input = $newItem.querySelector('input, textarea, select')
     if ($input && $input instanceof HTMLInputElement) {
       $input.focus()
     }
   }
 
-  /**
-   * Update visibility of remove buttons based on minimum items
-   */
   updateRemoveButtonsVisibility() {
     const $items = this.getItems()
     const totalItems = $items.length
 
     $items.forEach(($item, index) => {
-      let $removeButton = $item.querySelector('.moj-add-another__remove-button')
+      let $removeButton = $item.querySelector(REMOVE_BUTTON_CLASS)
 
-      const canBeRemoved = totalItems > this.minItems && index >= this.minItems
+      const shouldShowRemoveButton =
+        totalItems > this.minItems && index >= this.minItems
 
-      if (canBeRemoved) {
+      if (shouldShowRemoveButton) {
         if (!$removeButton) {
           this.createRemoveButton($item)
-          $removeButton = $item.querySelector('.moj-add-another__remove-button')
+          $removeButton = $item.querySelector(REMOVE_BUTTON_CLASS)
         }
-        if ($removeButton) {
-          $removeButton.style.display = ''
-        }
-      } else {
-        if ($removeButton) {
-          $removeButton.style.display = 'none'
-        }
+      }
+
+      if ($removeButton) {
+        $removeButton.style.display = shouldShowRemoveButton ? '' : 'none'
       }
     })
   }
@@ -126,7 +110,7 @@ export class AddAnother extends Component {
     }
 
     const $items = Array.from(
-      this.$root.querySelectorAll('.moj-add-another__item')
+      this.$root.querySelectorAll('.polygon-add-another__item')
     )
 
     return $items.filter((item) => item instanceof HTMLElement)
@@ -140,9 +124,7 @@ export class AddAnother extends Component {
       return
     }
 
-    const $existingRemoveButton = $item.querySelector(
-      '.moj-add-another__remove-button'
-    )
+    const $existingRemoveButton = $item.querySelector(REMOVE_BUTTON_CLASS)
     if ($existingRemoveButton) {
       $existingRemoveButton.remove()
     }
@@ -150,10 +132,6 @@ export class AddAnother extends Component {
     return $item
   }
 
-  /**
-   * @param {HTMLElement} $item - Add another item
-   * @param {number} index - Add another item index
-   */
   updateAttributes($item, index) {
     $item.querySelectorAll('[data-name]').forEach(($input) => {
       if (!this.isValidInputElement($input)) {
@@ -206,11 +184,8 @@ export class AddAnother extends Component {
     }
   }
 
-  /**
-   * @param {HTMLElement} $item - Add another item
-   */
   createRemoveButton($item) {
-    if ($item.querySelector('.moj-add-another__remove-button')) {
+    if ($item.querySelector(REMOVE_BUTTON_CLASS)) {
       return
     }
 
@@ -220,7 +195,7 @@ export class AddAnother extends Component {
     $button.classList.add(
       'govuk-button',
       'govuk-button--secondary',
-      'moj-add-another__remove-button'
+      'polygon-add-another__remove-button'
     )
 
     $button.textContent = 'Remove'
@@ -240,43 +215,30 @@ export class AddAnother extends Component {
     }
   }
 
-  /**
-   * @param {HTMLElement} $item - Add another item
-   */
   resetItem($item) {
     $item.querySelectorAll('[data-name], [data-id]').forEach(($input) => {
       if (!this.isValidInputElement($input)) {
         return
       }
-
-      if ($input instanceof HTMLSelectElement) {
-        $input.selectedIndex = -1
+      if (
+        ($input instanceof HTMLInputElement && $input.type === 'text') ||
+        $input instanceof HTMLTextAreaElement
+      ) {
         $input.value = ''
-      } else if ($input instanceof HTMLTextAreaElement) {
-        $input.value = ''
-      } else {
-        switch ($input.type) {
-          case 'checkbox':
-          case 'radio':
-            $input.checked = false
-            break
-          default:
-            $input.value = ''
-        }
       }
     })
   }
 
-  /**
-   * @param {MouseEvent} event - Click event
-   */
   onRemoveButtonClick(event) {
+    event.preventDefault()
+    event.stopPropagation()
+
     const $button = event.target
 
     if (
       !$button ||
       !($button instanceof HTMLButtonElement) ||
-      !$button.classList.contains('moj-add-another__remove-button')
+      !$button.classList.contains('polygon-add-another__remove-button')
     ) {
       return
     }
@@ -287,38 +249,21 @@ export class AddAnother extends Component {
       return
     }
 
-    $button.closest('.moj-add-another__item').remove()
+    $button.closest('.polygon-add-another__item').remove()
 
     this.getItems().forEach(($item, index) => {
       this.updateAttributes($item, index)
     })
 
     this.updateRemoveButtonsVisibility()
-
-    this.focusHeading()
   }
 
-  focusHeading() {
-    const $heading = this.$root.querySelector('.moj-add-another__heading')
-
-    if ($heading && $heading instanceof HTMLElement) {
-      $heading.focus()
-    }
-  }
-
-  /**
-   * @param {Element} $input - the input to validate
-   */
   isValidInputElement($input) {
     return (
-      $input instanceof HTMLInputElement ||
-      $input instanceof HTMLSelectElement ||
+      ($input instanceof HTMLInputElement && $input.type === 'text') ||
       $input instanceof HTMLTextAreaElement
     )
   }
 
-  /**
-   * Name for the component used when initialising using data-module attributes.
-   */
-  static moduleName = 'moj-add-another'
+  static moduleName = 'polygon-add-another'
 }
