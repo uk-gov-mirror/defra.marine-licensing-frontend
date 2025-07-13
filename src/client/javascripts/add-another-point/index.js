@@ -1,26 +1,14 @@
 import { Component } from 'govuk-frontend'
 
-const REMOVE_BUTTON_CLASS = 'polygon-add-another__remove-button'
+const REMOVE_BUTTON_CLASS = 'add-another-point__remove-button'
 
-export class AddAnotherPolygon extends Component {
+export class AddAnotherPoint extends Component {
   constructor($root) {
     super($root)
 
     this.minItems = parseInt($root.getAttribute('data-min-items') ?? '1', 10)
     this.$root.addEventListener('click', this.onRemoveButtonClick.bind(this))
     this.$root.addEventListener('click', this.onAddButtonClick.bind(this))
-
-    const $buttons = this.$root.querySelectorAll(
-      '.polygon-add-another__add-button, .polygon-add-another__remove-button'
-    )
-
-    $buttons.forEach(($button) => {
-      if (!($button instanceof HTMLButtonElement)) {
-        return
-      }
-      $button.type = 'button'
-    })
-
     this.initializeItems()
   }
 
@@ -53,7 +41,7 @@ export class AddAnotherPolygon extends Component {
     if (
       !$button ||
       !($button instanceof HTMLButtonElement) ||
-      !$button.classList.contains('polygon-add-another__add-button')
+      !$button.classList.contains('add-another-point__add-button')
     ) {
       return
     }
@@ -86,15 +74,14 @@ export class AddAnotherPolygon extends Component {
     const totalItems = $items.length
 
     $items.forEach(($item, index) => {
-      let $removeButton = $item.querySelector(REMOVE_BUTTON_CLASS)
+      let $removeButton = $item.querySelector(`.${REMOVE_BUTTON_CLASS}`) // Use class directly for querySelector
 
       const shouldShowRemoveButton =
         totalItems > this.minItems && index >= this.minItems
 
       if (shouldShowRemoveButton) {
         if (!$removeButton) {
-          this.createRemoveButton($item)
-          $removeButton = $item.querySelector(REMOVE_BUTTON_CLASS)
+          $removeButton = this.createRemoveButton($item)
         }
       }
 
@@ -110,7 +97,7 @@ export class AddAnotherPolygon extends Component {
     }
 
     const $items = Array.from(
-      this.$root.querySelectorAll('.polygon-add-another__item')
+      this.$root.querySelectorAll('.add-another-point__item')
     )
 
     return $items.filter((item) => item instanceof HTMLElement)
@@ -185,26 +172,23 @@ export class AddAnotherPolygon extends Component {
   }
 
   createRemoveButton($item) {
-    if ($item.querySelector(REMOVE_BUTTON_CLASS)) {
-      return
+    if ($item.querySelector(`.${REMOVE_BUTTON_CLASS}`)) {
+      return $item.querySelector(`.${REMOVE_BUTTON_CLASS}`)
     }
 
     const $button = document.createElement('button')
     $button.type = 'button'
-
     $button.classList.add(
       'govuk-button',
       'govuk-button--secondary',
-      'polygon-add-another__remove-button'
+      REMOVE_BUTTON_CLASS
     )
-
     $button.textContent = 'Remove'
 
     const $fieldset = $item.querySelector('.govuk-fieldset')
 
     if ($fieldset) {
       const $legend = $fieldset.querySelector('.govuk-fieldset__legend')
-
       if ($legend) {
         $legend.after($button)
       } else {
@@ -213,6 +197,7 @@ export class AddAnotherPolygon extends Component {
     } else {
       $item.append($button)
     }
+    return $button
   }
 
   resetItem($item) {
@@ -238,7 +223,7 @@ export class AddAnotherPolygon extends Component {
     if (
       !$button ||
       !($button instanceof HTMLButtonElement) ||
-      !$button.classList.contains('polygon-add-another__remove-button')
+      !$button.classList.contains('add-another-point__remove-button')
     ) {
       return
     }
@@ -249,7 +234,7 @@ export class AddAnotherPolygon extends Component {
       return
     }
 
-    $button.closest('.polygon-add-another__item').remove()
+    $button.closest('.add-another-point__item').remove()
 
     this.getItems().forEach(($item, index) => {
       this.updateAttributes($item, index)
@@ -265,5 +250,5 @@ export class AddAnotherPolygon extends Component {
     )
   }
 
-  static moduleName = 'polygon-add-another'
+  static moduleName = 'add-another-point'
 }

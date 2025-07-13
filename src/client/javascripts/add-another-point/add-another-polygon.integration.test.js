@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import { AddAnotherPolygon } from './index.js'
+import { AddAnotherPoint } from './index.js'
 
 jest.mock('govuk-frontend', () => ({
   Component: class {
@@ -13,17 +13,17 @@ jest.mock('govuk-frontend', () => ({
   }
 }))
 
-describe('AddAnotherPolygon', () => {
+describe('AddAnotherPoint', () => {
   let $root, component
 
   function createPolygonHtml() {
     return `
-      <div class="polygon-add-another" data-module="polygon-add-another" data-min-items="3" data-field-names="eastings,northings" data-polygon-add-another-init="">
+      <div class="add-another-point" data-module="add-another-point" data-min-items="3" data-field-names="eastings,northings" data-add-another-point-init="">
         <input type="hidden" name="csrfToken" value="NcoYBL0etsnEnOi79DTYrcSqOjf0fBGpU4gDRmv3ZsO">
-        <h2 class="govuk-heading-m polygon-add-another__heading" tabindex="-1">
+        <h2 class="govuk-heading-m add-another-point__heading" tabindex="-1">
           Coordinate points
         </h2>
-        <div class="polygon-add-another__item">
+        <div class="add-another-point__item">
           <fieldset class="govuk-fieldset">
             <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">Start and end point</legend>
             <div class="govuk-form-group">
@@ -36,7 +36,7 @@ describe('AddAnotherPolygon', () => {
             </div>
           </fieldset>
         </div>
-        <div class="polygon-add-another__item">
+        <div class="add-another-point__item">
           <fieldset class="govuk-fieldset">
             <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">Point 2</legend>
             <div class="govuk-form-group">
@@ -49,7 +49,7 @@ describe('AddAnotherPolygon', () => {
             </div>
           </fieldset>
         </div>
-        <div class="polygon-add-another__item">
+        <div class="add-another-point__item">
           <fieldset class="govuk-fieldset">
             <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">Point 3</legend>
             <div class="govuk-form-group">
@@ -62,7 +62,7 @@ describe('AddAnotherPolygon', () => {
             </div>
           </fieldset>
         </div>
-        <button type="button" class="govuk-button govuk-button--secondary polygon-add-another__add-button" data-module="govuk-button" name="add" value="add" data-govuk-button-init="">
+        <button type="button" class="govuk-button govuk-button--secondary add-another-point__add-button" data-module="govuk-button" name="add" value="add" data-govuk-button-init="">
           Add another point
         </button>
       </div>
@@ -71,8 +71,8 @@ describe('AddAnotherPolygon', () => {
 
   beforeEach(() => {
     document.body.innerHTML = createPolygonHtml()
-    $root = document.querySelector('.polygon-add-another')
-    component = new AddAnotherPolygon($root)
+    $root = document.querySelector('.add-another-point')
+    component = new AddAnotherPoint($root)
   })
 
   afterEach(() => {
@@ -80,30 +80,30 @@ describe('AddAnotherPolygon', () => {
   })
 
   describe('static moduleName', () => {
-    it('should be "polygon-add-another"', () => {
-      expect(AddAnotherPolygon.moduleName).toBe('polygon-add-another')
+    it('should be "add-another-point"', () => {
+      expect(AddAnotherPoint.moduleName).toBe('add-another-point')
     })
   })
 
   it('adds a new item when add button is clicked', () => {
-    const addButton = $root.querySelector('.polygon-add-another__add-button')
-    const initialItems = $root.querySelectorAll('.polygon-add-another__item')
+    const addButton = $root.querySelector('.add-another-point__add-button')
+    const initialItems = $root.querySelectorAll('.add-another-point__item')
     expect(initialItems).toHaveLength(3)
 
     addButton.dispatchEvent(new window.MouseEvent('click', { bubbles: true }))
 
-    const updatedItems = $root.querySelectorAll('.polygon-add-another__item')
+    const updatedItems = $root.querySelectorAll('.add-another-point__item')
     expect(updatedItems).toHaveLength(4)
   })
 
   it('adds a remove button to new items', () => {
-    const addButton = $root.querySelector('.polygon-add-another__add-button')
+    const addButton = $root.querySelector('.add-another-point__add-button')
     addButton.dispatchEvent(new window.MouseEvent('click', { bubbles: true }))
 
-    const items = $root.querySelectorAll('.polygon-add-another__item')
+    const items = $root.querySelectorAll('.add-another-point__item')
     let foundRemove = false
     items.forEach((item) => {
-      if (item.querySelector('.polygon-add-another__remove-button')) {
+      if (item.querySelector('.add-another-point__remove-button')) {
         foundRemove = true
       }
     })
@@ -111,33 +111,33 @@ describe('AddAnotherPolygon', () => {
   })
 
   it('removes an item when the remove button is clicked', () => {
-    const addButton = $root.querySelector('.polygon-add-another__add-button')
+    const addButton = $root.querySelector('.add-another-point__add-button')
     addButton.dispatchEvent(new window.MouseEvent('click', { bubbles: true }))
     addButton.dispatchEvent(new window.MouseEvent('click', { bubbles: true }))
-    const items = $root.querySelectorAll('.polygon-add-another__item')
+    const items = $root.querySelectorAll('.add-another-point__item')
     expect(items).toHaveLength(5)
     const removeButtons = $root.querySelectorAll(
-      '.polygon-add-another__remove-button'
+      '.add-another-point__remove-button'
     )
 
     removeButtons[0].dispatchEvent(
       new window.MouseEvent('click', { bubbles: true })
     )
-    const updatedItems = $root.querySelectorAll('.polygon-add-another__item')
+    const updatedItems = $root.querySelectorAll('.add-another-point__item')
     expect(updatedItems).toHaveLength(4)
   })
 
   it('removes a newly added point when its remove button is clicked', () => {
-    const addButton = $root.querySelector('.polygon-add-another__add-button')
+    const addButton = $root.querySelector('.add-another-point__add-button')
 
     addButton.dispatchEvent(new window.MouseEvent('click', { bubbles: true }))
     addButton.dispatchEvent(new window.MouseEvent('click', { bubbles: true }))
 
-    let items = $root.querySelectorAll('.polygon-add-another__item')
+    let items = $root.querySelectorAll('.add-another-point__item')
     expect(items).toHaveLength(5)
 
     const lastRemoveButton = items[4].querySelector(
-      '.polygon-add-another__remove-button'
+      '.add-another-point__remove-button'
     )
     expect(lastRemoveButton).toBeTruthy()
 
@@ -145,7 +145,7 @@ describe('AddAnotherPolygon', () => {
       new window.MouseEvent('click', { bubbles: true })
     )
 
-    items = $root.querySelectorAll('.polygon-add-another__item')
+    items = $root.querySelectorAll('.add-another-point__item')
     expect(items).toHaveLength(4)
 
     const lastLegend = items[3].querySelector('.govuk-fieldset__legend--s')
@@ -164,28 +164,28 @@ describe('AddAnotherPolygon', () => {
     it('throws if there are no items to clone', () => {
       // Remove all items
       $root
-        .querySelectorAll('.polygon-add-another__item')
+        .querySelectorAll('.add-another-point__item')
         .forEach((item) => item.remove())
       expect(() => component.getNewItem()).toThrow()
     })
 
     it('removes an existing remove button from the cloned item', () => {
       // Add a remove button to the first item
-      const firstItem = $root.querySelector('.polygon-add-another__item')
+      const firstItem = $root.querySelector('.add-another-point__item')
       const removeButton = document.createElement('button')
-      removeButton.className = 'polygon-add-another__remove-button'
+      removeButton.className = 'add-another-point__remove-button'
       firstItem.appendChild(removeButton)
       // Now clone
       const newItem = component.getNewItem()
       expect(
-        newItem.querySelector('polygon-add-another__remove-button')
+        newItem.querySelector('add-another-point__remove-button')
       ).toBeNull()
     })
   })
 
   describe('updateAttributes', () => {
     it('updates label for and text content for index 0', () => {
-      const item = $root.querySelector('.polygon-add-another__item')
+      const item = $root.querySelector('.add-another-point__item')
       const input = item.querySelector('input[data-name*="eastings"]')
       const label = item.querySelector('label[for="coordinates-0-eastings"]')
       component.updateAttributes(item, 0)
@@ -195,7 +195,7 @@ describe('AddAnotherPolygon', () => {
     })
 
     it('updates label for and text content for index > 0', () => {
-      const item = $root.querySelectorAll('.polygon-add-another__item')[1]
+      const item = $root.querySelectorAll('.add-another-point__item')[1]
       const input = item.querySelector('input[data-name*="eastings"]')
       const label = item.querySelector('label[for="coordinates-1-eastings"]')
       component.updateAttributes(item, 1)
@@ -205,19 +205,19 @@ describe('AddAnotherPolygon', () => {
     })
 
     it('updates legend text for index 0 and >0', () => {
-      const item0 = $root.querySelectorAll('.polygon-add-another__item')[0]
+      const item0 = $root.querySelectorAll('.add-another-point__item')[0]
       const legend0 = item0.querySelector('.govuk-fieldset__legend--s')
       component.updateAttributes(item0, 0)
       expect(legend0.textContent).toBe('Start and end point')
 
-      const item1 = $root.querySelectorAll('.polygon-add-another__item')[1]
+      const item1 = $root.querySelectorAll('.add-another-point__item')[1]
       const legend1 = item1.querySelector('.govuk-fieldset__legend--s')
       component.updateAttributes(item1, 1)
       expect(legend1.textContent).toBe('Point 2')
     })
 
     it('does not throw if label is not found', () => {
-      const item = $root.querySelector('.polygon-add-another__item')
+      const item = $root.querySelector('.add-another-point__item')
       // Remove all labels
       item.querySelectorAll('label').forEach((label) => label.remove())
       expect(() => component.updateAttributes(item, 0)).not.toThrow()
@@ -227,11 +227,11 @@ describe('AddAnotherPolygon', () => {
   describe('createRemoveButton', () => {
     it('appends the remove button directly to the item if no fieldset is found', () => {
       const item = document.createElement('div')
-      item.className = 'polygon-add-another__item'
+      item.className = 'add-another-point__item'
       // No fieldset inside
       component.createRemoveButton(item)
       const removeButton = item.querySelector(
-        '.polygon-add-another__remove-button'
+        '.add-another-point__remove-button'
       )
       expect(removeButton).toBeTruthy()
       expect(removeButton.parentElement).toBe(item)
@@ -241,7 +241,7 @@ describe('AddAnotherPolygon', () => {
   describe('resetItem', () => {
     it('resets the value of a textarea', () => {
       const item = document.createElement('div')
-      item.className = 'polygon-add-another__item'
+      item.className = 'add-another-point__item'
       const textarea = document.createElement('textarea')
       textarea.setAttribute('data-name', 'foo')
       textarea.value = 'some text'
@@ -252,7 +252,7 @@ describe('AddAnotherPolygon', () => {
 
     it('resets value for non-textarea input elements', () => {
       const item = document.createElement('div')
-      item.className = 'polygon-add-another__item'
+      item.className = 'add-another-point__item'
       const input = document.createElement('input')
       input.setAttribute('data-name', 'foo')
       input.value = 'should stay'
@@ -267,24 +267,24 @@ describe('AddAnotherPolygon', () => {
       // Set up with minItems = 3 and only 3 items
       $root.setAttribute('data-min-items', '3')
       // Remove extra items if any
-      while ($root.querySelectorAll('.polygon-add-another__item').length > 3) {
-        $root.querySelector('.polygon-add-another__item:last-child').remove()
+      while ($root.querySelectorAll('.add-another-point__item').length > 3) {
+        $root.querySelector('.add-another-point__item:last-child').remove()
       }
-      component = new AddAnotherPolygon($root)
+      component = new AddAnotherPoint($root)
       // Add a remove button to the first item
-      const firstItem = $root.querySelector('.polygon-add-another__item')
+      const firstItem = $root.querySelector('.add-another-point__item')
       component.createRemoveButton(firstItem)
       const removeButton = firstItem.querySelector(
-        '.polygon-add-another__remove-button'
+        '.add-another-point__remove-button'
       )
       const initialCount = $root.querySelectorAll(
-        '.polygon-add-another__item'
+        '.add-another-point__item'
       ).length
       removeButton.dispatchEvent(
         new window.MouseEvent('click', { bubbles: true })
       )
       const afterCount = $root.querySelectorAll(
-        '.polygon-add-another__item'
+        '.add-another-point__item'
       ).length
       expect(afterCount).toBe(initialCount)
     })

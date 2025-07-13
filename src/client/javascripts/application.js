@@ -8,7 +8,7 @@ import {
   SkipLink
 } from 'govuk-frontend'
 
-import { AddAnotherPolygon } from './add-another-polygon/index.js'
+import { AddAnotherPoint } from './add-another-point/index.js'
 
 createAll(Button)
 createAll(Checkboxes)
@@ -19,10 +19,10 @@ createAll(SkipLink)
 
 document.addEventListener('DOMContentLoaded', () => {
   const addAnotherElements = document.querySelectorAll(
-    '[data-module="polygon-add-another"]'
+    '[data-module="add-another-point"]'
   )
   addAnotherElements.forEach((element) => {
     // eslint-disable-next-line no-new
-    new AddAnotherPolygon(element)
+    new AddAnotherPoint(element)
   })
 })

@@ -51,12 +51,8 @@
       }) }}
       <form method="POST" class="govuk-grid-column-two-thirds">
         <input type="hidden" name="csrfToken" value="{{ csrfToken }}">
-          <div
-            class="polygon-add-another"
-            data-module="polygon-add-another"
-            data-min-items="3"
-            data-field-names="eastings,northings">
-            <h2 class="govuk-heading-m polygon-add-another__heading" tabindex="-1">
+          <div class="add-another-point" data-module="add-another-point" data-min-items="3" data-field-names="eastings,northings">
+            <h2 class="govuk-heading-m add-another-point__heading" tabindex="-1">
               Coordinate points
             </h2>
             {% set minCoords = 3 %}
@@ -76,7 +72,7 @@
               {% if i == 0 %}of start and end point{% else %}of point {{ pointNumber }}
               {% endif %}
               {% endset %}
-              <div class="polygon-add-another__item">
+              <div class="add-another-point__item">
                 {% call govukFieldset({
                 legend: {
                   text: legendText,
@@ -88,7 +84,7 @@
                 }
               }) %}
                 {% if i >= minCoords and loop.length > minCoords %}
-                  <button class="govuk-button govuk-button--secondary polygon-add-another__remove-button" name="remove" value="{{ i }}" type="submit">
+                  <button class="govuk-button govuk-button--secondary add-another-point__remove-button" name="remove" value="{{ i }}" type="submit">
                     Remove
                   </button>
                 {% endif %}
@@ -123,7 +119,7 @@
             <div class="govuk-button-group govuk-!-margin-top-2">
               {{ govukButton({
               text: "Add another point",
-              classes: "govuk-button--secondary polygon-add-another__add-button",
+              classes: "govuk-button--secondary add-another-point__add-button",
               attributes: {
                 id: "add-point",
                 name: "add",
