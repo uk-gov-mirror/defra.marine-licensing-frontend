@@ -104,10 +104,15 @@ export class AddAnotherPoint extends Component {
 
         const processedDataName = rawDataName.replace(/%index%/, `${index}`)
 
-        const match = processedDataName.match(/\[([^\]]+)\]$/)
-        const fieldName = match?.[1]
-          ? match[1].charAt(0).toUpperCase() + match[1].slice(1)
-          : ''
+        const lastBracketIndex = processedDataName.lastIndexOf('[')
+        const fieldName =
+          lastBracketIndex !== -1 && processedDataName.endsWith(']')
+            ? processedDataName
+                .slice(lastBracketIndex + 1, -1)
+                .charAt(0)
+                .toUpperCase() +
+              processedDataName.slice(lastBracketIndex + 1, -1).slice(1)
+            : ''
 
         if (index === 0) {
           $label.textContent = `${fieldName} of start and end point`
