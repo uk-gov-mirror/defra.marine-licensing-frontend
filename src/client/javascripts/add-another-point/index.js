@@ -53,10 +53,11 @@ export class AddAnotherPoint extends Component {
       const $removeButton = $item.querySelector(`.${REMOVE_BUTTON_CLASS}`)
       if (index >= this.minItems && !$removeButton) {
         this.createRemoveButton($item)
-      } else if (index < this.minItems && $removeButton) {
+        return
+      }
+      if (index < this.minItems && $removeButton) {
         $removeButton.remove()
       }
-      // else: button state is already correct (no action needed)
     })
   }
 
@@ -83,15 +84,12 @@ export class AddAnotherPoint extends Component {
   }
 
   updateAttributes($item, index) {
-    $item.querySelectorAll('[data-name]').forEach(($input) => {
-      if (!this.isValidInputElement($input)) {
-        return
-      }
-
-      const rawDataName = $input.getAttribute('data-name') ?? ''
-      const rawDataId = $input.getAttribute('data-id') ?? ''
-      const originalId = $input.id
-
+    const updateInputAndLabel = (
+      $input,
+      rawDataName,
+      rawDataId,
+      originalId
+    ) => {
       $input.name = rawDataName.replace(/%index%/, `${index}`)
       $input.id = rawDataId.replace(/%index%/, `${index}`)
 
@@ -104,16 +102,7 @@ export class AddAnotherPoint extends Component {
         $label.htmlFor = $input.id
 
         const processedDataName = rawDataName.replace(/%index%/, `${index}`)
-
-        const lastBracketIndex = processedDataName.lastIndexOf('[')
-        const fieldName =
-          lastBracketIndex !== -1 && processedDataName.endsWith(']')
-            ? processedDataName
-                .slice(lastBracketIndex + 1, -1)
-                .charAt(0)
-                .toUpperCase() +
-              processedDataName.slice(lastBracketIndex + 1, -1).slice(1)
-            : ''
+        const fieldName = this._extractFieldName(processedDataName)
 
         if (index === 0) {
           $label.textContent = `${fieldName} of start and end point`
@@ -121,22 +110,36 @@ export class AddAnotherPoint extends Component {
           $label.textContent = `${fieldName} of point ${index + 1}`
         }
       }
+    }
+
+    const updateErrorMessage = ($input, originalAriaDescribedBy) => {
+      const newErrorId = $input.id + '-error'
+      const $errorMessage = $item.querySelector(`#${originalAriaDescribedBy}`)
+
+      if ($errorMessage instanceof HTMLElement) {
+        $errorMessage.id = newErrorId
+        $errorMessage.textContent = $errorMessage.textContent.replace(
+          /point \d+/gi,
+          `point ${index + 1}`
+        )
+        $input.setAttribute('aria-describedby', newErrorId)
+      }
+    }
+
+    $item.querySelectorAll('[data-name]').forEach(($input) => {
+      if (!this.isValidInputElement($input)) {
+        return
+      }
+
+      const rawDataName = $input.getAttribute('data-name') ?? ''
+      const rawDataId = $input.getAttribute('data-id') ?? ''
+      const originalId = $input.id
+
+      updateInputAndLabel($input, rawDataName, rawDataId, originalId)
 
       const originalAriaDescribedBy = $input.getAttribute('aria-describedby')
       if (originalAriaDescribedBy) {
-        const newErrorId = $input.id + '-error'
-
-        const $errorMessage = $item.querySelector(`#${originalAriaDescribedBy}`)
-        if ($errorMessage instanceof HTMLElement) {
-          $errorMessage.id = newErrorId
-
-          $errorMessage.textContent = $errorMessage.textContent.replace(
-            /point \d+/gi,
-            `point ${index + 1}`
-          )
-
-          $input.setAttribute('aria-describedby', newErrorId)
-        }
+        updateErrorMessage($input, originalAriaDescribedBy)
       }
     })
 
@@ -148,6 +151,15 @@ export class AddAnotherPoint extends Component {
         $legend.textContent = `Point ${index + 1}`
       }
     }
+  }
+
+  _extractFieldName(processedDataName) {
+    const lastBracketIndex = processedDataName.lastIndexOf('[')
+    if (lastBracketIndex !== -1 && processedDataName.endsWith(']')) {
+      const fieldPart = processedDataName.slice(lastBracketIndex + 1, -1)
+      return fieldPart.charAt(0).toUpperCase() + fieldPart.slice(1)
+    }
+    return ''
   }
 
   createRemoveButton($item) {
