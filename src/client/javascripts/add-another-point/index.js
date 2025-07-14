@@ -50,10 +50,10 @@ export class AddAnotherPoint extends Component {
   updateRemoveButtonsVisibility() {
     const $items = this.getItems()
     $items.forEach(($item, index) => {
-      let $removeButton = $item.querySelector(`.${REMOVE_BUTTON_CLASS}`)
+      const $removeButton = $item.querySelector(`.${REMOVE_BUTTON_CLASS}`)
       if (index >= this.minItems) {
         if (!$removeButton) {
-          $removeButton = this.createRemoveButton($item)
+          this.createRemoveButton($item)
         }
       } else {
         if ($removeButton) {
@@ -74,7 +74,9 @@ export class AddAnotherPoint extends Component {
 
   getNewItem() {
     const $items = this.getItems()
-    if (!$items[0]) return
+    if (!$items[0]) {
+      return
+    }
     const $item = $items[0].cloneNode(true)
     const $existingRemoveButton = $item.querySelector(`.${REMOVE_BUTTON_CLASS}`)
     if ($existingRemoveButton) {
@@ -89,44 +91,38 @@ export class AddAnotherPoint extends Component {
         return
       }
 
-      const name = $input.getAttribute('data-name') ?? ''
-      const id = $input.getAttribute('data-id') ?? ''
+      const rawDataName = $input.getAttribute('data-name') ?? ''
+      const rawDataId = $input.getAttribute('data-id') ?? ''
       const originalId = $input.id
 
-      $input.name = name.replace(/%index%/, `${index}`)
-      $input.id = id.replace(/%index%/, `${index}`)
+      $input.name = rawDataName.replace(/%index%/, `${index}`)
+      $input.id = rawDataId.replace(/%index%/, `${index}`)
 
       const $label =
         $input.parentElement?.querySelector(`label[for="${originalId}"]`) ??
         $input.closest('label') ??
         $item.querySelector(`label[for="${originalId}"]`)
 
-      if ($label && $label instanceof HTMLLabelElement) {
+      if ($label instanceof HTMLLabelElement) {
         $label.htmlFor = $input.id
 
-        let labelTextPrefix = ''
-        const dataName = $input.getAttribute('data-name')
-        if (dataName) {
-          const match = dataName.match(
-            /\[(eastings|northings|latitude|longitude)\]/i
-          )
-          if (match?.[1]) {
-            const fieldName = match[1]
-            labelTextPrefix =
-              fieldName.charAt(0).toUpperCase() + fieldName.slice(1)
-          }
-        }
+        const processedDataName = rawDataName.replace(/%index%/, `${index}`)
+
+        const match = processedDataName.match(/\[([^\]]+)\](?!.*\[[^\]]+\])/)
+        const fieldName = match?.[1]
+          ? match[1].charAt(0).toUpperCase() + match[1].slice(1)
+          : ''
 
         if (index === 0) {
-          $label.textContent = `${labelTextPrefix} of start and end point`
+          $label.textContent = `${fieldName} of start and end point`
         } else {
-          $label.textContent = `${labelTextPrefix} of point ${index + 1}`
+          $label.textContent = `${fieldName} of point ${index + 1}`
         }
       }
     })
 
     const $legend = $item.querySelector('.govuk-fieldset__legend--s')
-    if ($legend && $legend instanceof HTMLElement) {
+    if ($legend instanceof HTMLElement) {
       if (index === 0) {
         $legend.textContent = 'Start and end point'
       } else {
@@ -136,10 +132,6 @@ export class AddAnotherPoint extends Component {
   }
 
   createRemoveButton($item) {
-    if ($item.querySelector(`.${REMOVE_BUTTON_CLASS}`)) {
-      return $item.querySelector(`.${REMOVE_BUTTON_CLASS}`)
-    }
-
     const $button = document.createElement('button')
     $button.type = 'button'
     $button.classList.add(
@@ -152,7 +144,6 @@ export class AddAnotherPoint extends Component {
     const $fieldset = $item.querySelector('.govuk-fieldset')
     const $legend = $fieldset.querySelector('.govuk-fieldset__legend')
     $legend.after($button)
-    return $button
   }
 
   resetItem($item) {

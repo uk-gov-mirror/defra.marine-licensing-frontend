@@ -258,8 +258,9 @@ describe('AddAnotherPoint', () => {
   describe('createRemoveButton', () => {
     it('should create a remove button with correct classes', () => {
       const item = $root.querySelector('.add-another-point__item')
-      const button = component.createRemoveButton(item)
+      component.createRemoveButton(item)
 
+      const button = item.querySelector('.add-another-point__remove-button')
       expect(button).toBeInstanceOf(HTMLButtonElement)
       expect(button.type).toBe('button')
       expect(button.classList.contains('govuk-button')).toBe(true)
