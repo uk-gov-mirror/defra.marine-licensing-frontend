@@ -100,12 +100,12 @@ describe('AddAnotherPoint', () => {
       expect(newItem.classList.contains('add-another-point__item')).toBe(true)
     })
 
-    it('should return undefined from getNewItem if there are no items', () => {
+    it('should return null from getNewItem if there are no items', () => {
       $root
         .querySelectorAll('.add-another-point__item')
         .forEach((item) => item.remove())
 
-      expect(component.getNewItem()).toBeFalsy()
+      expect(component.getNewItem()).toBeNull()
     })
 
     it('should remove existing remove button from cloned item', () => {
@@ -180,6 +180,39 @@ describe('AddAnotherPoint', () => {
 
       const label = item.querySelector('label')
       expect(label.textContent).toBe('Latitude of start and end point')
+    })
+
+    it('should update error message id and text, and input aria-describedby', () => {
+      const itemWithError = document.createElement('div')
+      itemWithError.className = 'add-another-point__item'
+      itemWithError.innerHTML = `
+      <fieldset class="govuk-fieldset">
+        <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">Point 4</legend>
+        <div class="govuk-form-group govuk-form-group--error">
+          <label class="govuk-label" for="coordinates-3-eastings">Eastings of point 4</label>
+          <p id="coordinates-4-eastings-error" class="govuk-error-message">
+            <span class="govuk-visually-hidden">Error:</span> Enter the eastings of point 5
+          </p>
+          <input class="govuk-input govuk-input--error" id="coordinates-3-eastings" name="coordinates[3][eastings]" type="text" value="" aria-describedby="coordinates-4-eastings-error" data-name="coordinates[%index%][eastings]" data-id="coordinates-%index%-eastings">
+        </div>
+      </fieldset>
+    `
+      $root.appendChild(itemWithError)
+
+      const input = itemWithError.querySelector('input')
+      const errorMessage = itemWithError.querySelector('.govuk-error-message')
+
+      component.updateAttributes(itemWithError, 3)
+
+      expect(input.id).toBe('coordinates-3-eastings')
+      expect(input.name).toBe('coordinates[3][eastings]')
+      expect(input.getAttribute('aria-describedby')).toBe(
+        'coordinates-3-eastings-error'
+      )
+
+      expect(errorMessage.id).toBe('coordinates-3-eastings-error')
+
+      expect(errorMessage.textContent).toContain('point 4')
     })
 
     it('should not throw if label is not found', () => {
@@ -271,15 +304,6 @@ describe('AddAnotherPoint', () => {
       expect(button.textContent).toBe('Remove')
     })
 
-    it('should return the existing remove button if already present', () => {
-      const item = $root.querySelector('.add-another-point__item')
-
-      const firstButton = component.createRemoveButton(item)
-
-      const secondButton = component.createRemoveButton(item)
-      expect(secondButton).toBe(firstButton)
-    })
-
     it('should append button after legend in fieldset', () => {
       const item = $root.querySelector('.add-another-point__item')
       const legend = item.querySelector('.govuk-fieldset__legend')
@@ -291,6 +315,12 @@ describe('AddAnotherPoint', () => {
           'add-another-point__remove-button'
         )
       ).toBe(true)
+    })
+
+    it('should not return a value', () => {
+      const item = $root.querySelector('.add-another-point__item')
+      const result = component.createRemoveButton(item)
+      expect(result).toBeUndefined()
     })
   })
 

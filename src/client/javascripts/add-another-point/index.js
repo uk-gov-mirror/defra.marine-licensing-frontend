@@ -53,12 +53,10 @@ export class AddAnotherPoint extends Component {
       const $removeButton = $item.querySelector(`.${REMOVE_BUTTON_CLASS}`)
       if (index >= this.minItems && !$removeButton) {
         this.createRemoveButton($item)
-        return
-      }
-
-      if (index < this.minItems && $removeButton) {
+      } else if (index < this.minItems && $removeButton) {
         $removeButton.remove()
       }
+      // else: button state is already correct (no action needed)
     })
   }
 
@@ -121,6 +119,23 @@ export class AddAnotherPoint extends Component {
           $label.textContent = `${fieldName} of start and end point`
         } else {
           $label.textContent = `${fieldName} of point ${index + 1}`
+        }
+      }
+
+      const originalAriaDescribedBy = $input.getAttribute('aria-describedby')
+      if (originalAriaDescribedBy) {
+        const newErrorId = $input.id + '-error'
+
+        const $errorMessage = $item.querySelector(`#${originalAriaDescribedBy}`)
+        if ($errorMessage instanceof HTMLElement) {
+          $errorMessage.id = newErrorId
+
+          $errorMessage.textContent = $errorMessage.textContent.replace(
+            /point \d+/gi,
+            `point ${index + 1}`
+          )
+
+          $input.setAttribute('aria-describedby', newErrorId)
         }
       }
     })
