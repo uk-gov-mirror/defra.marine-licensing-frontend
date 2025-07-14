@@ -53,7 +53,10 @@ export class AddAnotherPoint extends Component {
       const $removeButton = $item.querySelector(`.${REMOVE_BUTTON_CLASS}`)
       if (index >= this.minItems && !$removeButton) {
         this.createRemoveButton($item)
-      } else if (index < this.minItems && $removeButton) {
+        return
+      }
+
+      if (index < this.minItems && $removeButton) {
         $removeButton.remove()
       }
     })
