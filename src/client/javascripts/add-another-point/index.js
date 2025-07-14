@@ -51,14 +51,10 @@ export class AddAnotherPoint extends Component {
     const $items = this.getItems()
     $items.forEach(($item, index) => {
       const $removeButton = $item.querySelector(`.${REMOVE_BUTTON_CLASS}`)
-      if (index >= this.minItems) {
-        if (!$removeButton) {
-          this.createRemoveButton($item)
-        }
-      } else {
-        if ($removeButton) {
-          $removeButton.remove()
-        }
+      if (index >= this.minItems && !$removeButton) {
+        this.createRemoveButton($item)
+      } else if (index < this.minItems && $removeButton) {
+        $removeButton.remove()
       }
     })
   }
@@ -75,7 +71,7 @@ export class AddAnotherPoint extends Component {
   getNewItem() {
     const $items = this.getItems()
     if (!$items[0]) {
-      return
+      return null
     }
     const $item = $items[0].cloneNode(true)
     const $existingRemoveButton = $item.querySelector(`.${REMOVE_BUTTON_CLASS}`)
@@ -108,7 +104,7 @@ export class AddAnotherPoint extends Component {
 
         const processedDataName = rawDataName.replace(/%index%/, `${index}`)
 
-        const match = processedDataName.match(/\[([^\]]+)\](?!.*\[[^\]]+\])/)
+        const match = processedDataName.match(/\[([^\]]+)\]$/)
         const fieldName = match?.[1]
           ? match[1].charAt(0).toUpperCase() + match[1].slice(1)
           : ''

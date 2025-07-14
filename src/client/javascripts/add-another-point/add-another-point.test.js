@@ -105,7 +105,7 @@ describe('AddAnotherPoint', () => {
         .querySelectorAll('.add-another-point__item')
         .forEach((item) => item.remove())
 
-      expect(component.getNewItem()).toBeUndefined()
+      expect(component.getNewItem()).toBeFalsy()
     })
 
     it('should remove existing remove button from cloned item', () => {
