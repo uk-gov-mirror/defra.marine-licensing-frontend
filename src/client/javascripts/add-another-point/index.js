@@ -9,31 +9,9 @@ export class AddAnotherPoint extends Component {
     this.minItems = parseInt($root.getAttribute('data-min-items') ?? '1', 10)
     this.$root.addEventListener('click', this.onRemoveButtonClick.bind(this))
     this.$root.addEventListener('click', this.onAddButtonClick.bind(this))
-    this.initializeItems()
   }
 
-  initializeItems() {
-    const $items = this.getItems()
-
-    while ($items.length < this.minItems) {
-      const $newItem = this.getNewItem()
-      if ($newItem) {
-        this.updateAttributes($newItem, $items.length)
-        this.resetItem($newItem)
-
-        const $lastItem = $items[$items.length - 1] || $items[0]
-        if ($lastItem) {
-          $lastItem.after($newItem)
-          $items.push($newItem)
-        }
-      }
-    }
-
-    this.updateRemoveButtonsVisibility()
-    this.getItems().forEach(($item, index) => {
-      this.updateAttributes($item, index)
-    })
-  }
+  static moduleName = 'add-another-point'
 
   onAddButtonClick(event) {
     const $button = event.target
@@ -63,7 +41,7 @@ export class AddAnotherPoint extends Component {
       this.updateAttributes($item, index)
     })
 
-    const $input = $newItem.querySelector('input, textarea, select')
+    const $input = $newItem.querySelector('input')
     if ($input && $input instanceof HTMLInputElement) {
       $input.focus()
     }
@@ -71,22 +49,16 @@ export class AddAnotherPoint extends Component {
 
   updateRemoveButtonsVisibility() {
     const $items = this.getItems()
-    const totalItems = $items.length
-
     $items.forEach(($item, index) => {
-      let $removeButton = $item.querySelector(`.${REMOVE_BUTTON_CLASS}`) // Use class directly for querySelector
-
-      const shouldShowRemoveButton =
-        totalItems > this.minItems && index >= this.minItems
-
-      if (shouldShowRemoveButton) {
+      let $removeButton = $item.querySelector(`.${REMOVE_BUTTON_CLASS}`)
+      if (index >= this.minItems) {
         if (!$removeButton) {
           $removeButton = this.createRemoveButton($item)
         }
-      }
-
-      if ($removeButton) {
-        $removeButton.style.display = shouldShowRemoveButton ? '' : 'none'
+      } else {
+        if ($removeButton) {
+          $removeButton.remove()
+        }
       }
     })
   }
@@ -95,27 +67,19 @@ export class AddAnotherPoint extends Component {
     if (!this.$root) {
       return []
     }
-
-    const $items = Array.from(
+    return Array.from(
       this.$root.querySelectorAll('.add-another-point__item')
-    )
-
-    return $items.filter((item) => item instanceof HTMLElement)
+    ).filter((item) => item instanceof HTMLElement)
   }
 
   getNewItem() {
     const $items = this.getItems()
+    if (!$items[0]) return
     const $item = $items[0].cloneNode(true)
-
-    if (!$item || !($item instanceof HTMLElement)) {
-      return
-    }
-
-    const $existingRemoveButton = $item.querySelector(REMOVE_BUTTON_CLASS)
+    const $existingRemoveButton = $item.querySelector(`.${REMOVE_BUTTON_CLASS}`)
     if ($existingRemoveButton) {
       $existingRemoveButton.remove()
     }
-
     return $item
   }
 
@@ -186,17 +150,8 @@ export class AddAnotherPoint extends Component {
     $button.textContent = 'Remove'
 
     const $fieldset = $item.querySelector('.govuk-fieldset')
-
-    if ($fieldset) {
-      const $legend = $fieldset.querySelector('.govuk-fieldset__legend')
-      if ($legend) {
-        $legend.after($button)
-      } else {
-        $fieldset.append($button)
-      }
-    } else {
-      $item.append($button)
-    }
+    const $legend = $fieldset.querySelector('.govuk-fieldset__legend')
+    $legend.after($button)
     return $button
   }
 
@@ -249,6 +204,4 @@ export class AddAnotherPoint extends Component {
       $input instanceof HTMLTextAreaElement
     )
   }
-
-  static moduleName = 'add-another-point'
 }
