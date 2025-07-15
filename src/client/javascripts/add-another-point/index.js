@@ -76,10 +76,27 @@ export class AddAnotherPoint extends Component {
       return null
     }
     const $item = $items[$items.length - 1].cloneNode(true)
-    const $existingRemoveButton = $item.querySelector(`.${REMOVE_BUTTON_CLASS}`)
-    if ($existingRemoveButton) {
-      $existingRemoveButton.remove()
-    }
+
+    $item.querySelectorAll('.govuk-error-message').forEach(($error) => {
+      $error.remove()
+    })
+
+    $item.querySelectorAll('.govuk-form-group').forEach(($group) => {
+      $group.classList.remove('govuk-form-group--error')
+    })
+    $item.querySelectorAll('.govuk-input').forEach(($input) => {
+      $input.classList.remove('govuk-input--error')
+
+      if ($input instanceof HTMLInputElement) {
+        $input.value = ''
+      }
+
+      const describedBy = $input.getAttribute('aria-describedby')
+      if (describedBy && /-error\b/.test(describedBy)) {
+        $input.removeAttribute('aria-describedby')
+      }
+    })
+
     return $item
   }
 

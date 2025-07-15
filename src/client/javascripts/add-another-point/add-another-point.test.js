@@ -107,16 +107,6 @@ describe('AddAnotherPoint', () => {
 
       expect(component.getNewItem()).toBeNull()
     })
-
-    it('should remove existing remove button from cloned item', () => {
-      const firstItem = $root.querySelector('.add-another-point__item')
-      component.createRemoveButton(firstItem)
-
-      const newItem = component.getNewItem()
-      expect(
-        newItem.querySelector('.add-another-point__remove-button')
-      ).toBeNull()
-    })
   })
 
   describe('updateAttributes', () => {
