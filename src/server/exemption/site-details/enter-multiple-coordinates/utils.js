@@ -1,9 +1,6 @@
 import { COORDINATE_SYSTEMS } from '~/src/server/common/constants/exemptions.js'
 import { routes } from '~/src/server/common/constants/routes.js'
-import {
-  getExemptionCache,
-  updateExemptionSiteDetails
-} from '~/src/server/common/helpers/session-cache/utils.js'
+import { getExemptionCache } from '~/src/server/common/helpers/session-cache/utils.js'
 import { generatePointSpecificErrorMessage } from '~/src/server/common/helpers/site-details.js'
 import { createOsgb36MultipleCoordinatesSchema } from '~/src/server/common/schemas/osgb36.js'
 import { createWgs84MultipleCoordinatesSchema } from '~/src/server/common/schemas/wgs84.js'
