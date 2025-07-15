@@ -25,8 +25,8 @@ export const multipleCoordinatesController = {
         : COORDINATE_SYSTEMS.WGS84
 
     const coordinates = normaliseCoordinatesForDisplay(
-      siteDetails.coordinates,
-      coordinateSystem
+      coordinateSystem,
+      siteDetails.coordinates
     )
 
     return h.view(MULTIPLE_COORDINATES_VIEW_ROUTES[coordinateSystem], {
@@ -44,8 +44,8 @@ function renderMultipleCoordinatesView(
   projectName
 ) {
   const coordinatesForDisplay = normaliseCoordinatesForDisplay(
-    coordinates,
-    coordinateSystem
+    coordinateSystem,
+    coordinates
   )
   return h.view(MULTIPLE_COORDINATES_VIEW_ROUTES[coordinateSystem], {
     ...multipleCoordinatesPageData,

@@ -54,13 +54,13 @@ const createDefaultCoordinates = (coordinateSystem) => {
 
 /**
  * Normalise coordinates for display - ensures minimum 3 coordinates with empty defaults
- * @param {Array} coordinates - Coordinate data
  * @param {string} coordinateSystem - Coordinate system type
+ * @param {Array} coordinates - Coordinate data
  * @returns {Array} Array of all coordinates
  */
 export const normaliseCoordinatesForDisplay = (
-  coordinates = [],
-  coordinateSystem
+  coordinateSystem,
+  coordinates = []
 ) => {
   if (coordinates.length === 0) {
     return createDefaultCoordinates(coordinateSystem)

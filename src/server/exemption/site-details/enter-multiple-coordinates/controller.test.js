@@ -87,7 +87,9 @@ describe('#multipleCoordinates', () => {
       .spyOn(cacheUtils, 'getCoordinateSystem')
       .mockReturnValue({ coordinateSystem: COORDINATE_SYSTEMS.WGS84 })
 
-    normaliseCoordinatesForDisplay.mockImplementation((coords) => coords || [])
+    normaliseCoordinatesForDisplay.mockImplementation(
+      (system, coords) => coords || []
+    )
     isWGS84.mockImplementation(
       (coordinateSystem) => coordinateSystem === COORDINATE_SYSTEMS.WGS84
     )

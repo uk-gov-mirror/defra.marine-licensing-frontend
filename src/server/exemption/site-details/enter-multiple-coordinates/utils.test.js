@@ -81,7 +81,7 @@ describe('enter-multiple-coordinates utils', () => {
         ])(
           'should return 3 empty coordinates when $title provided',
           ({ input }) => {
-            const result = normaliseCoordinatesForDisplay(input, system)
+            const result = normaliseCoordinatesForDisplay(system, input)
             expect(result).toEqual([
               emptyCoordinate,
               emptyCoordinate,
@@ -99,7 +99,7 @@ describe('enter-multiple-coordinates utils', () => {
         ])(
           'should pad with empty coordinates when fewer than 3 provided - $description',
           ({ input }) => {
-            const result = normaliseCoordinatesForDisplay(input, system)
+            const result = normaliseCoordinatesForDisplay(system, input)
             expect(result).toHaveLength(3)
 
             input.forEach((coord, index) => {
@@ -114,8 +114,8 @@ describe('enter-multiple-coordinates utils', () => {
 
         it('should return exactly 3 coordinates when 3 provided', () => {
           const result = normaliseCoordinatesForDisplay(
-            sampleCoordinates,
-            system
+            system,
+            sampleCoordinates
           )
           expect(result).toHaveLength(3)
           expect(result).toEqual(sampleCoordinates)
@@ -128,8 +128,8 @@ describe('enter-multiple-coordinates utils', () => {
             sampleCoordinates[1]
           ]
           const result = normaliseCoordinatesForDisplay(
-            extraCoordinates,
-            system
+            system,
+            extraCoordinates
           )
           expect(result).toHaveLength(extraCoordinates.length)
           expect(result).toEqual(extraCoordinates)
@@ -144,16 +144,16 @@ describe('enter-multiple-coordinates utils', () => {
           additionalProperty: 'test'
         }
         const result = normaliseCoordinatesForDisplay(
-          [coordinateWithExtra],
-          COORDINATE_SYSTEMS.WGS84
+          COORDINATE_SYSTEMS.WGS84,
+          [coordinateWithExtra]
         )
         expect(result[0]).toEqual(coordinateWithExtra)
       })
 
       it('should handle mixed coordinate systems gracefully', () => {
         const result = normaliseCoordinatesForDisplay(
-          [SAMPLE_WGS84_COORDINATES[0]],
-          COORDINATE_SYSTEMS.OSGB36
+          COORDINATE_SYSTEMS.OSGB36,
+          [SAMPLE_WGS84_COORDINATES[0]]
         )
         expect(result).toHaveLength(3)
         expect(result[0]).toEqual(SAMPLE_WGS84_COORDINATES[0])
