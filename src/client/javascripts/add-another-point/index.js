@@ -72,10 +72,10 @@ export class AddAnotherPoint extends Component {
 
   getNewItem() {
     const $items = this.getItems()
-    if (!$items[0]) {
+    if (!$items.length) {
       return null
     }
-    const $item = $items[0].cloneNode(true)
+    const $item = $items[$items.length - 1].cloneNode(true)
     const $existingRemoveButton = $item.querySelector(`.${REMOVE_BUTTON_CLASS}`)
     if ($existingRemoveButton) {
       $existingRemoveButton.remove()
@@ -93,10 +93,19 @@ export class AddAnotherPoint extends Component {
       $input.name = rawDataName.replace(/%index%/, `${index}`)
       $input.id = rawDataId.replace(/%index%/, `${index}`)
 
-      const $label =
-        $input.parentElement?.querySelector(`label[for="${originalId}"]`) ??
-        $input.closest('label') ??
-        $item.querySelector(`label[for="${originalId}"]`)
+      let $label = null
+
+      if (originalId) {
+        $label = $item.querySelector(`label[for="${originalId}"]`)
+      }
+
+      if (!$label) {
+        $label = $input.closest('label')
+      }
+
+      if (!$label) {
+        $label = $item.querySelector('label')
+      }
 
       if ($label instanceof HTMLLabelElement) {
         $label.htmlFor = $input.id
@@ -118,10 +127,37 @@ export class AddAnotherPoint extends Component {
 
       if ($errorMessage instanceof HTMLElement) {
         $errorMessage.id = newErrorId
-        $errorMessage.textContent = $errorMessage.textContent.replace(
-          /point \d+/gi,
-          `point ${index + 1}`
+
+        const $visuallyHidden = $errorMessage.querySelector(
+          '.govuk-visually-hidden'
         )
+
+        let textNode = null
+        if ($visuallyHidden) {
+          let foundSpan = false
+          for (const node of $errorMessage.childNodes) {
+            if (node === $visuallyHidden) {
+              foundSpan = true
+              continue
+            }
+            if (foundSpan && node.nodeType === Node.TEXT_NODE) {
+              textNode = node
+              break
+            }
+          }
+        }
+
+        if (textNode) {
+          textNode.textContent = textNode.textContent.replace(
+            /point \d+/gi,
+            `point ${index + 1}`
+          )
+        } else {
+          $errorMessage.textContent = $errorMessage.textContent.replace(
+            /point \d+/gi,
+            `point ${index + 1}`
+          )
+        }
         $input.setAttribute('aria-describedby', newErrorId)
       }
     }
