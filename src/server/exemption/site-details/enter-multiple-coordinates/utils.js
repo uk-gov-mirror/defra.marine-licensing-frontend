@@ -62,7 +62,13 @@ export const normaliseCoordinatesForDisplay = (
   coordinateSystem,
   coordinates = []
 ) => {
-  if (coordinates.length === 0) {
+  if (
+    coordinates.length === 0 ||
+    !coordinates[0] ||
+    (coordinates[0]?.latitude &&
+      coordinateSystem !== COORDINATE_SYSTEMS.WGS84) ||
+    (coordinates[0]?.eastings && coordinateSystem !== COORDINATE_SYSTEMS.OSGB36)
+  ) {
     return createDefaultCoordinates(coordinateSystem)
   }
 
