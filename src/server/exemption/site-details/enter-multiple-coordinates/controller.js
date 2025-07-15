@@ -1,7 +1,8 @@
 import { COORDINATE_SYSTEMS } from '~/src/server/common/constants/exemptions.js'
 import {
   getExemptionCache,
-  getCoordinateSystem
+  getCoordinateSystem,
+  updateExemptionSiteDetails
 } from '~/src/server/common/helpers/session-cache/utils.js'
 import {
   MULTIPLE_COORDINATES_VIEW_ROUTES,
@@ -11,7 +12,6 @@ import {
   validateCoordinates,
   convertArrayErrorsToFlattenedErrors,
   handleValidationFailure,
-  saveCoordinatesToSession,
   removeCoordinateAtIndex
 } from './utils.js'
 
@@ -24,10 +24,8 @@ export const multipleCoordinatesController = {
         ? COORDINATE_SYSTEMS.OSGB36
         : COORDINATE_SYSTEMS.WGS84
 
-    const multipleCoordinates = siteDetails.multipleCoordinates || {}
-
     const coordinates = normaliseCoordinatesForDisplay(
-      multipleCoordinates[coordinateSystem] || [],
+      siteDetails.coordinates,
       coordinateSystem
     )
 
@@ -93,7 +91,7 @@ export const multipleCoordinatesSubmitController = {
       )
     }
 
-    saveCoordinatesToSession(request, coordinates, coordinateSystem)
+    updateExemptionSiteDetails(request, 'coordinates', coordinates)
 
     if (payload.add) {
       const emptyCoordinate =

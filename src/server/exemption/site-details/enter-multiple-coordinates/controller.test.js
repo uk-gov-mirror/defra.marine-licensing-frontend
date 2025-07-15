@@ -6,6 +6,7 @@ import {
 import { COORDINATE_SYSTEMS } from '~/src/server/common/constants/exemptions.js'
 import * as cacheUtils from '~/src/server/common/helpers/session-cache/utils.js'
 import { routes } from '~/src/server/common/constants/routes.js'
+import { updateExemptionSiteDetails } from '~/src/server/common/helpers/session-cache/utils.js'
 import {
   MULTIPLE_COORDINATES_VIEW_ROUTES,
   normaliseCoordinatesForDisplay,
@@ -14,8 +15,7 @@ import {
   convertPayloadToCoordinatesArray,
   validateCoordinates,
   convertArrayErrorsToFlattenedErrors,
-  handleValidationFailure,
-  saveCoordinatesToSession
+  handleValidationFailure
 } from '~/src/server/exemption/site-details/enter-multiple-coordinates/utils.js'
 
 jest.mock('~/src/server/common/helpers/session-cache/utils.js')
@@ -41,7 +41,6 @@ jest.mock(
       validateCoordinates: jest.fn(),
       convertArrayErrorsToFlattenedErrors: jest.fn(),
       handleValidationFailure: jest.fn(),
-      saveCoordinatesToSession: jest.fn(),
       removeCoordinateAtIndex: actualUtils.removeCoordinateAtIndex,
       REQUIRED_COORDINATES_COUNT: actualUtils.REQUIRED_COORDINATES_COUNT
     }
@@ -70,9 +69,7 @@ describe('#multipleCoordinates', () => {
     projectName: 'Test Project',
     siteDetails: {
       coordinateSystem: COORDINATE_SYSTEMS.WGS84,
-      multipleCoordinates: {
-        [COORDINATE_SYSTEMS.WGS84]: mockCoordinates.wgs84
-      }
+      coordinates: mockCoordinates.wgs84
     }
   }
 
@@ -115,7 +112,6 @@ describe('#multipleCoordinates', () => {
         })
         .takeover()
     })
-    saveCoordinatesToSession.mockImplementation(jest.fn())
   })
 
   afterAll(async () => {
@@ -149,9 +145,7 @@ describe('#multipleCoordinates', () => {
         ...mockExemption,
         siteDetails: {
           coordinateSystem: COORDINATE_SYSTEMS.OSGB36,
-          multipleCoordinates: {
-            [COORDINATE_SYSTEMS.OSGB36]: mockCoordinates.osgb36
-          }
+          coordinates: mockCoordinates.osgb36
         }
       })
       normaliseCoordinatesForDisplay.mockReturnValueOnce(mockCoordinates.osgb36)
@@ -197,7 +191,6 @@ describe('#multipleCoordinates', () => {
     beforeEach(() => {
       mockH.view.mockClear()
       mockTakeover.mockClear()
-      // Ensure view always returns object with takeover method
       mockH.view.mockReturnValue(mockViewResult)
     })
 
@@ -225,10 +218,10 @@ describe('#multipleCoordinates', () => {
         mockExemption.id,
         COORDINATE_SYSTEMS.WGS84
       )
-      expect(saveCoordinatesToSession).toHaveBeenCalledWith(
+      expect(updateExemptionSiteDetails).toHaveBeenCalledWith(
         request,
-        expectedCoordinates,
-        COORDINATE_SYSTEMS.WGS84
+        'coordinates',
+        expectedCoordinates
       )
       expect(mockH.view).toHaveBeenCalledWith(
         MULTIPLE_COORDINATES_VIEW_ROUTES[COORDINATE_SYSTEMS.WGS84],
@@ -262,7 +255,6 @@ describe('#multipleCoordinates', () => {
         mockValidationError,
         COORDINATE_SYSTEMS.WGS84
       )
-      expect(saveCoordinatesToSession).not.toHaveBeenCalled()
     })
 
     test('should handle OSGB36 coordinate system correctly', () => {
@@ -290,6 +282,11 @@ describe('#multipleCoordinates', () => {
         expectedCoordinates,
         mockExemption.id,
         COORDINATE_SYSTEMS.OSGB36
+      )
+      expect(updateExemptionSiteDetails).toHaveBeenCalledWith(
+        request,
+        'coordinates',
+        expectedCoordinates
       )
       expect(mockH.view).toHaveBeenCalledWith(
         MULTIPLE_COORDINATES_VIEW_ROUTES[COORDINATE_SYSTEMS.OSGB36],

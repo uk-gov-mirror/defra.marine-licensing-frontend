@@ -62,20 +62,18 @@ const createDefaultCoordinates = (coordinateSystem) => {
  * @returns {Array} Array of all coordinates
  */
 export const normaliseCoordinatesForDisplay = (
-  coordinates,
+  coordinates = [],
   coordinateSystem
 ) => {
-  const displayCoordinates = coordinates || []
-
-  if (displayCoordinates.length === 0) {
+  if (coordinates.length === 0) {
     return createDefaultCoordinates(coordinateSystem)
   }
 
-  while (displayCoordinates.length < REQUIRED_COORDINATES_COUNT) {
-    displayCoordinates.push(createEmptyCoordinate(coordinateSystem))
+  while (coordinates.length < REQUIRED_COORDINATES_COUNT) {
+    coordinates.push(createEmptyCoordinate(coordinateSystem))
   }
 
-  return displayCoordinates
+  return coordinates
 }
 
 export const extractCoordinateIndexFromFieldName = (fieldName) => {
@@ -205,27 +203,6 @@ export const handleValidationFailure = (
       errorSummary
     })
     .takeover()
-}
-
-export const saveCoordinatesToSession = (
-  request,
-  coordinates,
-  coordinateSystem
-) => {
-  const exemption = getExemptionCache(request)
-  const existingMultipleCoordinates =
-    exemption?.siteDetails?.multipleCoordinates || {}
-
-  const updatedMultipleCoordinates = {
-    ...existingMultipleCoordinates,
-    [coordinateSystem]: coordinates
-  }
-
-  updateExemptionSiteDetails(
-    request,
-    'multipleCoordinates',
-    updatedMultipleCoordinates
-  )
 }
 
 export const validateCoordinates = (

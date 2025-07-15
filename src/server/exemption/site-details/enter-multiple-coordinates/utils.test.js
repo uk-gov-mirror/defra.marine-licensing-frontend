@@ -81,7 +81,6 @@ describe('enter-multiple-coordinates utils', () => {
       ({ system, emptyCoordinate, sampleCoordinates }) => {
         it.each([
           { input: [], title: 'empty array' },
-          { input: null, title: 'null' },
           { input: undefined, title: 'undefined' }
         ])(
           'should return 3 empty coordinates when $title provided',
@@ -558,52 +557,6 @@ describe('enter-multiple-coordinates utils', () => {
         })
       )
     })
-  })
-
-  describe('saveCoordinatesToSession', () => {
-    const mockRequest = {}
-    const existingCoordinates = {
-      [COORDINATE_SYSTEMS.OSGB36]: [{ eastings: '529090', northings: '181680' }]
-    }
-
-    it('should save coordinates to session', () => {
-      getExemptionCache.mockReturnValue({
-        siteDetails: { multipleCoordinates: existingCoordinates }
-      })
-      const coordinates = [{ latitude: '51.5074', longitude: '-0.1278' }]
-
-      saveCoordinatesToSession(
-        mockRequest,
-        coordinates,
-        COORDINATE_SYSTEMS.WGS84
-      )
-
-      expect(updateExemptionSiteDetails).toHaveBeenCalledWith(
-        mockRequest,
-        'multipleCoordinates',
-        { ...existingCoordinates, [COORDINATE_SYSTEMS.WGS84]: coordinates }
-      )
-    })
-
-    it.each([{ mockReturn: { siteDetails: {} } }, { mockReturn: null }])(
-      'should handle missing cache scenarios - $description',
-      ({ mockReturn }) => {
-        getExemptionCache.mockReturnValue(mockReturn)
-        const coordinates = [{ latitude: '51.5074', longitude: '-0.1278' }]
-
-        saveCoordinatesToSession(
-          mockRequest,
-          coordinates,
-          COORDINATE_SYSTEMS.WGS84
-        )
-
-        expect(updateExemptionSiteDetails).toHaveBeenCalledWith(
-          mockRequest,
-          'multipleCoordinates',
-          { [COORDINATE_SYSTEMS.WGS84]: coordinates }
-        )
-      }
-    )
   })
 
   describe('validateCoordinates', () => {
