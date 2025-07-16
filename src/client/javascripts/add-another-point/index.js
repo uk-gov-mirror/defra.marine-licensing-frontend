@@ -1,6 +1,7 @@
 import { Component } from 'govuk-frontend'
 
 const REMOVE_BUTTON_CLASS = 'add-another-point__remove-button'
+const ARIA_DESCRIBED_BY = 'aria-describedby'
 
 export class AddAnotherPoint extends Component {
   constructor($root) {
@@ -37,6 +38,7 @@ export class AddAnotherPoint extends Component {
     $items[$items.length - 1].after($newItem)
 
     this.updateRemoveButtonsVisibility()
+
     this.getItems().forEach(($item, index) => {
       this.updateAttributes($item, index)
     })
@@ -87,13 +89,15 @@ export class AddAnotherPoint extends Component {
     $item.querySelectorAll('.govuk-input').forEach(($input) => {
       $input.classList.remove('govuk-input--error')
 
-      if ($input instanceof HTMLInputElement) {
+      if ($input instanceof HTMLInputElement && $input.type === 'text') {
+        $input.value = ''
+      } else if ($input instanceof HTMLTextAreaElement) {
         $input.value = ''
       }
 
-      const describedBy = $input.getAttribute('aria-describedby')
+      const describedBy = $input.getAttribute(ARIA_DESCRIBED_BY)
       if (describedBy && /-error\b/.test(describedBy)) {
-        $input.removeAttribute('aria-describedby')
+        $input.removeAttribute(ARIA_DESCRIBED_BY)
       }
     })
 
@@ -175,7 +179,7 @@ export class AddAnotherPoint extends Component {
             `point ${index + 1}`
           )
         }
-        $input.setAttribute('aria-describedby', newErrorId)
+        $input.setAttribute(ARIA_DESCRIBED_BY, newErrorId)
       }
     }
 
@@ -190,11 +194,17 @@ export class AddAnotherPoint extends Component {
 
       updateInputAndLabel($input, rawDataName, rawDataId, originalId)
 
-      const originalAriaDescribedBy = $input.getAttribute('aria-describedby')
+      const originalAriaDescribedBy = $input.getAttribute(ARIA_DESCRIBED_BY)
+
       if (originalAriaDescribedBy) {
         updateErrorMessage($input, originalAriaDescribedBy)
       }
     })
+
+    const $fieldset = $item.querySelector('.govuk-fieldset')
+    if ($fieldset instanceof HTMLFieldSetElement) {
+      $fieldset.setAttribute('data-point-index', `${index}`)
+    }
 
     const $legend = $item.querySelector('.govuk-fieldset__legend--s')
     if ($legend instanceof HTMLElement) {
@@ -203,6 +213,11 @@ export class AddAnotherPoint extends Component {
       } else {
         $legend.textContent = `Point ${index + 1}`
       }
+    }
+
+    const $removeButton = $item.querySelector(`.${REMOVE_BUTTON_CLASS}`)
+    if ($removeButton instanceof HTMLButtonElement) {
+      $removeButton.value = `${index}`
     }
   }
 
@@ -226,8 +241,15 @@ export class AddAnotherPoint extends Component {
     $button.textContent = 'Remove'
 
     const $fieldset = $item.querySelector('.govuk-fieldset')
-    const $legend = $fieldset.querySelector('.govuk-fieldset__legend')
-    $legend.after($button)
+
+    if ($fieldset && $fieldset instanceof HTMLFieldSetElement) {
+      const $legend = $fieldset.querySelector('.govuk-fieldset__legend')
+      if ($legend) {
+        $legend.after($button)
+      } else {
+        $fieldset.appendChild($button)
+      }
+    }
   }
 
   resetItem($item) {
@@ -264,7 +286,7 @@ export class AddAnotherPoint extends Component {
       return
     }
 
-    $button.closest('.add-another-point__item').remove()
+    $button.closest('.add-another-point__item')?.remove()
 
     this.getItems().forEach(($item, index) => {
       this.updateAttributes($item, index)
