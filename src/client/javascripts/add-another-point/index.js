@@ -10,6 +10,18 @@ export class AddAnotherPoint extends Component {
     this.minItems = parseInt($root.getAttribute('data-min-items') ?? '1', 10)
     this.$root.addEventListener('click', this.onRemoveButtonClick.bind(this))
     this.$root.addEventListener('click', this.onAddButtonClick.bind(this))
+
+    const $buttons = this.$root.querySelectorAll(
+      '.add-another-point__add-button, .add-another-point__remove-button'
+    )
+
+    $buttons.forEach(($button) => {
+      if (!($button instanceof HTMLButtonElement)) {
+        return
+      }
+
+      $button.type = 'button'
+    })
   }
 
   static moduleName = 'add-another-point'
