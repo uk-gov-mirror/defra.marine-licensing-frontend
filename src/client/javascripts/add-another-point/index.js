@@ -106,123 +106,6 @@ export class AddAnotherPoint extends Component {
   }
 
   updateAttributes($item, index) {
-    const updateInputAndLabel = (
-      $input,
-      rawDataName,
-      rawDataId,
-      originalId
-    ) => {
-      $input.name = rawDataName.replace(/%index%/, `${index}`)
-      $input.id = rawDataId.replace(/%index%/, `${index}`)
-
-      let $label = null
-
-      if (originalId) {
-        $label = $item.querySelector(`label[for="${originalId}"]`)
-      }
-
-      if (!$label) {
-        $label = $input.closest('label')
-      }
-
-      if (!$label) {
-        $label = $item.querySelector('label')
-      }
-
-      if ($label instanceof HTMLLabelElement) {
-        $label.htmlFor = $input.id
-
-        const processedDataName = rawDataName.replace(/%index%/, `${index}`)
-        const fieldName = this._extractFieldName(processedDataName)
-
-        if (index === 0) {
-          $label.textContent = `${fieldName} of start and end point`
-        } else {
-          $label.textContent = `${fieldName} of point ${index + 1}`
-        }
-      }
-    }
-
-    const updateErrorMessage = ($input, originalAriaDescribedBy) => {
-      const $originalErrorMessage = $item.querySelector(
-        `#${originalAriaDescribedBy}`
-      )
-
-      if (!($originalErrorMessage instanceof HTMLElement)) {
-        return
-      }
-
-      const $clonedErrorMessage = createClonedErrorMessage(
-        $originalErrorMessage,
-        $input.id
-      )
-      updatePointNumbers($clonedErrorMessage, originalAriaDescribedBy)
-
-      $originalErrorMessage.replaceWith($clonedErrorMessage)
-      $input.setAttribute(ARIA_DESCRIBED_BY, $clonedErrorMessage.id)
-    }
-
-    const createClonedErrorMessage = ($original, inputId) => {
-      const $cloned = $original.cloneNode(true)
-      $cloned.id = `${inputId}-error`
-      return $cloned
-    }
-
-    const updatePointNumbers = ($errorMessage, originalAriaDescribedBy) => {
-      const textNode = findTargetTextNode(
-        $errorMessage,
-        originalAriaDescribedBy
-      )
-      const pointPattern = /point \d+/gi
-
-      if (textNode) {
-        textNode.textContent = textNode.textContent.replace(
-          pointPattern,
-          `point ${index + 1}`
-        )
-      } else {
-        $errorMessage.textContent = $errorMessage.textContent.replace(
-          pointPattern,
-          `point ${index + 1}`
-        )
-      }
-    }
-
-    const findTargetTextNode = ($errorMessage, originalAriaDescribedBy) => {
-      const isErrorId = /-error\b/.test(originalAriaDescribedBy)
-      let foundVisuallyHidden = false
-
-      for (const node of $errorMessage.childNodes) {
-        if (isElementWithClass(node, 'govuk-visually-hidden')) {
-          foundVisuallyHidden = true
-          continue
-        }
-
-        if (node.nodeType === Node.TEXT_NODE) {
-          if (foundVisuallyHidden) {
-            return node
-          }
-
-          if (
-            !foundVisuallyHidden &&
-            isErrorId &&
-            node.textContent.includes('point')
-          ) {
-            return node
-          }
-        }
-      }
-
-      return null
-    }
-
-    const isElementWithClass = (node, className) => {
-      return (
-        node.nodeType === Node.ELEMENT_NODE &&
-        node.classList.contains(className)
-      )
-    }
-
     $item.querySelectorAll('[data-name]').forEach(($input) => {
       if (!this.isValidInputElement($input)) {
         return
@@ -232,20 +115,152 @@ export class AddAnotherPoint extends Component {
       const rawDataId = $input.getAttribute('data-id') ?? ''
       const originalId = $input.id
 
-      updateInputAndLabel($input, rawDataName, rawDataId, originalId)
+      this.updateInputAndLabel(
+        $item,
+        $input,
+        rawDataName,
+        rawDataId,
+        originalId,
+        index
+      )
 
       const originalAriaDescribedBy = $input.getAttribute(ARIA_DESCRIBED_BY)
-
       if (originalAriaDescribedBy) {
-        updateErrorMessage($input, originalAriaDescribedBy)
+        this.updateErrorMessage($item, $input, originalAriaDescribedBy, index)
       }
     })
 
+    this.updateFieldset($item, index)
+    this.updateLegend($item, index)
+    this.updateRemoveButtonValue($item, index)
+  }
+
+  updateInputAndLabel(
+    $item,
+    $input,
+    rawDataName,
+    rawDataId,
+    originalId,
+    index
+  ) {
+    $input.name = rawDataName.replace(/%index%/, `${index}`)
+    $input.id = rawDataId.replace(/%index%/, `${index}`)
+
+    const $label = this.findLabelForInput($item, $input, originalId)
+
+    if ($label instanceof HTMLLabelElement) {
+      $label.htmlFor = $input.id
+
+      const processedDataName = rawDataName.replace(/%index%/, `${index}`)
+      const fieldName = this.extractFieldName(processedDataName)
+
+      if (index === 0) {
+        $label.textContent = `${fieldName} of start and end point`
+      } else {
+        $label.textContent = `${fieldName} of point ${index + 1}`
+      }
+    }
+  }
+
+  findLabelForInput($item, $input, originalId) {
+    if (originalId) {
+      const $label = $item.querySelector(`label[for="${originalId}"]`)
+      if ($label) return $label
+    }
+
+    const $closestLabel = $input.closest('label')
+    if ($closestLabel) return $closestLabel
+
+    return $item.querySelector('label')
+  }
+
+  updateErrorMessage($item, $input, originalAriaDescribedBy, index) {
+    const $originalErrorMessage = $item.querySelector(
+      `#${originalAriaDescribedBy}`
+    )
+
+    if (!($originalErrorMessage instanceof HTMLElement)) {
+      return
+    }
+
+    const $clonedErrorMessage = this.createClonedErrorMessage(
+      $originalErrorMessage,
+      $input.id
+    )
+    this.updatePointNumbers($clonedErrorMessage, originalAriaDescribedBy, index)
+
+    $originalErrorMessage.replaceWith($clonedErrorMessage)
+    $input.setAttribute(ARIA_DESCRIBED_BY, $clonedErrorMessage.id)
+  }
+
+  createClonedErrorMessage($original, inputId) {
+    const $cloned = $original.cloneNode(true)
+    $cloned.id = `${inputId}-error`
+    return $cloned
+  }
+
+  updatePointNumbers($errorMessage, originalAriaDescribedBy, index) {
+    const textNode = this.findTargetTextNode(
+      $errorMessage,
+      originalAriaDescribedBy
+    )
+    const pointPattern = /point \d+/gi
+
+    if (textNode) {
+      textNode.textContent = textNode.textContent.replace(
+        pointPattern,
+        `point ${index + 1}`
+      )
+    } else {
+      $errorMessage.textContent = $errorMessage.textContent.replace(
+        pointPattern,
+        `point ${index + 1}`
+      )
+    }
+  }
+
+  findTargetTextNode($errorMessage, originalAriaDescribedBy) {
+    const isErrorId = /-error\b/.test(originalAriaDescribedBy)
+    let foundVisuallyHidden = false
+
+    for (const node of $errorMessage.childNodes) {
+      if (this.isElementWithClass(node, 'govuk-visually-hidden')) {
+        foundVisuallyHidden = true
+        continue
+      }
+
+      if (node.nodeType === Node.TEXT_NODE) {
+        if (foundVisuallyHidden) {
+          return node
+        }
+
+        if (
+          !foundVisuallyHidden &&
+          isErrorId &&
+          node.textContent.includes('point')
+        ) {
+          return node
+        }
+      }
+    }
+
+    return null
+  }
+
+  isElementWithClass(node, className) {
+    return (
+      node.nodeType === Node.ELEMENT_NODE && node.classList.contains(className)
+    )
+  }
+
+  updateFieldset($item, index) {
     const $fieldset = $item.querySelector('.govuk-fieldset')
     if ($fieldset instanceof HTMLFieldSetElement) {
       $fieldset.setAttribute('data-point-index', `${index}`)
     }
+  }
 
+  updateLegend($item, index) {
     const $legend = $item.querySelector('.govuk-fieldset__legend--s')
     if ($legend instanceof HTMLElement) {
       if (index === 0) {
@@ -254,14 +269,16 @@ export class AddAnotherPoint extends Component {
         $legend.textContent = `Point ${index + 1}`
       }
     }
+  }
 
+  updateRemoveButtonValue($item, index) {
     const $removeButton = $item.querySelector(`.${REMOVE_BUTTON_CLASS}`)
     if ($removeButton instanceof HTMLButtonElement) {
       $removeButton.value = `${index}`
     }
   }
 
-  _extractFieldName(processedDataName) {
+  extractFieldName(processedDataName) {
     const lastBracketIndex = processedDataName.lastIndexOf('[')
     if (lastBracketIndex !== -1 && processedDataName.endsWith(']')) {
       const fieldPart = processedDataName.slice(lastBracketIndex + 1, -1)
