@@ -180,10 +180,10 @@ describe('AddAnotherPoint', () => {
         <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">Point 4</legend>
         <div class="govuk-form-group govuk-form-group--error">
           <label class="govuk-label" for="coordinates-3-eastings">Eastings of point 4</label>
-          <p id="coordinates-4-eastings-error" class="govuk-error-message">
-            <span class="govuk-visually-hidden">Error:</span> Enter the eastings of point 5
+          <p id="coordinates-3-eastings-error" class="govuk-error-message">
+            <span class="govuk-visually-hidden">Error:</span> Enter the eastings of point 4
           </p>
-          <input class="govuk-input govuk-input--error" id="coordinates-3-eastings" name="coordinates[3][eastings]" type="text" value="" aria-describedby="coordinates-4-eastings-error" data-name="coordinates[%index%][eastings]" data-id="coordinates-%index%-eastings">
+          <input class="govuk-input govuk-input--error" id="coordinates-3-eastings" name="coordinates[3][eastings]" type="text" value="" aria-describedby="coordinates-3-eastings-error" data-name="coordinates[%index%][eastings]" data-id="coordinates-%index%-eastings">
         </div>
       </fieldset>
     `

@@ -89,9 +89,10 @@ export class AddAnotherPoint extends Component {
     $item.querySelectorAll('.govuk-input').forEach(($input) => {
       $input.classList.remove('govuk-input--error')
 
-      if ($input instanceof HTMLInputElement && $input.type === 'text') {
-        $input.value = ''
-      } else if ($input instanceof HTMLTextAreaElement) {
+      if (
+        ($input instanceof HTMLInputElement && $input.type === 'text') ||
+        $input instanceof HTMLTextAreaElement
+      ) {
         $input.value = ''
       }
 
@@ -143,44 +144,83 @@ export class AddAnotherPoint extends Component {
     }
 
     const updateErrorMessage = ($input, originalAriaDescribedBy) => {
-      const newErrorId = $input.id + '-error'
-      const $errorMessage = $item.querySelector(`#${originalAriaDescribedBy}`)
+      const $originalErrorMessage = $item.querySelector(
+        `#${originalAriaDescribedBy}`
+      )
 
-      if ($errorMessage instanceof HTMLElement) {
-        $errorMessage.id = newErrorId
+      if (!($originalErrorMessage instanceof HTMLElement)) {
+        return
+      }
 
-        const $visuallyHidden = $errorMessage.querySelector(
-          '.govuk-visually-hidden'
+      const $clonedErrorMessage = createClonedErrorMessage(
+        $originalErrorMessage,
+        $input.id
+      )
+      updatePointNumbers($clonedErrorMessage, originalAriaDescribedBy)
+
+      $originalErrorMessage.replaceWith($clonedErrorMessage)
+      $input.setAttribute(ARIA_DESCRIBED_BY, $clonedErrorMessage.id)
+    }
+
+    const createClonedErrorMessage = ($original, inputId) => {
+      const $cloned = $original.cloneNode(true)
+      $cloned.id = `${inputId}-error`
+      return $cloned
+    }
+
+    const updatePointNumbers = ($errorMessage, originalAriaDescribedBy) => {
+      const textNode = findTargetTextNode(
+        $errorMessage,
+        originalAriaDescribedBy
+      )
+      const pointPattern = /point \d+/gi
+
+      if (textNode) {
+        textNode.textContent = textNode.textContent.replace(
+          pointPattern,
+          `point ${index + 1}`
         )
+      } else {
+        $errorMessage.textContent = $errorMessage.textContent.replace(
+          pointPattern,
+          `point ${index + 1}`
+        )
+      }
+    }
 
-        let textNode = null
-        if ($visuallyHidden) {
-          let foundSpan = false
-          for (const node of $errorMessage.childNodes) {
-            if (node === $visuallyHidden) {
-              foundSpan = true
-              continue
-            }
-            if (foundSpan && node.nodeType === Node.TEXT_NODE) {
-              textNode = node
-              break
-            }
+    const findTargetTextNode = ($errorMessage, originalAriaDescribedBy) => {
+      const isErrorId = /-error\b/.test(originalAriaDescribedBy)
+      let foundVisuallyHidden = false
+
+      for (const node of $errorMessage.childNodes) {
+        if (isElementWithClass(node, 'govuk-visually-hidden')) {
+          foundVisuallyHidden = true
+          continue
+        }
+
+        if (node.nodeType === Node.TEXT_NODE) {
+          if (foundVisuallyHidden) {
+            return node
+          }
+
+          if (
+            !foundVisuallyHidden &&
+            isErrorId &&
+            node.textContent.includes('point')
+          ) {
+            return node
           }
         }
-
-        if (textNode) {
-          textNode.textContent = textNode.textContent.replace(
-            /point \d+/gi,
-            `point ${index + 1}`
-          )
-        } else {
-          $errorMessage.textContent = $errorMessage.textContent.replace(
-            /point \d+/gi,
-            `point ${index + 1}`
-          )
-        }
-        $input.setAttribute(ARIA_DESCRIBED_BY, newErrorId)
       }
+
+      return null
+    }
+
+    const isElementWithClass = (node, className) => {
+      return (
+        node.nodeType === Node.ELEMENT_NODE &&
+        node.classList.contains(className)
+      )
     }
 
     $item.querySelectorAll('[data-name]').forEach(($input) => {
