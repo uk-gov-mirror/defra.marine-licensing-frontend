@@ -165,11 +165,15 @@ export class AddAnotherPoint extends Component {
   findLabelForInput($item, $input, originalId) {
     if (originalId) {
       const $label = $item.querySelector(`label[for="${originalId}"]`)
-      if ($label) return $label
+      if ($label) {
+        return $label
+      }
     }
 
     const $closestLabel = $input.closest('label')
-    if ($closestLabel) return $closestLabel
+    if ($closestLabel) {
+      return $closestLabel
+    }
 
     return $item.querySelector('label')
   }
