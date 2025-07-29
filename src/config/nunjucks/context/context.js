@@ -37,7 +37,7 @@ export async function context(request) {
     signOutUrl: routes.SIGN_OUT,
     breadcrumbs: [],
     navigation,
-
+    clarityProjectId: config.get('clarityProjectId'),
     /**
      * @param {string} asset
      */
