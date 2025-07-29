@@ -76,7 +76,7 @@ describe('#context', () => {
     describe('When user is authenticated with defraId', () => {
       beforeEach(async () => {
         mockGetUserSession.mockResolvedValue({
-          strategy: 'defraId',
+          strategy: 'defra-id',
           displayName: 'John Doe'
         })
 

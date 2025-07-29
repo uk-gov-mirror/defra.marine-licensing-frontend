@@ -16,8 +16,10 @@ export const buildNavigation = async (request) => {
       active: request?.path === routes.DASHBOARD
     }
   ]
-
-  if (authedUser?.strategy === 'defraId') {
+  if (request.logger) {
+    request.logger.info('Auth strategy:', authedUser?.strategy)
+  }
+  if (authedUser?.strategy === 'defra-id') {
     navigation.push({
       text: 'Defra account',
       href: accountManagementUrl
