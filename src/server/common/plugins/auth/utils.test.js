@@ -51,7 +51,7 @@ describe('#utils', () => {
         setBindings: jest.fn()
       },
       state: {
-        session: {
+        userSession: {
           sessionId: 'test-id'
         }
       }

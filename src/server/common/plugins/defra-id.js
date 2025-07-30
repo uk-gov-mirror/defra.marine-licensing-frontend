@@ -40,6 +40,7 @@ export const defraId = {
 
       server.auth.strategy('session', 'cookie', {
         cookie: {
+          name: 'userSession',
           path: '/',
           password: cookie.password,
           isSecure: cookie.secure,
@@ -50,7 +51,7 @@ export const defraId = {
           return `/login`
         },
         validate: async (request, session) => {
-          return validateUserSession(request, session)
+          return validateUserSession(server, request, session)
         }
       })
 

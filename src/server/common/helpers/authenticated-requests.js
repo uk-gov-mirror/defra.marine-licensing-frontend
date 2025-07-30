@@ -4,9 +4,10 @@ import { getUserSession } from '~/src/server/common/plugins/auth/utils.js'
 
 export const getAuthToken = async (request) => {
   try {
-    const userSession = await getUserSession(request, {
-      sessionId: request.auth.credentials.sessionId
-    })
+    const userSession = await getUserSession(
+      request,
+      request.state?.userSession
+    )
     return userSession?.token || null
   } catch (error) {
     request.logger.error('Error getting auth token from session:', error)

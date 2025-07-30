@@ -7,7 +7,8 @@ import { routes } from '~/src/server/common/constants/routes.js'
  */
 export const buildNavigation = async (request) => {
   const { accountManagementUrl } = config.get('defraId')
-  const authedUser = await getUserSession(request)
+
+  const authedUser = await getUserSession(request, request.state?.userSession)
 
   const navigation = [
     {
@@ -16,9 +17,7 @@ export const buildNavigation = async (request) => {
       active: request?.path === routes.DASHBOARD
     }
   ]
-  if (request.logger) {
-    request.logger.info('Auth strategy:', authedUser?.strategy)
-  }
+
   if (authedUser?.strategy === 'defra-id') {
     navigation.push({
       text: 'Defra account',
