@@ -59,7 +59,6 @@ export const updateUserSession = async (request, refreshedSession) => {
       ...authedUser,
       id: payload.sub,
       correlationId: payload.correlationId,
-      sessionId: payload.sessionId,
       contactId: payload.contactId,
       serviceId: payload.serviceId,
       firstName: payload.firstName,

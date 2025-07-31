@@ -44,7 +44,8 @@ export const defraId = {
           path: '/',
           password: cookie.password,
           isSecure: cookie.secure,
-          ttl: cookie.ttl
+          ttl: cookie.ttl,
+          isSameSite: 'Lax'
         },
         keepAlive: true,
         redirectTo: () => {

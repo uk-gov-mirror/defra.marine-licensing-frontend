@@ -206,7 +206,6 @@ describe('#utils', () => {
           ...mockAuthedUser,
           id: 'test-user-id',
           correlationId: 'test-correlation-id',
-          sessionId: 'test-id',
           contactId: 'test-contact-id',
           serviceId: 'test-service-id',
           firstName: 'John',
