@@ -52,7 +52,7 @@ export const defraId = {
           return `/login`
         },
         validate: async (request, session) => {
-          return validateUserSession(server, request, session)
+          return validateUserSession(request, session)
         }
       })
 

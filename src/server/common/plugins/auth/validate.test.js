@@ -40,6 +40,7 @@ describe('validateUserSession', () => {
     }
 
     server = await startServer()
+    mockRequest.server = server
   })
 
   afterEach(async () => {
@@ -58,7 +59,7 @@ describe('validateUserSession', () => {
 
     await server.app.cache.set(mockUserSession.sessionId, mockUserSession)
 
-    const result = await validateUserSession(server, mockRequest, mockSession)
+    const result = await validateUserSession(mockRequest, mockSession)
 
     expect(result).toEqual({
       isValid: true,
@@ -70,7 +71,7 @@ describe('validateUserSession', () => {
     authUtils.getUserSession.mockResolvedValue(mockUserSession)
     isPast.mockReturnValue(false)
 
-    const result = await validateUserSession(server, mockRequest, mockSession)
+    const result = await validateUserSession(mockRequest, mockSession)
 
     expect(result).toEqual({
       isValid: false
@@ -99,7 +100,7 @@ describe('validateUserSession', () => {
     authUtils.updateUserSession.mockResolvedValue(mockUpdatedSession)
     isPast.mockReturnValue(true)
 
-    const result = await validateUserSession(server, mockRequest, mockSession)
+    const result = await validateUserSession(mockRequest, mockSession)
 
     expect(result).toEqual({
       isValid: true,
@@ -124,7 +125,7 @@ describe('validateUserSession', () => {
     authUtils.refreshAccessToken.mockResolvedValue(mockRefreshResponse)
     isPast.mockReturnValue(true)
 
-    const result = await validateUserSession(server, mockRequest, mockSession)
+    const result = await validateUserSession(mockRequest, mockSession)
 
     expect(result).toEqual({ isValid: false })
     expect(authUtils.refreshAccessToken).toHaveBeenCalledWith(

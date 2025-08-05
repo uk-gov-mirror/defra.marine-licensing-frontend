@@ -6,7 +6,7 @@ import {
 } from '~/src/server/common/plugins/auth/utils.js'
 import { isPast, parseISO, subMinutes } from 'date-fns'
 
-export const validateUserSession = async (server, request, session) => {
+export const validateUserSession = async (request, session) => {
   const authedUser = await getUserSession(request, session)
 
   if (!authedUser) {
@@ -34,7 +34,7 @@ export const validateUserSession = async (server, request, session) => {
       credentials: updatedSession
     }
   }
-  const userSession = await server.app.cache.get(session.sessionId)
+  const userSession = await request.server.app.cache.get(session.sessionId)
 
   if (userSession) {
     return {
