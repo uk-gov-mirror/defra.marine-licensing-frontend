@@ -19,7 +19,7 @@ export const mockExemption = {
   // consent:yes: means consent to withdraw the application from the public register
   publicRegister: { consent: 'yes', reason: 'Test reason' },
   multipleSiteDetails: {
-    multipleSitesEnabled: true,
+    multipleSitesEnabled: false,
     sameActivityDates: 'yes'
   },
   siteDetails: {
