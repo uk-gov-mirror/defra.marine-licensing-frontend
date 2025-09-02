@@ -60,6 +60,22 @@ describe('exemption route', () => {
       }),
       expect.objectContaining({
         method: 'GET',
+        path: '/exemption/site-name'
+      }),
+      expect.objectContaining({
+        method: 'POST',
+        path: '/exemption/site-name'
+      }),
+      expect.objectContaining({
+        method: 'GET',
+        path: '/exemption/same-activity-dates'
+      }),
+      expect.objectContaining({
+        method: 'POST',
+        path: '/exemption/same-activity-dates'
+      }),
+      expect.objectContaining({
+        method: 'GET',
         path: '/exemption/what-coordinate-system'
       }),
       expect.objectContaining({
@@ -123,10 +139,18 @@ describe('exemption route', () => {
         path: '/exemption/activity-dates'
       }),
       expect.objectContaining({
+        method: 'GET',
+        path: '/exemption/site-details-activity-dates'
+      }),
+      expect.objectContaining({
         method: 'POST',
         path: '/exemption/activity-dates'
       }),
       expect.objectContaining({
+        method: 'POST',
+        path: '/exemption/site-details-activity-dates'
+      }),
+      expect.objectContaining({
         method: 'GET',
         path: '/exemption/activity-description'
       }),
@@ -141,6 +165,10 @@ describe('exemption route', () => {
       expect.objectContaining({
         method: 'POST',
         path: '/exemption/check-your-answers'
+      }),
+      expect.objectContaining({
+        method: 'GET',
+        path: '/exemption/view-details/{exemptionId}'
       }),
       expect.objectContaining({
         method: 'GET',

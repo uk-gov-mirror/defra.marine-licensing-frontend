@@ -18,13 +18,17 @@ export const mockExemption = {
   activityDescription: 'Test activity description',
   // consent:yes: means consent to withdraw the application from the public register
   publicRegister: { consent: 'yes', reason: 'Test reason' },
-  multipleSiteDetails: { multipleSitesEnabled: false },
+  multipleSiteDetails: {
+    multipleSitesEnabled: false,
+    sameActivityDates: 'yes'
+  },
   siteDetails: {
     coordinatesType: 'coordinates',
     coordinatesEntry: 'single',
     coordinateSystem: COORDINATE_SYSTEMS.WGS84,
     coordinates: { latitude: '51.489676', longitude: '-0.231530' },
-    circleWidth: '100'
+    circleWidth: '100',
+    siteName: 'Mock site'
   },
   taskList: mockExemptionTaskList
 }
@@ -32,6 +36,13 @@ export const mockExemption = {
 export const mockExemptionWithShapefile = {
   ...mockExemption,
   siteDetails: { ...mockExemption.siteDetails, fileUploadType: 'shapefile' }
+}
+
+export const mockExemptionNoSiteDetails = {
+  ...mockExemption,
+  siteDetails: null,
+  multipleSiteDetails: null,
+  taskList: null
 }
 
 export const mockExemptionWithUploadConfig = {

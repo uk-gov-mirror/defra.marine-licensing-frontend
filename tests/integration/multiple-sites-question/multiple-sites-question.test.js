@@ -1,41 +1,33 @@
 import { JSDOM } from 'jsdom'
-import { getByRole, getByText, within } from '@testing-library/dom'
-import { createServer } from '~/src/server/index.js'
+import { getByRole, getByText } from '@testing-library/dom'
 import { statusCodes } from '~/src/server/common/constants/status-codes.js'
 import {
   getExemptionCache,
   updateExemptionSiteDetails,
   setExemptionCache
 } from '~/src/server/common/helpers/session-cache/utils.js'
+import { validateErrors } from '../shared/expect-utils.js'
+
+import { setupTestServer } from '~/tests/integration/shared/test-setup-helpers.js'
 
 jest.mock('~/src/server/common/helpers/session-cache/utils.js')
 
 describe('Multiple sites question page', () => {
-  let server
+  const getServer = setupTestServer()
 
   const mockExemption = {
     id: 'test-exemption-123',
     projectName: 'Test Project'
   }
 
-  beforeAll(async () => {
-    server = await createServer()
-    await server.initialize()
-  })
-
-  afterAll(async () => {
-    await server.stop()
-  })
-
   beforeEach(() => {
-    jest.resetAllMocks()
     jest.mocked(getExemptionCache).mockReturnValue(mockExemption)
     jest.mocked(updateExemptionSiteDetails).mockReturnValue({})
     jest.mocked(setExemptionCache).mockReturnValue({})
   })
 
   test('should display the multiple sites question page with correct content and multipleSiteDetails defaults to false', async () => {
-    const { result, statusCode } = await server.inject({
+    const { result, statusCode } = await getServer().inject({
       method: 'GET',
       url: '/exemption/does-your-project-involve-more-than-one-site'
     })
@@ -67,7 +59,7 @@ describe('Multiple sites question page', () => {
       multipleSiteDetails: { multipleSitesEnabled: 'yes' }
     })
 
-    const { result, statusCode } = await server.inject({
+    const { result, statusCode } = await getServer().inject({
       method: 'GET',
       url: '/exemption/does-your-project-involve-more-than-one-site'
     })
@@ -90,7 +82,7 @@ describe('Multiple sites question page', () => {
       multipleSiteDetails: { multipleSitesEnabled: 'yes' }
     })
 
-    const { statusCode } = await server.inject({
+    const { statusCode } = await getServer().inject({
       method: 'GET',
       url: '/exemption/does-your-project-involve-more-than-one-site'
     })
@@ -101,7 +93,7 @@ describe('Multiple sites question page', () => {
   })
 
   test('should have correct navigation links', async () => {
-    const { result } = await server.inject({
+    const { result } = await getServer().inject({
       method: 'GET',
       url: '/exemption/does-your-project-involve-more-than-one-site'
     })
@@ -125,7 +117,7 @@ describe('Multiple sites question page', () => {
   })
 
   test('should stay on same page when continue is clicked without selection', async () => {
-    const { result, statusCode } = await server.inject({
+    const { result, statusCode } = await getServer().inject({
       method: 'POST',
       url: '/exemption/does-your-project-involve-more-than-one-site',
       payload: {}
@@ -142,10 +134,6 @@ describe('Multiple sites question page', () => {
       })
     ).toBeInTheDocument()
 
-    const errorSummary = getByRole(document, 'alert')
-    expect(errorSummary).toBeInTheDocument()
-    expect(getByText(errorSummary, 'There is a problem')).toBeInTheDocument()
-
     const expectedErrors = [
       {
         field: 'multipleSitesEnabled',
@@ -153,33 +141,7 @@ describe('Multiple sites question page', () => {
       }
     ]
 
-    expectedErrors.forEach(({ field, message, summaryMessage }) => {
-      const summaryList = within(errorSummary).getByRole('list')
-      const summaryLink = within(summaryList).getByText(
-        summaryMessage || message
-      )
-      expect(summaryLink).toBeInTheDocument()
-      expect(summaryLink).toHaveAttribute(
-        'href',
-        expect.stringMatching(new RegExp(`^#${field}`))
-      )
-
-      const fieldContainer = document.getElementById(field)
-      expect(fieldContainer).toBeInTheDocument()
-
-      const errorMessage = getByText(
-        fieldContainer.closest('.govuk-form-group') ?? fieldContainer,
-        message,
-        { exact: false }
-      )
-      expect(errorMessage).toBeInTheDocument()
-
-      const formGroup = fieldContainer.closest('.govuk-form-group')
-      const hasErrorStyling =
-        formGroup?.classList.contains('govuk-form-group--error') ??
-        fieldContainer.querySelectorAll('.govuk-input--error').length > 0
-      expect(hasErrorStyling).toBe(true)
-    })
+    validateErrors(expectedErrors, document)
 
     expect(
       getByText(
@@ -192,8 +154,8 @@ describe('Multiple sites question page', () => {
     ).toBeInTheDocument()
   })
 
-  test('should stay on same page when YES is selected and set multipleSiteDetails to true', async () => {
-    const { result, statusCode } = await server.inject({
+  test('should navigate to Site Name page when YES is selected and set multipleSiteDetails to true', async () => {
+    const response = await getServer().inject({
       method: 'POST',
       url: '/exemption/does-your-project-involve-more-than-one-site',
       payload: {
@@ -201,16 +163,8 @@ describe('Multiple sites question page', () => {
       }
     })
 
-    expect(statusCode).toBe(statusCodes.ok)
-
-    const { document } = new JSDOM(result).window
-
-    expect(
-      getByRole(document, 'heading', {
-        level: 1,
-        name: 'Do you need to tell us about more than one site?'
-      })
-    ).toBeInTheDocument()
+    expect(response.statusCode).toBe(statusCodes.redirect)
+    expect(response.headers.location).toBe('/exemption/site-name')
 
     expect(setExemptionCache).toHaveBeenCalledWith(expect.any(Object), {
       ...mockExemption,
@@ -219,7 +173,7 @@ describe('Multiple sites question page', () => {
   })
 
   test('should redirect to coordinates entry choice when NO is selected and set multipleSiteDetails to false', async () => {
-    const response = await server.inject({
+    const response = await getServer().inject({
       method: 'POST',
       url: '/exemption/does-your-project-involve-more-than-one-site',
       payload: {
@@ -239,7 +193,7 @@ describe('Multiple sites question page', () => {
   })
 
   test('should redirect to task list when cancel is clicked', async () => {
-    const { result, statusCode } = await server.inject({
+    const { result, statusCode } = await getServer().inject({
       method: 'GET',
       url: '/exemption/does-your-project-involve-more-than-one-site'
     })
