@@ -74,12 +74,16 @@ describe('Cookies page', () => {
     })
 
     test('AC3: Should display "No" selected when analytics cookies not accepted', async () => {
+      const cookiesPolicy = {
+        essential: true,
+        analytics: false,
+        timestamp: 1704040000
+      }
       const { result, statusCode } = await getServer().inject({
         method: 'GET',
         url: '/help/cookies',
         headers: {
-          cookie:
-            'cookies_policy=eyJlc3NlbnRpYWwiOnRydWUsImFuYWx5dGljcyI6ZmFsc2UsInRpbWVzdGFtcCI6MTcwNDA0MDAwMH0=; cookies_preferences_set=true'
+          cookie: `cookies_policy=${Buffer.from(JSON.stringify(cookiesPolicy)).toString('base64')}; cookies_preferences_set=true`
         }
       })
 
@@ -95,12 +99,16 @@ describe('Cookies page', () => {
     })
 
     test('AC4: Should display "Yes" selected when analytics cookies accepted', async () => {
+      const cookiesPolicy = {
+        essential: true,
+        analytics: true,
+        timestamp: 1704040000
+      }
       const { result, statusCode } = await getServer().inject({
         method: 'GET',
         url: '/help/cookies',
         headers: {
-          cookie:
-            'cookies_policy=eyJlc3NlbnRpYWwiOnRydWUsImFuYWx5dGljcyI6dHJ1ZSwidGltZXN0YW1wIjoxNzA0MDQwMDAwfQ==; cookies_preferences_set=true'
+          cookie: `cookies_policy=${Buffer.from(JSON.stringify(cookiesPolicy)).toString('base64')}; cookies_preferences_set=true`
         }
       })
 
