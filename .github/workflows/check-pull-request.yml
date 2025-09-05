@@ -70,7 +70,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - run: docker build -t defradigital/marine-licensing-frontend:${{github.sha}} .
-      - uses: DEFRA/marine-licensing-journey-tests/run-journey-tests@usedependonforjourneytest
+      - uses: DEFRA/marine-licensing-journey-tests/run-journey-tests@main
         with:
           marine-licensing-frontend: ${{github.sha}}
           branch: usedependonforjourneytest
