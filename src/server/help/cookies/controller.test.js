@@ -6,226 +6,182 @@ import * as referrerValidation from '~/src/server/common/helpers/referrer-valida
 jest.mock('~/src/server/common/helpers/cookie-preferences.js')
 jest.mock('~/src/server/common/helpers/referrer-validation.js')
 
+const createMockRequest = (overrides = {}) => ({
+  headers: {},
+  auth: { isAuthenticated: false },
+  query: {},
+  payload: {},
+  logger: { error: jest.fn() },
+  state: {},
+  yar: { get: jest.fn(), set: jest.fn(), clear: jest.fn() },
+  ...overrides
+})
+
+const createMockH = () => ({
+  view: jest.fn(),
+  redirect: jest.fn().mockReturnValue({ state: jest.fn().mockReturnThis() })
+})
+
+const DEFAULT_PREFERENCES = {
+  essential: true,
+  analytics: false,
+  timestamp: null
+}
+
+const setupMocks = (preferences = DEFAULT_PREFERENCES) => {
+  cookiePreferences.getCookiePreferences.mockReturnValue(preferences)
+  referrerValidation.storeReferrer.mockReturnValue(undefined)
+  referrerValidation.getBackUrl.mockReturnValue('/')
+  referrerValidation.clearStoredReferrer.mockReturnValue(undefined)
+}
+
 describe('Cookies Controller', () => {
   let mockRequest
   let mockH
-  let mockLogger
 
   beforeEach(() => {
-    mockLogger = {
-      error: jest.fn()
-    }
-
-    mockRequest = {
-      headers: {},
-      auth: {
-        isAuthenticated: false
-      },
-      query: {},
-      payload: {},
-      logger: mockLogger,
-      state: {},
-      yar: {
-        get: jest.fn(),
-        set: jest.fn(),
-        clear: jest.fn()
-      }
-    }
-
-    mockH = {
-      view: jest.fn(),
-      redirect: jest.fn().mockReturnValue({
-        state: jest.fn().mockReturnThis()
-      })
-    }
-
+    mockRequest = createMockRequest()
+    mockH = createMockH()
     jest.clearAllMocks()
   })
 
   describe('cookiesController (GET)', () => {
-    describe('basic functionality', () => {
-      beforeEach(() => {
-        cookiePreferences.getCookiePreferences.mockReturnValue({
-          essential: true,
-          analytics: false,
-          timestamp: null
-        })
-        referrerValidation.storeReferrer.mockReturnValue(undefined)
-        referrerValidation.getBackUrl.mockReturnValue('/')
-        referrerValidation.clearStoredReferrer.mockReturnValue(undefined)
-      })
+    beforeEach(() => setupMocks())
 
-      it('should render the cookies page with default preferences', () => {
-        cookiesController.handler(mockRequest, mockH)
+    it('should render cookies page with default preferences', () => {
+      cookiesController.handler(mockRequest, mockH)
 
-        expect(cookiePreferences.getCookiePreferences).toHaveBeenCalledWith(
-          mockRequest
-        )
-        expect(mockH.view).toHaveBeenCalledWith('help/cookies/index', {
-          pageTitle: 'Cookies on Get permission for marine work',
-          backUrl: '/',
-          payload: {
-            analytics: 'no'
-          },
-          showSuccessBanner: false,
-          isAuthenticated: false
-        })
-      })
-
-      it('should set analytics to "yes" when preferences.analytics is true', () => {
-        cookiePreferences.getCookiePreferences.mockReturnValue({
-          essential: true,
-          analytics: true,
-          timestamp: 1234567890
-        })
-
-        cookiesController.handler(mockRequest, mockH)
-
-        expect(mockH.view).toHaveBeenCalledWith('help/cookies/index', {
-          pageTitle: 'Cookies on Get permission for marine work',
-          backUrl: '/',
-          payload: {
-            analytics: 'yes'
-          },
-          showSuccessBanner: false,
-          isAuthenticated: false
-        })
-      })
-
-      it('should pass through authenticated status when user is logged in', () => {
-        mockRequest.auth.isAuthenticated = true
-
-        cookiesController.handler(mockRequest, mockH)
-
-        expect(mockH.view).toHaveBeenCalledWith(
-          expect.any(String),
-          expect.objectContaining({
-            isAuthenticated: true
-          })
-        )
+      expect(cookiePreferences.getCookiePreferences).toHaveBeenCalledWith(
+        mockRequest
+      )
+      expect(mockH.view).toHaveBeenCalledWith('help/cookies/index', {
+        pageTitle: 'Cookies on Get permission for marine work',
+        backUrl: '/',
+        payload: { analytics: 'no' },
+        showSuccessBanner: false,
+        isAuthenticated: false
       })
     })
 
-    describe('referrer handling', () => {
-      beforeEach(() => {
-        cookiePreferences.getCookiePreferences.mockReturnValue({
-          essential: true,
-          analytics: false,
-          timestamp: null
+    it('should set analytics to "yes" when analytics enabled', () => {
+      setupMocks({ essential: true, analytics: true, timestamp: 1234567890 })
+
+      cookiesController.handler(mockRequest, mockH)
+
+      expect(mockH.view).toHaveBeenCalledWith(
+        'help/cookies/index',
+        expect.objectContaining({
+          payload: { analytics: 'yes' }
         })
-        referrerValidation.clearStoredReferrer.mockReturnValue(undefined)
-      })
-
-      it('should store referrer when provided', () => {
-        mockRequest.headers.referer = 'http://localhost/exemption/task-list'
-        referrerValidation.getBackUrl.mockReturnValue('/exemption/task-list')
-
-        cookiesController.handler(mockRequest, mockH)
-
-        expect(referrerValidation.storeReferrer).toHaveBeenCalledWith(
-          mockRequest,
-          'http://localhost/exemption/task-list'
-        )
-        expect(mockH.view).toHaveBeenCalledWith(
-          expect.any(String),
-          expect.objectContaining({
-            backUrl: '/exemption/task-list'
-          })
-        )
-      })
-
-      it('should not store referrer when from cookies page itself', () => {
-        mockRequest.headers.referer = 'http://localhost/help/cookies'
-        referrerValidation.getBackUrl.mockReturnValue('/')
-
-        cookiesController.handler(mockRequest, mockH)
-
-        expect(referrerValidation.storeReferrer).not.toHaveBeenCalled()
-      })
-
-      it('should not store referrer when no referer header present', () => {
-        referrerValidation.getBackUrl.mockReturnValue('/')
-
-        cookiesController.handler(mockRequest, mockH)
-
-        expect(referrerValidation.storeReferrer).not.toHaveBeenCalled()
-      })
-
-      it('should use fallback URL when no back URL available', () => {
-        referrerValidation.getBackUrl.mockReturnValue('/')
-
-        cookiesController.handler(mockRequest, mockH)
-
-        expect(referrerValidation.getBackUrl).toHaveBeenCalledWith(
-          mockRequest,
-          '/'
-        )
-        expect(mockH.view).toHaveBeenCalledWith(
-          expect.any(String),
-          expect.objectContaining({
-            backUrl: '/'
-          })
-        )
-      })
+      )
     })
 
-    describe('success banner handling', () => {
-      beforeEach(() => {
-        cookiePreferences.getCookiePreferences.mockReturnValue({
-          essential: true,
-          analytics: false,
-          timestamp: null
+    it('should pass through authenticated status when user is logged in', () => {
+      mockRequest.auth.isAuthenticated = true
+
+      cookiesController.handler(mockRequest, mockH)
+
+      expect(mockH.view).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          isAuthenticated: true
         })
-        referrerValidation.getBackUrl.mockReturnValue('/')
-      })
-
-      it('should show success banner when success query parameter is true', () => {
-        mockRequest.query.success = 'true'
-
-        cookiesController.handler(mockRequest, mockH)
-
-        expect(mockH.view).toHaveBeenCalledWith(
-          expect.any(String),
-          expect.objectContaining({
-            showSuccessBanner: true
-          })
-        )
-        expect(referrerValidation.clearStoredReferrer).toHaveBeenCalledWith(
-          mockRequest
-        )
-      })
-
-      it('should not show success banner when success query parameter is false', () => {
-        mockRequest.query.success = 'false'
-
-        cookiesController.handler(mockRequest, mockH)
-
-        expect(mockH.view).toHaveBeenCalledWith(
-          expect.any(String),
-          expect.objectContaining({
-            showSuccessBanner: false
-          })
-        )
-        expect(referrerValidation.clearStoredReferrer).not.toHaveBeenCalled()
-      })
-
-      it('should not show success banner when no success query parameter', () => {
-        cookiesController.handler(mockRequest, mockH)
-
-        expect(mockH.view).toHaveBeenCalledWith(
-          expect.any(String),
-          expect.objectContaining({
-            showSuccessBanner: false
-          })
-        )
-        expect(referrerValidation.clearStoredReferrer).not.toHaveBeenCalled()
-      })
+      )
     })
 
-    describe('controller options', () => {
-      it('should have correct auth strategy configuration', () => {
-        expect(cookiesController.options.auth.strategy).toBe('session')
-        expect(cookiesController.options.auth.mode).toBe('try')
+    it('should store referrer when provided', () => {
+      mockRequest.headers.referer = 'http://localhost/exemption/task-list'
+      referrerValidation.getBackUrl.mockReturnValue('/exemption/task-list')
+
+      cookiesController.handler(mockRequest, mockH)
+
+      expect(referrerValidation.storeReferrer).toHaveBeenCalledWith(
+        mockRequest,
+        'http://localhost/exemption/task-list'
+      )
+      expect(mockH.view).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          backUrl: '/exemption/task-list'
+        })
+      )
+    })
+
+    it('should not store referrer when from cookies page itself', () => {
+      mockRequest.headers.referer = 'http://localhost/help/cookies'
+      referrerValidation.getBackUrl.mockReturnValue('/')
+
+      cookiesController.handler(mockRequest, mockH)
+
+      expect(referrerValidation.storeReferrer).not.toHaveBeenCalled()
+      expect(mockH.view).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          backUrl: '/'
+        })
+      )
+    })
+
+    it('should not store referrer when no referer header', () => {
+      referrerValidation.getBackUrl.mockReturnValue('/')
+
+      cookiesController.handler(mockRequest, mockH)
+
+      expect(referrerValidation.storeReferrer).not.toHaveBeenCalled()
+      expect(mockH.view).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          backUrl: '/'
+        })
+      )
+    })
+
+    it('should show success banner when query is true', () => {
+      mockRequest.query.success = 'true'
+
+      cookiesController.handler(mockRequest, mockH)
+
+      expect(mockH.view).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          showSuccessBanner: true
+        })
+      )
+      expect(referrerValidation.clearStoredReferrer).toHaveBeenCalledWith(
+        mockRequest
+      )
+    })
+
+    it('should not show success banner when query is false', () => {
+      mockRequest.query.success = 'false'
+
+      cookiesController.handler(mockRequest, mockH)
+
+      expect(mockH.view).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          showSuccessBanner: false
+        })
+      )
+      expect(referrerValidation.clearStoredReferrer).not.toHaveBeenCalled()
+    })
+
+    it('should not show success banner when query is undefined', () => {
+      cookiesController.handler(mockRequest, mockH)
+
+      expect(mockH.view).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.objectContaining({
+          showSuccessBanner: false
+        })
+      )
+      expect(referrerValidation.clearStoredReferrer).not.toHaveBeenCalled()
+    })
+
+    it('should have correct auth strategy configuration', () => {
+      expect(cookiesController.options.auth).toEqual({
+        strategy: 'session',
+        mode: 'try'
       })
     })
   })
@@ -342,7 +298,7 @@ describe('Cookies Controller', () => {
           cookiesSubmitController.handler(mockRequest, mockH)
         }).toThrow('Error saving cookie preferences')
 
-        expect(mockLogger.error).toHaveBeenCalledWith(
+        expect(mockRequest.logger.error).toHaveBeenCalledWith(
           expect.any(Error),
           'Error saving cookie preferences'
         )

@@ -3,6 +3,46 @@ import { getByRole, getByText, within } from '@testing-library/dom'
 import { statusCodes } from '~/src/server/common/constants/status-codes.js'
 import { setupTestServer } from '~/tests/integration/shared/test-setup-helpers.js'
 
+const createCookiesPolicy = (analytics = false, timestamp = 1704040000) => ({
+  essential: true,
+  analytics,
+  timestamp
+})
+
+const createCookieHeaders = (cookiesPolicy, preferencesSet = true) => {
+  const policyHeader = `cookies_policy=${Buffer.from(JSON.stringify(cookiesPolicy)).toString('base64')}`
+  const preferencesHeader = `cookies_preferences_set=${preferencesSet}`
+  return `${policyHeader}; ${preferencesHeader}`
+}
+
+const expectRadioSelection = (document, analytics) => {
+  const yesRadio = getByRole(document, 'radio', { name: 'Yes' })
+  const noRadio = getByRole(document, 'radio', { name: 'No' })
+
+  if (analytics) {
+    expect(yesRadio).toBeChecked()
+    expect(noRadio).not.toBeChecked()
+  } else {
+    expect(noRadio).toBeChecked()
+    expect(yesRadio).not.toBeChecked()
+  }
+}
+
+const expectCookiesInResponse = (response) => {
+  expect(response.statusCode).toBe(statusCodes.redirect)
+  expect(response.headers.location).toBe('/help/cookies?success=true')
+
+  const setCookieHeaders = response.headers['set-cookie']
+  expect(setCookieHeaders).toBeDefined()
+
+  const cookieString = Array.isArray(setCookieHeaders)
+    ? setCookieHeaders.join('; ')
+    : setCookieHeaders
+
+  expect(cookieString).toContain('cookies_policy=')
+  expect(cookieString).toContain('cookies_preferences_set=true')
+}
+
 describe('Cookies page', () => {
   const getServer = setupTestServer()
 
@@ -66,61 +106,33 @@ describe('Cookies page', () => {
       ).toBeInTheDocument()
 
       // Verify "No" is selected by default
-      const noRadio = getByRole(document, 'radio', { name: 'No' })
-      expect(noRadio).toBeChecked()
-
-      const yesRadio = getByRole(document, 'radio', { name: 'Yes' })
-      expect(yesRadio).not.toBeChecked()
+      expectRadioSelection(document, false)
     })
 
     test('AC3: Should display "No" selected when analytics cookies not accepted', async () => {
-      const cookiesPolicy = {
-        essential: true,
-        analytics: false,
-        timestamp: 1704040000
-      }
+      const cookiesPolicy = createCookiesPolicy(false)
       const { result, statusCode } = await getServer().inject({
         method: 'GET',
         url: '/help/cookies',
-        headers: {
-          cookie: `cookies_policy=${Buffer.from(JSON.stringify(cookiesPolicy)).toString('base64')}; cookies_preferences_set=true`
-        }
+        headers: { cookie: createCookieHeaders(cookiesPolicy) }
       })
 
       expect(statusCode).toBe(statusCodes.ok)
-
       const { document } = new JSDOM(result).window
-
-      const noRadio = getByRole(document, 'radio', { name: 'No' })
-      expect(noRadio).toBeChecked()
-
-      const yesRadio = getByRole(document, 'radio', { name: 'Yes' })
-      expect(yesRadio).not.toBeChecked()
+      expectRadioSelection(document, false)
     })
 
     test('AC4: Should display "Yes" selected when analytics cookies accepted', async () => {
-      const cookiesPolicy = {
-        essential: true,
-        analytics: true,
-        timestamp: 1704040000
-      }
+      const cookiesPolicy = createCookiesPolicy(true)
       const { result, statusCode } = await getServer().inject({
         method: 'GET',
         url: '/help/cookies',
-        headers: {
-          cookie: `cookies_policy=${Buffer.from(JSON.stringify(cookiesPolicy)).toString('base64')}; cookies_preferences_set=true`
-        }
+        headers: { cookie: createCookieHeaders(cookiesPolicy) }
       })
 
       expect(statusCode).toBe(statusCodes.ok)
-
       const { document } = new JSDOM(result).window
-
-      const yesRadio = getByRole(document, 'radio', { name: 'Yes' })
-      expect(yesRadio).toBeChecked()
-
-      const noRadio = getByRole(document, 'radio', { name: 'No' })
-      expect(noRadio).not.toBeChecked()
+      expectRadioSelection(document, true)
     })
 
     test('AC7: Should show back link that goes to previous page', async () => {
@@ -200,103 +212,75 @@ describe('Cookies page', () => {
   })
 
   describe('POST /help/cookies', () => {
-    test('AC5: Should accept analytics cookies and redirect with success', async () => {
-      const response = await getServer().inject({
-        method: 'POST',
-        url: '/help/cookies',
-        payload: {
-          analytics: 'yes'
-        }
+    const postTestCases = [
+      {
+        name: 'AC5: Should accept analytics cookies and redirect with success',
+        analytics: 'yes'
+      },
+      {
+        name: 'AC6: Should reject analytics cookies and redirect with success',
+        analytics: 'no'
+      }
+    ]
+
+    postTestCases.forEach(({ name, analytics }) => {
+      test(`${name}`, async () => {
+        const response = await getServer().inject({
+          method: 'POST',
+          url: '/help/cookies',
+          payload: `analytics=${analytics}&csrfToken=`,
+          headers: {
+            'content-type': 'application/x-www-form-urlencoded'
+          }
+        })
+
+        expectCookiesInResponse(response)
       })
-
-      expect(response.statusCode).toBe(statusCodes.redirect)
-      expect(response.headers.location).toBe('/help/cookies?success=true')
-
-      // Check cookies are set
-      const setCookieHeaders = response.headers['set-cookie']
-      expect(setCookieHeaders).toBeDefined()
-
-      const cookieString = Array.isArray(setCookieHeaders)
-        ? setCookieHeaders.join('; ')
-        : setCookieHeaders
-
-      expect(cookieString).toContain('cookies_policy=')
-      expect(cookieString).toContain('cookies_preferences_set=true')
-    })
-
-    test('AC6: Should reject analytics cookies and redirect with success', async () => {
-      const response = await getServer().inject({
-        method: 'POST',
-        url: '/help/cookies',
-        payload: {
-          analytics: 'no'
-        }
-      })
-
-      expect(response.statusCode).toBe(statusCodes.redirect)
-      expect(response.headers.location).toBe('/help/cookies?success=true')
-
-      // Check cookies are set
-      const setCookieHeaders = response.headers['set-cookie']
-      expect(setCookieHeaders).toBeDefined()
-
-      const cookieString = Array.isArray(setCookieHeaders)
-        ? setCookieHeaders.join('; ')
-        : setCookieHeaders
-
-      expect(cookieString).toContain('cookies_policy=')
-      expect(cookieString).toContain('cookies_preferences_set=true')
     })
   })
 
   describe('Cookie preferences functionality', () => {
     test('AC9: Should show correct back link on confirmation page', async () => {
-      // First navigate to cookies page from a specific page
+      // Navigate to cookies page from a specific page
       const getResponse = await getServer().inject({
         method: 'GET',
         url: '/help/cookies',
-        headers: {
-          referer: 'http://localhost/exemption/site-name'
-        }
+        headers: { referer: 'http://localhost/exemption/site-name' }
       })
 
-      const getCookies = getResponse.headers['set-cookie']
-      const sessionCookie = Array.isArray(getCookies)
-        ? getCookies.join('; ')
-        : getCookies || ''
+      const sessionCookie = Array.isArray(getResponse.headers['set-cookie'])
+        ? getResponse.headers['set-cookie'][0]
+        : getResponse.headers['set-cookie'] || ''
 
       // Save preferences
       const postResponse = await getServer().inject({
         method: 'POST',
         url: '/help/cookies',
-        payload: {
-          analytics: 'yes'
-        },
+        payload: 'analytics=yes&csrfToken=',
         headers: {
-          cookie: sessionCookie
+          cookie: sessionCookie,
+          'content-type': 'application/x-www-form-urlencoded'
         }
       })
 
-      expect(postResponse.statusCode).toBe(statusCodes.redirect)
+      expectCookiesInResponse(postResponse)
 
-      const postCookies = postResponse.headers['set-cookie']
-      const allCookies = [
-        sessionCookie,
-        Array.isArray(postCookies) ? postCookies.join('; ') : postCookies || ''
-      ]
+      // Check success page shows return link
+      const postCookies = Array.isArray(postResponse.headers['set-cookie'])
+        ? postResponse.headers['set-cookie'][0]
+        : postResponse.headers['set-cookie'] || ''
+
+      const allCookies = [sessionCookie, postCookies]
         .filter((c) => c)
         .join('; ')
 
       const successResponse = await getServer().inject({
         method: 'GET',
         url: postResponse.headers.location,
-        headers: {
-          cookie: allCookies
-        }
+        headers: { cookie: allCookies }
       })
 
       const { document } = new JSDOM(successResponse.result).window
-
       const banner = document.querySelector(
         '.govuk-notification-banner--success'
       )
@@ -305,9 +289,7 @@ describe('Cookies page', () => {
       const returnLink = within(banner).getByRole('link', {
         name: 'Go back to the previous page'
       })
-
       expect(returnLink).toBeInTheDocument()
-      // The back URL should be available from the session
       expect(returnLink.getAttribute('href')).toBeTruthy()
     })
   })
