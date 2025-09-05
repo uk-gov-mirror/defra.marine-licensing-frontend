@@ -26,9 +26,6 @@ export const cookiesController = {
     auth: {
       strategy: 'session',
       mode: 'try'
-    },
-    plugins: {
-      crumb: false
     }
   },
   handler(request, h) {
@@ -68,11 +65,9 @@ export const cookiesSubmitController = {
       strategy: 'session',
       mode: 'try'
     },
-    plugins: {
-      crumb: false
-    },
     validate: {
       payload: joi.object({
+        csrfToken: joi.string().allow(''),
         analytics: joi.string().valid('yes', 'no').required().messages({
           'any.only': 'ANALYTICS_CHOICE_REQUIRED',
           'string.empty': 'ANALYTICS_CHOICE_REQUIRED',
