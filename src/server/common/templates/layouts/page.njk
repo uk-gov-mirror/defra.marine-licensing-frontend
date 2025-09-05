@@ -12,15 +12,21 @@
 
 {% block head %}
   <link href="{{ getAssetPath('stylesheets/application.scss') }}" rel="stylesheet">
-  <script>
-    window.CLARITY_PROJECT_ID = "{{ clarityProjectId | default('') }}";
-  </script>
+  {% if analyticsEnabled %}
+    <script>
+      window.CLARITY_PROJECT_ID = "{{ clarityProjectId | default('') }}";
+    </script>
+    <!-- Google Analytics would be added here when implemented -->
+  {% endif %}
 {% endblock %}
 
-{% set navigationLinks = navigation.concat({
-      text: 'Sign out',
-      href: signOutUrl
-}) %}
+{% set navigationLinks = navigation %}
+{% if isAuthenticated %}
+  {% set navigationLinks = navigation.concat({
+        text: 'Sign out',
+        href: signOutUrl
+  }) %}
+{% endif %}
 
 {% block header %}
   {{ govukHeader({
@@ -70,7 +76,7 @@
           text: "Privacy"
         },
         {
-          href: "https://www.gov.uk/help/cookies",
+          href: "/help/cookies",
           text: "Cookies"
         },
         {

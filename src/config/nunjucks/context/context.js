@@ -5,6 +5,7 @@ import { config } from '~/src/config/config.js'
 import { createLogger } from '~/src/server/common/helpers/logging/logger.js'
 import { buildNavigation } from '~/src/config/nunjucks/context/build-navigation.js'
 import { routes } from '~/src/server/common/constants/routes.js'
+import { areAnalyticsCookiesAccepted } from '~/src/server/common/helpers/cookie-preferences.js'
 
 const logger = createLogger()
 const assetPath = config.get('assetPath')
@@ -29,6 +30,8 @@ export async function context(request) {
   }
 
   const navigation = await buildNavigation(request)
+  const analyticsEnabled = areAnalyticsCookiesAccepted(request)
+  const isAuthenticated = request?.auth?.isAuthenticated ?? false
 
   return {
     assetPath: `${assetPath}/assets`,
@@ -37,7 +40,9 @@ export async function context(request) {
     signOutUrl: routes.SIGN_OUT,
     breadcrumbs: [],
     navigation,
-    clarityProjectId: config.get('clarityProjectId'),
+    isAuthenticated,
+    analyticsEnabled,
+    clarityProjectId: analyticsEnabled ? config.get('clarityProjectId') : '',
     /**
      * @param {string} asset
      */
