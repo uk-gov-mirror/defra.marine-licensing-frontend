@@ -19,11 +19,7 @@ export function isValidReferrerPath(referrerPath, excludedPaths = []) {
     /vbscript:/i
   ]
 
-  if (suspiciousPatterns.some((pattern) => pattern.test(referrerPath))) {
-    return false
-  }
-
-  return true
+  return !suspiciousPatterns.some((pattern) => pattern.test(referrerPath))
 }
 
 export function extractReferrerPath(referrerUrl) {
