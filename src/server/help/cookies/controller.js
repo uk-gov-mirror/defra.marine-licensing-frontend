@@ -17,6 +17,8 @@ const cookiesPageSettings = {
   pageTitle: 'Cookies on Get permission for marine work'
 }
 
+const EXCLUDED_REFERRER_PATHS = ['/help/cookies']
+
 /**
  * Cookies page GET controller
  * @satisfies {Partial<ServerRoute>}
@@ -34,10 +36,10 @@ export const cookiesController = {
     const showSuccessBanner = request.query.success === 'true'
 
     if (referer && !referer.includes('/help/cookies')) {
-      storeReferrer(request, referer)
+      storeReferrer(request, referer, EXCLUDED_REFERRER_PATHS)
     }
 
-    const backUrl = getBackUrl(request, '/')
+    const backUrl = getBackUrl(request, '/', EXCLUDED_REFERRER_PATHS)
 
     if (showSuccessBanner) {
       clearStoredReferrer(request)
@@ -78,7 +80,7 @@ export const cookiesSubmitController = {
         const { payload } = request
 
         // Get back URL from session with fallback to '/'
-        const backUrl = getBackUrl(request, '/')
+        const backUrl = getBackUrl(request, '/', EXCLUDED_REFERRER_PATHS)
 
         if (!err.details) {
           return h

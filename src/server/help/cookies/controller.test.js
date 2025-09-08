@@ -97,7 +97,8 @@ describe('Cookies Controller', () => {
 
       expect(referrerValidation.storeReferrer).toHaveBeenCalledWith(
         mockRequest,
-        'http://localhost/exemption/task-list'
+        'http://localhost/exemption/task-list',
+        ['/help/cookies']
       )
       expect(mockH.view).toHaveBeenCalledWith(
         expect.any(String),
@@ -176,6 +177,16 @@ describe('Cookies Controller', () => {
         })
       )
       expect(referrerValidation.clearStoredReferrer).not.toHaveBeenCalled()
+    })
+
+    it('should pass excluded paths to getBackUrl', () => {
+      cookiesController.handler(mockRequest, mockH)
+
+      expect(referrerValidation.getBackUrl).toHaveBeenCalledWith(
+        mockRequest,
+        '/',
+        ['/help/cookies']
+      )
     })
 
     it('should have correct auth strategy configuration', () => {
@@ -361,6 +372,24 @@ describe('Cookies Controller', () => {
           ]
         }
         referrerValidation.getBackUrl.mockReturnValue('/test-back-url')
+      })
+
+      it('should pass excluded paths to getBackUrl in failAction', () => {
+        mockRequest.payload = { analytics: '' }
+        const mockTakeoverResponse = { takeover: jest.fn().mockReturnThis() }
+        mockH.view.mockReturnValue(mockTakeoverResponse)
+
+        cookiesSubmitController.options.validate.failAction(
+          mockRequest,
+          mockH,
+          mockErr
+        )
+
+        expect(referrerValidation.getBackUrl).toHaveBeenCalledWith(
+          mockRequest,
+          '/',
+          ['/help/cookies']
+        )
       })
 
       it('should handle validation errors with error details', () => {

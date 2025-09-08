@@ -1,4 +1,4 @@
-export function isValidReferrerPath(referrerPath) {
+export function isValidReferrerPath(referrerPath, excludedPaths = []) {
   if (!referrerPath || typeof referrerPath !== 'string') {
     return false
   }
@@ -7,7 +7,7 @@ export function isValidReferrerPath(referrerPath) {
     return false
   }
 
-  if (referrerPath === '/help/cookies') {
+  if (excludedPaths.includes(referrerPath)) {
     return false
   }
 
@@ -40,18 +40,21 @@ export function extractReferrerPath(referrerUrl) {
   }
 }
 
-export function storeReferrer(request, referrerUrl) {
+export function storeReferrer(request, referrerUrl, excludedPaths = []) {
   const referrerPath = extractReferrerPath(referrerUrl)
 
-  if (referrerPath && isValidReferrerPath(referrerPath)) {
-    request.yar.set('cookiePageReferrer', referrerPath)
+  if (referrerPath && isValidReferrerPath(referrerPath, excludedPaths)) {
+    request.yar.set('pageReferrer', referrerPath)
   }
 }
 
-export function getStoredReferrer(request) {
-  const storedReferrerPath = request.yar.get('cookiePageReferrer')
+export function getStoredReferrer(request, excludedPaths = []) {
+  const storedReferrerPath = request.yar.get('pageReferrer')
 
-  if (storedReferrerPath && isValidReferrerPath(storedReferrerPath)) {
+  if (
+    storedReferrerPath &&
+    isValidReferrerPath(storedReferrerPath, excludedPaths)
+  ) {
     return storedReferrerPath
   }
 
@@ -59,10 +62,10 @@ export function getStoredReferrer(request) {
 }
 
 export function clearStoredReferrer(request) {
-  request.yar.clear('cookiePageReferrer')
+  request.yar.clear('pageReferrer')
 }
 
-export function getBackUrl(request, fallbackUrl = '/') {
-  const storedReferrer = getStoredReferrer(request)
+export function getBackUrl(request, fallbackUrl = '/', excludedPaths = []) {
+  const storedReferrer = getStoredReferrer(request, excludedPaths)
   return storedReferrer || fallbackUrl
 }

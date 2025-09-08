@@ -121,8 +121,16 @@ describe('referrer-validation', () => {
       })
     })
 
-    it('should return false for cookies page self-reference', () => {
-      expect(isValidReferrerPath('/help/cookies')).toBe(false)
+    it('should accept excluded paths parameter', () => {
+      expect(isValidReferrerPath('/help/cookies', ['/help/cookies'])).toBe(
+        false
+      )
+      expect(isValidReferrerPath('/help/cookies', [])).toBe(true)
+      expect(isValidReferrerPath('/other/path', ['/other/path'])).toBe(false)
+    })
+
+    it('should use empty array as default for excludedPaths', () => {
+      expect(isValidReferrerPath('/help/cookies')).toBe(true)
     })
 
     const edgeCaseTests = [
@@ -259,14 +267,13 @@ describe('referrer-validation', () => {
       it(`should store valid referrer: ${url}`, () => {
         storeReferrer(mockRequest, url)
         expect(mockRequest.yar.set).toHaveBeenCalledWith(
-          'cookiePageReferrer',
+          'pageReferrer',
           expectedPath
         )
       })
     })
 
     const invalidReferrers = [
-      'http://localhost/help/cookies', // Self-reference
       'javascript:alert(1)', // JS injection
       'not-a-url', // Invalid URL
       'http://localhost/javascript:alert(1)', // URL with invalid path
@@ -282,10 +289,25 @@ describe('referrer-validation', () => {
       })
     })
 
+    it('should store cookies page by default when no excluded paths provided', () => {
+      storeReferrer(mockRequest, 'http://localhost/help/cookies')
+      expect(mockRequest.yar.set).toHaveBeenCalledWith(
+        'pageReferrer',
+        '/help/cookies'
+      )
+    })
+
+    it('should not store cookies page when in excluded paths', () => {
+      storeReferrer(mockRequest, 'http://localhost/help/cookies', [
+        '/help/cookies'
+      ])
+      expect(mockRequest.yar.set).not.toHaveBeenCalled()
+    })
+
     it('should store path traversal URL after normalization', () => {
       storeReferrer(mockRequest, 'http://example.com/../../../etc/passwd')
       expect(mockRequest.yar.set).toHaveBeenCalledWith(
-        'cookiePageReferrer',
+        'pageReferrer',
         '/etc/passwd'
       )
     })
@@ -309,13 +331,12 @@ describe('referrer-validation', () => {
         mockRequest.yar.get.mockReturnValue(storedPath)
         const result = getStoredReferrer(mockRequest)
 
-        expect(mockRequest.yar.get).toHaveBeenCalledWith('cookiePageReferrer')
+        expect(mockRequest.yar.get).toHaveBeenCalledWith('pageReferrer')
         expect(result).toBe(storedPath)
       })
     })
 
     const invalidStoredPaths = [
-      '/help/cookies', // Self-reference
       '/../../../etc/passwd', // Path traversal
       '/javascript:alert(1)', // JS injection
       'not-starting-with-slash', // Invalid format
@@ -330,6 +351,16 @@ describe('referrer-validation', () => {
         expect(getStoredReferrer(mockRequest)).toBeNull()
       })
     })
+
+    it('should return cookies page by default when no excluded paths provided', () => {
+      mockRequest.yar.get.mockReturnValue('/help/cookies')
+      expect(getStoredReferrer(mockRequest)).toBe('/help/cookies')
+    })
+
+    it('should return null for cookies page when in excluded paths', () => {
+      mockRequest.yar.get.mockReturnValue('/help/cookies')
+      expect(getStoredReferrer(mockRequest, ['/help/cookies'])).toBeNull()
+    })
   })
 
   describe('clearStoredReferrer', () => {
@@ -342,7 +373,7 @@ describe('referrer-validation', () => {
 
     it('should clear the stored referrer', () => {
       clearStoredReferrer(mockRequest)
-      expect(mockRequest.yar.clear).toHaveBeenCalledWith('cookiePageReferrer')
+      expect(mockRequest.yar.clear).toHaveBeenCalledWith('pageReferrer')
     })
 
     it('should be callable multiple times', () => {
@@ -391,7 +422,6 @@ describe('referrer-validation', () => {
     })
 
     const invalidPaths = [
-      '/help/cookies',
       '/../../../etc/passwd',
       '/javascript:alert(1)',
       'invalid-path'
@@ -401,6 +431,18 @@ describe('referrer-validation', () => {
         mockRequest.yar.get.mockReturnValue(invalidPath)
         expect(getBackUrl(mockRequest, '/fallback')).toBe('/fallback')
       })
+    })
+
+    it('should return cookies page by default when no excluded paths provided', () => {
+      mockRequest.yar.get.mockReturnValue('/help/cookies')
+      expect(getBackUrl(mockRequest, '/fallback')).toBe('/help/cookies')
+    })
+
+    it('should return fallback for cookies page when in excluded paths', () => {
+      mockRequest.yar.get.mockReturnValue('/help/cookies')
+      expect(getBackUrl(mockRequest, '/fallback', ['/help/cookies'])).toBe(
+        '/fallback'
+      )
     })
   })
 
@@ -417,7 +459,7 @@ describe('referrer-validation', () => {
 
       storeReferrer(mockRequest, referrerUrl)
       expect(mockRequest.yar.set).toHaveBeenCalledWith(
-        'cookiePageReferrer',
+        'pageReferrer',
         '/exemption/task-list'
       )
 
@@ -426,7 +468,7 @@ describe('referrer-validation', () => {
       expect(getBackUrl(mockRequest, '/')).toBe('/exemption/task-list')
 
       clearStoredReferrer(mockRequest)
-      expect(mockRequest.yar.clear).toHaveBeenCalledWith('cookiePageReferrer')
+      expect(mockRequest.yar.clear).toHaveBeenCalledWith('pageReferrer')
     })
 
     it('should handle malicious input throughout workflow', () => {
