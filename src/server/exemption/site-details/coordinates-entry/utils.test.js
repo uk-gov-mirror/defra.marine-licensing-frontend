@@ -9,10 +9,10 @@ describe('#getCoordinatesEntryBackLink', () => {
 
     const result = getCoordinatesEntryBackLink(exemption)
 
-    expect(result).toBe(routes.SITE_DETAILS_ACTIVITY_DATES)
+    expect(result).toBe(routes.SAME_ACTIVITY_DESCRIPTION)
   })
 
-  test('should return activity dates route when multipleSitesEnabled is true and sameActivityDates is yes', () => {
+  test('should return same activity description route when multipleSitesEnabled is true and sameActivityDates is yes', () => {
     const exemption = {
       multipleSiteDetails: {
         multipleSitesEnabled: true,
@@ -22,7 +22,7 @@ describe('#getCoordinatesEntryBackLink', () => {
 
     const result = getCoordinatesEntryBackLink(exemption)
 
-    expect(result).toBe(`${routes.SITE_DETAILS_ACTIVITY_DATES}`)
+    expect(result).toBe(`${routes.SAME_ACTIVITY_DESCRIPTION}`)
   })
 
   test('should return correct route when multipleSitesEnabled is false', () => {
@@ -32,7 +32,7 @@ describe('#getCoordinatesEntryBackLink', () => {
 
     const result = getCoordinatesEntryBackLink(exemption)
 
-    expect(result).toBe(routes.MULTIPLE_SITES_CHOICE)
+    expect(result).toBe(routes.SITE_DETAILS_ACTIVITY_DESCRIPTION)
   })
 
   test('should return correct route when multipleSiteDetails is undefined', () => {
@@ -40,12 +40,12 @@ describe('#getCoordinatesEntryBackLink', () => {
 
     const result = getCoordinatesEntryBackLink(exemption)
 
-    expect(result).toBe(routes.MULTIPLE_SITES_CHOICE)
+    expect(result).toBe(routes.SITE_DETAILS_ACTIVITY_DESCRIPTION)
   })
 
   test('should return correct route when exemption is null', () => {
     const result = getCoordinatesEntryBackLink(null)
 
-    expect(result).toBe(routes.MULTIPLE_SITES_CHOICE)
+    expect(result).toBe(routes.SITE_DETAILS_ACTIVITY_DESCRIPTION)
   })
 })
