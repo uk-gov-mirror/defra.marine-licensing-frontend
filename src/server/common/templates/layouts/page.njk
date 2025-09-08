@@ -16,7 +16,6 @@
     <script>
       window.CLARITY_PROJECT_ID = "{{ clarityProjectId | default('') }}";
     </script>
-    <!-- Google Analytics would be added here when implemented -->
   {% endif %}
 {% endblock %}
 
@@ -44,7 +43,7 @@
 
 {% block pageTitle %}
   {% if errors %}
-    Error: 
+    Error:
   {% endif %}
   {{ pageTitle }} | {{ serviceName }}
 {% endblock %}
