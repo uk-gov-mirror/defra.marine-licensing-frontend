@@ -16,10 +16,6 @@ describe('#buildNavigation', () => {
         active: false,
         text: 'Projects',
         href: '/home'
-      },
-      {
-        href: '/sign-out',
-        text: 'Sign out'
       }
     ])
   })
@@ -30,10 +26,6 @@ describe('#buildNavigation', () => {
         active: false,
         text: 'Projects',
         href: '/home'
-      },
-      {
-        href: '/sign-out',
-        text: 'Sign out'
       }
     ])
   })

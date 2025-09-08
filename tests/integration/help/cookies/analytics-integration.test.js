@@ -256,26 +256,15 @@ describe('MS Clarity Analytics Integration', () => {
   })
 
   describe('Other pages with analytics', () => {
-    test('Should respect analytics preferences on exemption page', async () => {
+    test('Should respect analytics preferences on privacy page', async () => {
       // Test with analytics rejected
       let response = await getServer().inject({
         method: 'GET',
-        url: '/exemption',
+        url: '/help/privacy',
         headers: {
           cookie: createCookieHeaders(false)
         }
       })
-
-      // Allow redirect to occur
-      if (response.statusCode === statusCodes.redirect) {
-        response = await getServer().inject({
-          method: 'GET',
-          url: response.headers.location,
-          headers: {
-            cookie: createCookieHeaders(false)
-          }
-        })
-      }
 
       expect(response.statusCode).toBe(statusCodes.ok)
       let document = new JSDOM(response.result).window.document
@@ -284,22 +273,11 @@ describe('MS Clarity Analytics Integration', () => {
       // Test with analytics accepted
       response = await getServer().inject({
         method: 'GET',
-        url: '/exemption',
+        url: '/help/privacy',
         headers: {
           cookie: createCookieHeaders(true)
         }
       })
-
-      // Allow redirect to occur
-      if (response.statusCode === statusCodes.redirect) {
-        response = await getServer().inject({
-          method: 'GET',
-          url: response.headers.location,
-          headers: {
-            cookie: createCookieHeaders(true)
-          }
-        })
-      }
 
       expect(response.statusCode).toBe(statusCodes.ok)
       document = new JSDOM(response.result).window.document

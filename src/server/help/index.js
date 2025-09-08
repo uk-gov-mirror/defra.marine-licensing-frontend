@@ -1,4 +1,5 @@
 import { cookiesRoutes } from './cookies/index.js'
+import { privacyRoutes } from './privacy/index.js'
 
 /**
  * Sets up the routes used in the help section.
@@ -9,7 +10,7 @@ export const help = {
   plugin: {
     name: 'help',
     register(server) {
-      server.route([...cookiesRoutes])
+      server.route([...cookiesRoutes, ...privacyRoutes])
     }
   }
 }

@@ -52,10 +52,6 @@ describe('#context', () => {
             active: false,
             text: 'Projects',
             href: '/home'
-          },
-          {
-            href: '/sign-out',
-            text: 'Sign out'
           }
         ],
         serviceName: 'Get permission for marine work',
@@ -205,10 +201,6 @@ describe('#context cache', () => {
             active: false,
             text: 'Projects',
             href: '/home'
-          },
-          {
-            href: '/sign-out',
-            text: 'Sign out'
           }
         ],
         serviceName: 'Get permission for marine work',
