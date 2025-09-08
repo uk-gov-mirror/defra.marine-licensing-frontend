@@ -29,7 +29,8 @@ export async function context(request) {
     }
   }
 
-  const navigation = await buildNavigation(request)
+  const navigation =
+    request.path === routes.PROJECT_NAME ? [] : await buildNavigation(request)
   const analyticsEnabled = areAnalyticsCookiesAccepted(request)
   const isAuthenticated = request?.auth?.isAuthenticated ?? false
 
@@ -37,7 +38,6 @@ export async function context(request) {
     assetPath: `${assetPath}/assets`,
     serviceName: config.get('serviceName'),
     serviceUrl: '/',
-    signOutUrl: routes.SIGN_OUT,
     breadcrumbs: [],
     navigation,
     isAuthenticated,

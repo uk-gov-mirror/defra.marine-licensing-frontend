@@ -1,4 +1,5 @@
 import { getUserSession } from '~/src/server/common/plugins/auth/utils.js'
+import { context } from '~/src/config/nunjucks/context/context.js'
 
 const mockReadFileSync = jest.fn()
 const mockLoggerError = jest.fn()
@@ -49,13 +50,16 @@ describe('#context', () => {
         navigation: [
           {
             active: false,
-            text: 'Projects home',
+            text: 'Projects',
             href: '/home'
+          },
+          {
+            href: '/sign-out',
+            text: 'Sign out'
           }
         ],
         serviceName: 'Get permission for marine work',
-        serviceUrl: '/',
-        signOutUrl: '/sign-out'
+        serviceUrl: '/'
       })
     })
 
@@ -89,12 +93,16 @@ describe('#context', () => {
         expect(contextResult.navigation).toEqual([
           {
             active: false,
-            text: 'Projects home',
+            text: 'Projects',
             href: '/home'
           },
           {
             text: 'Defra account',
             href: '#'
+          },
+          {
+            href: '/sign-out',
+            text: 'Sign out'
           }
         ])
       })
@@ -114,8 +122,12 @@ describe('#context', () => {
         expect(contextResult.navigation).toEqual([
           {
             active: false,
-            text: 'Projects home',
+            text: 'Projects',
             href: '/home'
+          },
+          {
+            href: '/sign-out',
+            text: 'Sign out'
           }
         ])
       })
@@ -139,6 +151,14 @@ describe('#context', () => {
       expect(mockLoggerError).toHaveBeenCalledWith(
         'Webpack assets-manifest.json not found'
       )
+    })
+  })
+
+  describe('When on the project name page', () => {
+    it('should not use navigation links', async () => {
+      const mockRequest = { path: '/exemption/project-name' }
+      const contextResult = await context(mockRequest)
+      expect(contextResult.navigation).toEqual([])
     })
   })
 })
@@ -183,13 +203,16 @@ describe('#context cache', () => {
         navigation: [
           {
             active: false,
-            text: 'Projects home',
+            text: 'Projects',
             href: '/home'
+          },
+          {
+            href: '/sign-out',
+            text: 'Sign out'
           }
         ],
         serviceName: 'Get permission for marine work',
-        serviceUrl: '/',
-        signOutUrl: '/sign-out'
+        serviceUrl: '/'
       })
     })
   })
