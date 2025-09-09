@@ -1,4 +1,4 @@
-import clarity from '@microsoft/clarity'
+import Clarity from '@microsoft/clarity'
 import {
   Button,
   Checkboxes,
@@ -37,5 +37,5 @@ document.addEventListener('DOMContentLoaded', () => {
   })
 })
 if (window.CLARITY_PROJECT_ID) {
-  clarity.init(window.CLARITY_PROJECT_ID)
+  Clarity.init(window.CLARITY_PROJECT_ID)
 }
