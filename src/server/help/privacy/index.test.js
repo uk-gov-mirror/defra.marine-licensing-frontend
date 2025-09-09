@@ -5,7 +5,10 @@ describe('privacy route', () => {
     expect(privacyRoutes).toEqual([
       expect.objectContaining({
         method: 'GET',
-        path: '/help/privacy'
+        path: '/help/privacy',
+        options: {
+          auth: { strategy: 'defra-id', mode: 'try' }
+        }
       })
     ])
   })
