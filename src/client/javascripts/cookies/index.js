@@ -22,7 +22,7 @@ export class CookieSettings {
 
       try {
         window.clarity('consent', consentValue)
-      } catch (error) {
+      } catch {
         // Silently handle Clarity consent errors
       }
     }
