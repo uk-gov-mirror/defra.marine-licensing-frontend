@@ -12,6 +12,7 @@ import {
 
 import { AddAnotherPoint } from './add-another-point/index.js'
 import { SiteDetailsMap } from './site-details-map/index.js'
+import { CookieSettings } from './cookies/index.js'
 
 createAll(Button)
 createAll(Checkboxes)
@@ -35,6 +36,11 @@ document.addEventListener('DOMContentLoaded', () => {
   mapElements.forEach((element) => {
     new SiteDetailsMap(element) // eslint-disable-line no-new
   })
+
+  const cookieForm = document.querySelector('[data-module="cookie-settings"]')
+  if (cookieForm) {
+    new CookieSettings(cookieForm) // eslint-disable-line no-new
+  }
 })
 if (window.CLARITY_PROJECT_ID) {
   Clarity.init(window.CLARITY_PROJECT_ID)
