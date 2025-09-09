@@ -101,7 +101,7 @@ describe('Cookies page', () => {
       expect(
         getByRole(document, 'heading', {
           level: 3,
-          name: 'Microsoft Clarity cookies'
+          name: 'Microsoft Clarity'
         })
       ).toBeInTheDocument()
 

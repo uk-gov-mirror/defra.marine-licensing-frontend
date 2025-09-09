@@ -78,7 +78,7 @@
               text: "userSession"
             },
             {
-              text: "Set during sign-in and manages authentication state"
+              text: "Confirms you’re signed in while you use the service"
             },
             {
               text: "4 hours"
@@ -89,7 +89,7 @@
               text: "csrfToken"
             },
             {
-              text: "Ensures you can submit forms"
+              text: "Helps keep your information secure when you submit forms"
             },
             {
               text: "When the browser closes"
@@ -100,7 +100,7 @@
               text: "cookies_preferences_set"
             },
             {
-              text: "Let's us know that you've saved your cookies consent setting"
+              text: "Remembers that you’ve set your cookie preferences"
             },
             {
               text: "1 year"
@@ -111,7 +111,7 @@
               text: "cookies_policy"
             },
             {
-              text: "Saves your cookies consent preferences"
+              text: "Saves your cookie consent preferences"
             },
             {
               text: "1 year"
@@ -122,11 +122,14 @@
 
       <h2 class="govuk-heading-l">Analytics cookies (optional)</h2>
 
-      <p class="govuk-body">With your permission, we use Microsoft Clarity Analytics to collect data about how you use this service. This information helps us to improve our service.</p>
+      <p class="govuk-body">With your permission, we use analytics cookies to collect data about how you use the Get
+         permission for marine work service. This information helps us to improve our service.</p>
 
-      <p class="govuk-body">Microsoft is not allowed to use or share our analytics data with anyone.</p>
 
-      <h3 class="govuk-heading-m">Microsoft Clarity cookies</h3>
+
+      <h3 class="govuk-heading-m">Microsoft Clarity</h3>
+      <p class="govuk-body">We use Microsoft Clarity to understand how you use the service. This includes mouse
+         movements, clicks, scrolling, and other interactions. Microsoft Clarity uses the following cookies:</p>
 
       {{ govukTable({
         head: [
@@ -146,7 +149,7 @@
               text: "_clck"
             },
             {
-              text: "Persists the Clarity User ID and preferences, unique to that site is attributed to the same user ID"
+              text: "Stores your Clarity user ID and preferences, so your visits are linked"
             },
             {
               text: "1 year"
@@ -157,7 +160,7 @@
               text: "_clsk"
             },
             {
-              text: "Connects multiple page views by a user into a single Clarity session recording"
+              text: "Groups page views from a single visit into one session"
             },
             {
               text: "1 day"
@@ -168,7 +171,7 @@
               text: "CLID"
             },
             {
-              text: "Identifies the first-time Clarity saw this user on any site using Clarity"
+              text: "Identifies when Clarity first saw this user on any site using Clarity"
             },
             {
               text: "1 year"
@@ -179,7 +182,7 @@
               text: "ANNOCHK"
             },
             {
-              text: "Indicates whether MUID is transferred to ANID, a cookie used for advertising. Clarity doesn't use ANID and so this is always set to 0"
+              text: "Checks whether data is shared with another Microsoft advertising cookie (ANID). This is always off because this service does not use ANID"
             },
             {
               text: "10 minutes"
@@ -187,21 +190,10 @@
           ],
           [
             {
-              text: "MR"
-            },
-            {
-              text: "Indicates whether to refresh MUID"
-            },
-            {
-              text: "7 days"
-            }
-          ],
-          [
-            {
               text: "MUID"
             },
             {
-              text: "Identifies unique web browsers visiting Microsoft sites. These cookies are used for advertising, site analytics, and other operational purposes"
+              text: "Identifies your browser when you visit Microsoft sites. Used for analytics, advertising and to help improve the service"
             },
             {
               text: "25 days"
@@ -209,10 +201,21 @@
           ],
           [
             {
+              text: "MR"
+            },
+            {
+              text: "Checks whether your MUID should be refreshed"
+            },
+            {
+              text: "7 days"
+            }
+          ],
+          [
+            {
               text: "SM"
             },
             {
-              text: "Used in synchronizing the MUID across Microsoft domains"
+              text: "Syncs your MUID across Microsoft sites"
             },
             {
               text: "When the browser closes"
@@ -253,10 +256,7 @@
 
         {{ govukButton({
           text: "Save cookie settings",
-          type: "submit",
-          attributes: {
-            "data-module": "govuk-button"
-          }
+          type: "submit"
         }) }}
       </form>
     </div>
