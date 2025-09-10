@@ -254,7 +254,7 @@ describe('siteDetails utils', () => {
           COORDINATE_SYSTEMS.WGS84
         )
       ).toBe(
-        `${mockExemption.siteDetails[0].coordinates.latitude || ''}, ${mockExemption.siteDetails[0].coordinates.longitude || ''}`
+        `${mockExemption.siteDetails[0].coordinates.latitude ?? ''}, ${mockExemption.siteDetails[0].coordinates.longitude ?? ''}`
       )
     })
 
