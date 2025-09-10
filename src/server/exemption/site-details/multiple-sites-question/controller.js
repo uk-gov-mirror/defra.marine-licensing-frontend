@@ -2,6 +2,7 @@ import {
   getExemptionCache,
   setExemptionCache
 } from '~/src/server/common/helpers/session-cache/utils.js'
+import { getSiteDetailsBySite } from '~/src/server/common/helpers/session-cache/site-utils.js'
 import { routes } from '~/src/server/common/constants/routes.js'
 import {
   errorDescriptionByFieldName,
@@ -97,7 +98,10 @@ export const multipleSitesSubmitController = {
     const multiSiteValue = payload.multipleSitesEnabled === 'yes'
 
     if (payload.multipleSitesEnabled === 'no' && exemption.siteDetails) {
-      delete exemption.siteDetails.siteName
+      const siteDetails = getSiteDetailsBySite(exemption)
+      if (siteDetails) {
+        delete siteDetails.siteName
+      }
     }
 
     setExemptionCache(request, {
