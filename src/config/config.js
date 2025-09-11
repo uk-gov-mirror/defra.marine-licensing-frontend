@@ -302,6 +302,54 @@ export const config = convict({
       env: 'DEFRA_ID_REFRESH_TOKENS'
     }
   },
+  entraId: {
+    oidcConfigurationUrl: {
+      doc: 'Entra ID OIDC configuration URL',
+      format: String,
+      env: 'ENTRA_ID_OIDC_CONFIGURATION_URL',
+      default:
+        'http://localhost:3200/cdp-defra-id-stub/.well-known/openid-configuration'
+    },
+    authEnabled: {
+      doc: 'ENTRA ID Auth enabled',
+      format: Boolean,
+      env: 'ENTRA_ID_ENABLED',
+      default: false
+    },
+    clientId: {
+      doc: 'ENTRA ID client ID',
+      format: String,
+      env: 'ENTRA_ID_CLIENT_ID',
+      default: 'f68226cb-8dbc-44ef-a24e-d4e4835b16ff'
+    },
+    clientSecret: {
+      doc: 'ENTRA ID client secret',
+      format: String,
+      sensitive: true,
+      env: 'ENTRA_ID_CLIENT_SECRET',
+      default: ''
+    },
+    groups: {
+      doc: 'ENTRA ID user groups',
+      format: Array,
+      sensitive: true,
+      env: 'ENTRA_ID_SECURITY_GROUPS',
+      default: []
+    },
+    scopes: {
+      doc: 'ENTRA ID scopes',
+      format: Array,
+      sensitive: true,
+      env: 'ENTRA_ID_SCOPES',
+      default: ['openid', 'email', 'offline_access']
+    },
+    redirectUrl: {
+      doc: 'ENTRA ID redirect URl.',
+      format: String,
+      default: 'http://localhost:3000',
+      env: 'APP_BASE_URL'
+    }
+  },
   cdpUploader: {
     cdpUploadServiceBaseUrl: {
       doc: 'CDP Uploader service base URL',
