@@ -75,7 +75,7 @@ export const fileUploadController = {
     const exemption = getExemptionCache(request)
     const site = getSiteDetailsBySite(exemption)
 
-    const { fileUploadType, uploadedFile, uploadError } = site || {}
+    const { fileUploadType, uploadedFile, uploadError } = site
 
     request.logger.debug(
       `fileUploadController: fileUploadType [${fileUploadType}]`

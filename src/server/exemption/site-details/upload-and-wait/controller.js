@@ -464,7 +464,7 @@ export const uploadAndWaitController = {
 
     const site = getSiteDetailsBySite(exemption)
 
-    const { uploadConfig } = site || {}
+    const { uploadConfig } = site
 
     if (!uploadConfig) {
       return h.redirect(routes.CHOOSE_FILE_UPLOAD_TYPE)

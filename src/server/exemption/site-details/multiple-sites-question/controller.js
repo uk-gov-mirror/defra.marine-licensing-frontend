@@ -99,9 +99,7 @@ export const multipleSitesSubmitController = {
 
     if (payload.multipleSitesEnabled === 'no' && exemption.siteDetails) {
       const siteDetails = getSiteDetailsBySite(exemption)
-      if (siteDetails) {
-        delete siteDetails.siteName
-      }
+      delete siteDetails.siteName
     }
 
     setExemptionCache(request, {
