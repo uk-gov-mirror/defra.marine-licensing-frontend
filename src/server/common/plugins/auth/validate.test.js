@@ -205,5 +205,24 @@ describe('validateUserSession', () => {
         })
       })
     })
+
+    describe('No strategy set', () => {
+      beforeEach(() => {
+        mockUserSession.strategy = null
+        authUtils.getUserSession.mockResolvedValue(mockUserSession)
+        isPast.mockReturnValue(false)
+      })
+
+      test('should fail validation if no strategy is set', async () => {
+        mockRequest.path = '/exemption/task-list'
+        await server.app.cache.set(mockUserSession.sessionId, mockUserSession)
+
+        const result = await validateUserSession(mockRequest, mockSession)
+
+        expect(result).toEqual({
+          isValid: false
+        })
+      })
+    })
   })
 })
