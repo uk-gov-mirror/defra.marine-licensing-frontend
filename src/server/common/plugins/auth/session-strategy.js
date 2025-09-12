@@ -1,5 +1,5 @@
 import { config } from '~/src/config/config.js'
-import { routes } from '~/src/server/common/constants/routes.js'
+import { isEntraIdRoute, routes } from '~/src/server/common/constants/routes.js'
 import { validateUserSession } from '~/src/server/common/plugins/auth/validate.js'
 import { cacheMcmsContextFromQueryParams } from '~/src/server/common/helpers/mcms-context/cache-mcms-context.js'
 import { clearExemptionCache } from '~/src/server/common/helpers/session-cache/utils.js'
@@ -25,9 +25,7 @@ export const createSessionStrategy = (server) => {
     redirectTo: (request) => {
       cacheMcmsContextFromQueryParams(request)
       request.yar.flash('redirectPath', request.path, true)
-      return request.path.startsWith(routes.VIEW_DETAILS_INTERNAL_USER)
-        ? routes.LOGIN_ENTRA
-        : routes.LOGIN
+      return isEntraIdRoute(request.path) ? routes.LOGIN_ENTRA : routes.LOGIN
     },
     validate: async (request, session) => {
       const validity = await validateUserSession(request, session)

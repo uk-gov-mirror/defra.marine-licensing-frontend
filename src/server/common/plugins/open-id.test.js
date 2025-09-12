@@ -3,6 +3,7 @@ import { config } from '~/src/config/config.js'
 import { createDefraIdStrategy } from '~/src/server/common/plugins/auth/defra-id-strategy.js'
 import { createEntraIdStrategy } from '~/src/server/common/plugins/auth/entra-id-strategy.js'
 import { createSessionStrategy } from '~/src/server/common/plugins/auth/session-strategy.js'
+import { AUTH_STRATEGIES } from '~/src/server/common/constants/auth.js'
 
 // Mock external dependencies that these strategy functions depend on
 jest.mock('~/src/config/config.js')
@@ -38,7 +39,7 @@ describe('Strategy Functions Integration Tests', () => {
       await createDefraIdStrategy(mockServer)
 
       expect(mockServer.auth.strategy).toHaveBeenCalledWith(
-        'defra-id',
+        AUTH_STRATEGIES.DEFRA_ID,
         'basic',
         {
           validate: expect.any(Function)
@@ -69,7 +70,7 @@ describe('Strategy Functions Integration Tests', () => {
 
       // Verify it tried to register a bell strategy
       expect(mockServer.auth.strategy).toHaveBeenCalledWith(
-        'defra-id',
+        AUTH_STRATEGIES.DEFRA_ID,
         'bell',
         expect.objectContaining({
           clientId: 'test',
@@ -91,7 +92,7 @@ describe('Strategy Functions Integration Tests', () => {
       await createEntraIdStrategy(mockServer)
 
       expect(mockServer.auth.strategy).toHaveBeenCalledWith(
-        'entra-id',
+        AUTH_STRATEGIES.ENTRA_ID,
         'basic',
         {
           validate: expect.any(Function)

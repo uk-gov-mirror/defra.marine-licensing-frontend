@@ -38,3 +38,8 @@ export const routes = {
   DELETE_EXEMPTION: '/exemption/delete',
   PRIVACY: '/help/privacy'
 }
+
+export const entraIdRoutes = [routes.VIEW_DETAILS_INTERNAL_USER]
+
+export const isEntraIdRoute = (route) =>
+  entraIdRoutes.find((r) => r === route || route.startsWith(r))
