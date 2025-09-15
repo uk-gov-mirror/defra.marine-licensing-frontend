@@ -309,7 +309,7 @@ export const config = convict({
       format: String,
       env: 'ENTRA_ID_OIDC_CONFIGURATION_URL',
       default:
-        'https://login.microsoftonline.com/6f504113-6b64-43f2-ade9-242e05780007/.well-known/openid-configuration'
+        'http://localhost:3200/cdp-defra-id-stub/.well-known/openid-configuration'
     },
     clientId: {
       doc: 'ENTRA ID client ID',
