@@ -43,4 +43,4 @@ export const routes = {
 export const entraIdRoutes = [routes.VIEW_DETAILS_INTERNAL_USER]
 
 export const isEntraIdRoute = (route) =>
-  entraIdRoutes.some((r) => r === route || route.startsWith(r))
+  entraIdRoutes.some((r) => r === route || route?.startsWith(r))
