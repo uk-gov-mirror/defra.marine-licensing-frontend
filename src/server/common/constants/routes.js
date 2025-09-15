@@ -36,6 +36,7 @@ export const routes = {
   SAME_ACTIVITY_DESCRIPTION: '/exemption/same-activity-description',
   DASHBOARD: '/home',
   DELETE_EXEMPTION: '/exemption/delete',
+  COOKIES: '/help/cookies',
   PRIVACY: '/help/privacy'
 }
 

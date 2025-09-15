@@ -42,10 +42,12 @@ describe('#context', () => {
 
     test('Should provide expected context', () => {
       expect(contextResult).toEqual({
+        analyticsEnabled: false,
         assetPath: '/public/assets',
         breadcrumbs: [],
         clarityProjectId: '',
         getAssetPath: expect.any(Function),
+        isAuthenticated: false,
         navigation: [
           {
             active: false,
@@ -189,10 +191,12 @@ describe('#context cache', () => {
 
     test('Should provide expected context', () => {
       expect(contextResult).toEqual({
+        analyticsEnabled: false,
         assetPath: '/public/assets',
         breadcrumbs: [],
         clarityProjectId: '',
         getAssetPath: expect.any(Function),
+        isAuthenticated: false,
         navigation: [
           {
             active: false,
