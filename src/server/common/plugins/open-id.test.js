@@ -252,7 +252,7 @@ describe('Strategy Functions Integration Tests', () => {
         expect(mockCacheMcmsContextFromQueryParams).toHaveBeenCalledWith(
           mockRequest
         )
-        expect(result).toBe('/login')
+        expect(result).toBe('/signin')
         expect(mockRequest.yar.flash).toHaveBeenCalledWith(
           'redirectPath',
           '/exemption/task-list',
@@ -268,7 +268,7 @@ describe('Strategy Functions Integration Tests', () => {
         expect(mockCacheMcmsContextFromQueryParams).toHaveBeenCalledWith(
           mockRequest
         )
-        expect(result).toBe('/login-entra')
+        expect(result).toBe('/signin-entra')
         expect(mockRequest.yar.flash).toHaveBeenCalledWith(
           'redirectPath',
           '/view-details',
@@ -284,7 +284,7 @@ describe('Strategy Functions Integration Tests', () => {
         expect(mockCacheMcmsContextFromQueryParams).toHaveBeenCalledWith(
           mockRequest
         )
-        expect(result).toBe('/login-entra')
+        expect(result).toBe('/signin-entra')
         expect(mockRequest.yar.flash).toHaveBeenCalledWith(
           'redirectPath',
           '/view-details/some-id',

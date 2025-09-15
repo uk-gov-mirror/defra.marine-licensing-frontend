@@ -3,7 +3,7 @@ import { AUTH_STRATEGIES } from '~/src/server/common/constants/auth.js'
 
 export const loginEntraController = {
   method: 'GET',
-  path: routes.LOGIN_ENTRA,
+  path: routes.SIGNIN_ENTRA,
   options: {
     auth: AUTH_STRATEGIES.ENTRA_ID
   },

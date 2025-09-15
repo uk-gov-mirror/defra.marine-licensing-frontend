@@ -25,7 +25,7 @@ export const createSessionStrategy = (server) => {
     redirectTo: (request) => {
       cacheMcmsContextFromQueryParams(request)
       request.yar.flash('redirectPath', request.path, true)
-      return isEntraIdRoute(request.path) ? routes.LOGIN_ENTRA : routes.LOGIN
+      return isEntraIdRoute(request.path) ? routes.SIGNIN_ENTRA : routes.SIGNIN
     },
     validate: async (request, session) => {
       const validity = await validateUserSession(request, session)

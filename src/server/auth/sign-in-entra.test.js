@@ -1,5 +1,5 @@
 import { createServer } from '~/src/server/index.js'
-import { loginEntraController } from '~/src/server/auth/login-entra.js'
+import { loginEntraController } from '~/src/server/auth/sign-in-entra.js'
 
 describe('#login with Entra ID', () => {
   let server
