@@ -79,9 +79,13 @@ describe('Strategy Functions Integration Tests', () => {
           clientId: 'test',
           clientSecret: 'test',
           password: 'test',
-          isSecure: true
+          isSecure: true,
+          location: expect.any(Function)
         })
       )
+      const locationCallback =
+        mockServer.auth.strategy.mock.calls[0][2].location
+      expect(locationCallback()).toBe('http://test/signin-oidc')
     })
   })
 
@@ -132,9 +136,13 @@ describe('Strategy Functions Integration Tests', () => {
           clientId: 'test',
           clientSecret: 'test',
           password: 'test',
-          isSecure: true
+          isSecure: true,
+          location: expect.any(Function)
         })
       )
+      const locationCallback =
+        mockServer.auth.strategy.mock.calls[0][2].location
+      expect(locationCallback()).toBe('http://test/auth')
     })
   })
 
