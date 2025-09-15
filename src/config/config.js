@@ -336,7 +336,7 @@ export const config = convict({
       format: Array,
       sensitive: true,
       env: 'ENTRA_ID_SCOPES',
-      default: ['openid', 'email', 'offline_access']
+      default: ['api://f68226cb-8dbc-44ef-a24e-d4e4835b16ff/.default']
     },
     redirectUrl: {
       doc: 'ENTRA ID redirect URl.',
