@@ -90,6 +90,26 @@ describe('Strategy Functions Integration Tests', () => {
   })
 
   describe('createEntraIdStrategy', () => {
+    test('should register basic strategy when auth is disabled', async () => {
+      mockConfig.get.mockImplementation((key) => {
+        if (key === 'entraId') return { authEnabled: false }
+        return {}
+      })
+
+      await createEntraIdStrategy(mockServer)
+
+      expect(mockServer.auth.strategy).toHaveBeenCalledWith(
+        AUTH_STRATEGIES.ENTRA_ID,
+        'basic',
+        {
+          validate: expect.any(Function)
+        }
+      )
+
+      const validateFn = mockServer.auth.strategy.mock.calls[0][2].validate
+      expect(validateFn()).toEqual({ isValid: true })
+    })
+
     test('should try to register bell strategy when auth is enabled', async () => {
       mockConfig.get.mockImplementation((key) => {
         if (key === 'entraId')
@@ -127,9 +147,10 @@ describe('Strategy Functions Integration Tests', () => {
   })
 
   describe('createSessionStrategy', () => {
-    test('should not register when defraId auth is not enabled', () => {
+    test('should not register when neither auth is enabled', () => {
       mockConfig.get.mockImplementation((key) => {
         if (key === 'defraId') return { authEnabled: false }
+        if (key === 'entraId') return { authEnabled: false }
         return {}
       })
 
@@ -141,6 +162,7 @@ describe('Strategy Functions Integration Tests', () => {
     test('should register session strategy when defraId auth is enabled', () => {
       mockConfig.get.mockImplementation((key) => {
         if (key === 'defraId') return { authEnabled: true }
+        if (key === 'entraId') return { authEnabled: false }
         if (key === 'session.cookie')
           return { password: 'test', secure: true, ttl: 3600000 }
         return {}
@@ -166,9 +188,10 @@ describe('Strategy Functions Integration Tests', () => {
       expect(mockServer.auth.default).toHaveBeenCalledWith('session')
     })
 
-    test('should register session strategy if defraId auth is enabled', () => {
+    test('should register session strategy when entraId auth is enabled', () => {
       mockConfig.get.mockImplementation((key) => {
-        if (key === 'defraId') return { authEnabled: true }
+        if (key === 'defraId') return { authEnabled: false }
+        if (key === 'entraId') return { authEnabled: true }
         if (key === 'session.cookie')
           return { password: 'test', secure: true, ttl: 3600000 }
         return {}
@@ -204,6 +227,7 @@ describe('Strategy Functions Integration Tests', () => {
       beforeEach(() => {
         mockConfig.get.mockImplementation((key) => {
           if (key === 'defraId') return { authEnabled: true }
+          if (key === 'entraId') return { authEnabled: false }
           if (key === 'session.cookie')
             return { password: 'test', secure: true, ttl: 3600000 }
           return {}
@@ -279,6 +303,7 @@ describe('Strategy Functions Integration Tests', () => {
       beforeEach(() => {
         mockConfig.get.mockImplementation((key) => {
           if (key === 'defraId') return { authEnabled: true }
+          if (key === 'entraId') return { authEnabled: false }
           if (key === 'session.cookie')
             return { password: 'test', secure: true, ttl: 3600000 }
           return {}

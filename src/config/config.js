@@ -311,6 +311,12 @@ export const config = convict({
       default:
         'http://localhost:3200/cdp-defra-id-stub/.well-known/openid-configuration'
     },
+    authEnabled: {
+      doc: 'ENTRA ID Auth enabled',
+      format: Boolean,
+      env: 'ENTRA_ID_ENABLED',
+      default: false
+    },
     clientId: {
       doc: 'ENTRA ID client ID',
       format: String,
