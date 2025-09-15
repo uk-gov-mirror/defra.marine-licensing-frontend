@@ -309,7 +309,7 @@ export const config = convict({
       format: String,
       env: 'ENTRA_ID_OIDC_CONFIGURATION_URL',
       default:
-        'http://localhost:3200/cdp-defra-id-stub/.well-known/openid-configuration'
+        'https://login.microsoftonline.com/6f504113-6b64-43f2-ade9-242e05780007/.well-known/openid-configuration'
     },
     clientId: {
       doc: 'ENTRA ID client ID',
@@ -323,13 +323,6 @@ export const config = convict({
       sensitive: true,
       env: 'ENTRA_ID_CLIENT_SECRET',
       default: ''
-    },
-    groups: {
-      doc: 'ENTRA ID user groups',
-      format: Array,
-      sensitive: true,
-      env: 'ENTRA_ID_SECURITY_GROUPS',
-      default: []
     },
     scopes: {
       doc: 'ENTRA ID scopes',
