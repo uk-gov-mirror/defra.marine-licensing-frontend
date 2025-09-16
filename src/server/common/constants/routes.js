@@ -43,6 +43,8 @@ export const routes = {
 export const entraIdRoutes = [routes.VIEW_DETAILS_INTERNAL_USER]
 
 export const isEntraIdRoute = (route) => {
-  if (!route) return false
+  if (!route) {
+    return false
+  }
   return entraIdRoutes.some((r) => r === route || route?.startsWith(r))
 }
