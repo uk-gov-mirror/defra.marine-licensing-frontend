@@ -60,8 +60,8 @@ describe('utils', () => {
       mockRequest = {
         auth: {
           credentials: {
+            expiresIn: 3600,
             profile: {
-              expiresIn: 3600,
               token: 'mock-access-token',
               refreshToken: 'mock-refresh-token'
             },
