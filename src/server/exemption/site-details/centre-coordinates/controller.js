@@ -2,7 +2,11 @@ import {
   getExemptionCache,
   updateExemptionSiteDetails
 } from '~/src/server/common/helpers/session-cache/utils.js'
-import { getSiteDetailsBySite } from '~/src/server/common/helpers/session-cache/site-utils.js'
+import {
+  getSiteDetailsBySite,
+  setSiteData,
+  setSiteDataPreHandler
+} from '~/src/server/common/helpers/session-cache/site-utils.js'
 import { getCoordinateSystem } from '~/src/server/common/helpers/coordinate-utils.js'
 import {
   errorDescriptionByFieldName,
@@ -58,28 +62,35 @@ export const errorMessages = {
  * @satisfies {Partial<ServerRoute>}
  */
 export const centreCoordinatesController = {
+  options: {
+    pre: [setSiteDataPreHandler]
+  },
   handler(request, h) {
     const exemption = getExemptionCache(request)
+    const { siteIndex, queryParams } = request.site
     const { coordinateSystem } = getCoordinateSystem(request)
 
-    const siteDetails = getSiteDetailsBySite(exemption)
+    const siteDetails = getSiteDetailsBySite(exemption, siteIndex)
 
     return h.view(COORDINATE_SYSTEM_VIEW_ROUTES[coordinateSystem], {
       ...centreCoordinatesPageData,
+      backLink: centreCoordinatesPageData.backLink + queryParams,
       projectName: exemption.projectName,
       payload: getPayload(siteDetails, coordinateSystem)
     })
   }
 }
 
-export const centreCoordinatesSubmitFailHandler = (
-  request,
-  h,
-  error,
-  coordinateSystem
-) => {
+export const centreCoordinatesSubmitFailHandler = (request, h, error) => {
   const { payload } = request
+
+  const site = setSiteData(request)
+
   const exemption = getExemptionCache(request)
+
+  const { queryParams } = site
+
+  const { coordinateSystem } = getCoordinateSystem(request)
 
   const { projectName } = exemption
 
@@ -87,6 +98,7 @@ export const centreCoordinatesSubmitFailHandler = (
     return h
       .view(COORDINATE_SYSTEM_VIEW_ROUTES[coordinateSystem], {
         ...centreCoordinatesPageData,
+        backLink: centreCoordinatesPageData.backLink + queryParams,
         projectName,
         payload
       })
@@ -102,6 +114,7 @@ export const centreCoordinatesSubmitFailHandler = (
   return h
     .view(COORDINATE_SYSTEM_VIEW_ROUTES[coordinateSystem], {
       ...centreCoordinatesPageData,
+      backLink: centreCoordinatesPageData.backLink + queryParams,
       projectName,
       payload,
       errors,
@@ -115,8 +128,13 @@ export const centreCoordinatesSubmitFailHandler = (
  * @satisfies {Partial<ServerRoute>}
  */
 export const centreCoordinatesSubmitController = {
+  options: {
+    pre: [setSiteDataPreHandler]
+  },
   handler(request, h) {
     const { payload } = request
+
+    const { queryParams, siteIndex } = request.site
 
     const { coordinateSystem } = getCoordinateSystem(request)
 
@@ -130,16 +148,11 @@ export const centreCoordinatesSubmitController = {
     })
 
     if (error) {
-      return centreCoordinatesSubmitFailHandler(
-        request,
-        h,
-        error,
-        coordinateSystem
-      )
+      return centreCoordinatesSubmitFailHandler(request, h, error)
     }
 
-    updateExemptionSiteDetails(request, 0, 'coordinates', payload)
+    updateExemptionSiteDetails(request, siteIndex, 'coordinates', payload)
 
-    return h.redirect(routes.WIDTH_OF_SITE)
+    return h.redirect(routes.WIDTH_OF_SITE + queryParams)
   }
 }
