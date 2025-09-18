@@ -15,6 +15,10 @@ export const signInOidcController = {
     if (authEnabled && request.auth?.isAuthenticated) {
       await setUserSession(request)
       request.logger.info('User has been successfully authenticated')
+      request.logger.info('Access token: ' + request.auth?.credentials?.token)
+      request.logger.info(
+        'ID token: ' + request.auth?.credentials?.profile?.idToken
+      )
     }
 
     const redirect = request.yar.flash('referrer')?.at(0) ?? routes.PROJECT_NAME
