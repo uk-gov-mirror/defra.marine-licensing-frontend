@@ -146,3 +146,58 @@ export const cookiesSubmitController = {
     }
   }
 }
+
+/**
+ * Cookie consent POST controller for banner
+ * @satisfies {Partial<ServerRoute>}
+ */
+export const cookiesConsentController = {
+  options: {
+    auth: false,
+    validate: {
+      payload: joi.object({
+        csrfToken: joi.string().allow(''),
+        analytics: joi.string().valid('yes', 'no').required()
+      })
+    }
+  },
+  handler(request, h) {
+    const { payload } = request
+    const analytics = payload.analytics === 'yes'
+
+    try {
+      const timestamp = Math.floor(Date.now() / 1000)
+
+      const cookiesPolicy = {
+        essential: true,
+        analytics,
+        timestamp
+      }
+
+      const referer = request.headers.referer || '/'
+      const response = h.redirect(referer)
+
+      const cookieOptions = {
+        ttl: 365 * 24 * 60 * 60 * 1000,
+        path: '/',
+        isSecure: process.env.NODE_ENV === 'production',
+        isSameSite: 'Strict'
+      }
+
+      const cookieOptionsB64 = {
+        ...cookieOptions,
+        encoding: 'base64json'
+      }
+
+      response.state('cookies_policy', cookiesPolicy, cookieOptionsB64)
+      response.state('cookies_preferences_set', 'true', cookieOptions)
+
+      request.yar.flash('showCookieConfirmationBanner', true)
+
+      return response
+    } catch (error) {
+      request.logger.error(error, 'Error saving cookie preferences from banner')
+      throw Boom.internal('Error saving cookie preferences')
+    }
+  }
+}
