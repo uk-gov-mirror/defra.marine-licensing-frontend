@@ -1,8 +1,4 @@
-import {
-  cookiesController,
-  cookiesSubmitController,
-  cookiesConsentController
-} from './controller.js'
+import { cookiesController, cookiesSubmitController } from './controller.js'
 import { routes } from '~/src/server/common/constants/routes.js'
 
 /**
@@ -19,11 +15,6 @@ export const cookiesRoutes = [
     method: 'POST',
     path: routes.COOKIES,
     ...cookiesSubmitController
-  },
-  {
-    method: 'POST',
-    path: `${routes.COOKIES}/consent`,
-    ...cookiesConsentController
   }
 ]
 
