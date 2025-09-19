@@ -145,15 +145,15 @@ export const cookiesSubmitController = {
       response.state('cookies_policy', cookiesPolicy, cookieOptionsB64)
       response.state('cookies_preferences_set', 'true', cookieOptions)
 
-      // Only flash confirmation banner for banner submissions
       if (isFromBanner) {
         request.yar.flash('showCookieConfirmationBanner', true)
       }
 
       return response
     } catch (error) {
-      request.logger.error(error, 'Error saving cookie preferences')
-      throw Boom.internal('Error saving cookie preferences')
+      const msg = 'Error saving cookie preferences'
+      request.logger.error(error, msg)
+      throw Boom.internal(msg)
     }
   }
 }
