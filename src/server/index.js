@@ -17,11 +17,8 @@ import { requestTracing } from '~/src/server/common/helpers/request-tracing.js'
 import { setupProxy } from '~/src/server/common/helpers/proxy/setup-proxy.js'
 import { csrf } from '~/src/server/common/helpers/csrf.js'
 import { openId } from '~/src/server/common/plugins/open-id.js'
+import { cookies } from '~/src/server/common/plugins/cookies.js'
 import { setPageCacheControlHeaders } from '~/src/server/common/helpers/cache-control.js'
-import {
-  cookieBannerFlashConsumer,
-  cookieBannerContextInjector
-} from '~/src/server/common/helpers/cookie-banner-flash-consumer.js'
 
 export async function createServer() {
   setupProxy()
@@ -69,14 +66,7 @@ export async function createServer() {
     segment: 'session'
   })
 
-  // Configure cookie state definitions for automatic decoding
-  server.state('cookies_policy', {
-    encoding: 'base64json',
-    ttl: 365 * 24 * 60 * 60 * 1000, // 1 year in milliseconds
-    path: '/',
-    isSecure: process.env.NODE_ENV === 'production',
-    isSameSite: 'Strict'
-  })
+  // Cookie state configuration is now handled by the cookie-policy plugin
 
   await server.register([
     requestLogger,
@@ -90,11 +80,10 @@ export async function createServer() {
     nunjucksConfig,
     csrf,
     openId,
+    cookies,
     router // Register all the controllers/routes defined in src/server/router.js
   ])
 
-  server.ext('onPostAuth', cookieBannerFlashConsumer)
-  server.ext('onPreResponse', cookieBannerContextInjector)
   server.ext('onPreResponse', setPageCacheControlHeaders)
   server.ext('onPreResponse', catchAll)
 

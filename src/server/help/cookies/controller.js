@@ -10,6 +10,10 @@ import {
   clearStoredReferrer
 } from '~/src/server/common/helpers/referrer-validation.js'
 import { getCookiePreferences } from '~/src/server/common/helpers/cookie-preferences.js'
+import {
+  setCookiePreferences,
+  setConfirmationBanner
+} from '~/src/server/common/helpers/cookie-service.js'
 import { routes } from '~/src/server/common/constants/routes.js'
 
 const COOKIES_VIEW_ROUTE = 'help/cookies/index'
@@ -115,38 +119,16 @@ export const cookiesSubmitController = {
     const isFromBanner = payload.source === 'banner'
 
     try {
-      const timestamp = Math.floor(Date.now() / 1000)
-
-      const cookiesPolicy = {
-        essential: true,
-        analytics,
-        timestamp
-      }
-
-      // Different redirect behavior based on source
       const redirectUrl = isFromBanner
         ? request.headers.referer || '/'
         : `${routes.COOKIES}?success=true`
 
       const response = h.redirect(redirectUrl)
 
-      const cookieOptions = {
-        ttl: 365 * 24 * 60 * 60 * 1000,
-        path: '/',
-        isSecure: process.env.NODE_ENV === 'production',
-        isSameSite: 'Strict'
-      }
-
-      const cookieOptionsB64 = {
-        ...cookieOptions,
-        encoding: 'base64json'
-      }
-
-      response.state('cookies_policy', cookiesPolicy, cookieOptionsB64)
-      response.state('cookies_preferences_set', 'true', cookieOptions)
+      setCookiePreferences(response, analytics)
 
       if (isFromBanner) {
-        request.yar.flash('showCookieConfirmationBanner', true)
+        setConfirmationBanner(request)
       }
 
       return response
