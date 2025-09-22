@@ -4,6 +4,7 @@ import {
   FLASH_MESSAGE_KEYS
 } from '~/src/server/common/constants/cookies.js'
 import { getCookiePreferences } from '~/src/server/common/helpers/cookie-preferences.js'
+import { config } from '~/src/config/config.js'
 
 export const cookies = {
   name: 'cookie-policy',
@@ -13,7 +14,7 @@ export const cookies = {
       encoding: COOKIE_OPTIONS_BASE64.ENCODING,
       ttl: COOKIE_OPTIONS_BASE64.TTL,
       path: COOKIE_OPTIONS_BASE64.PATH,
-      isSecure: COOKIE_OPTIONS_BASE64.IS_SECURE,
+      isSecure: config.get('isProduction'),
       isSameSite: COOKIE_OPTIONS_BASE64.IS_SAME_SITE
     })
 

@@ -5,8 +5,10 @@ import {
   COOKIE_OPTIONS_BASE64,
   FLASH_MESSAGE_KEYS
 } from '~/src/server/common/constants/cookies.js'
+import { config } from '~/src/config/config.js'
 
 jest.mock('~/src/server/common/helpers/cookie-preferences.js')
+jest.mock('~/src/config/config.js')
 
 const createMockServer = () => ({
   state: jest.fn(),
@@ -48,6 +50,7 @@ describe('Cookies Plugin', () => {
     mockH = createMockH()
     mockResponse = createMockResponse()
     jest.clearAllMocks()
+    config.get.mockReturnValue(false) // Default to development environment
   })
 
   describe('plugin registration', () => {
@@ -55,7 +58,7 @@ describe('Cookies Plugin', () => {
       expect(cookies.name).toBe('cookie-policy')
     })
 
-    test('should register cookie state with correct configuration', () => {
+    test('should register cookie state with correct configuration in development', () => {
       cookies.register(mockServer)
 
       expect(mockServer.state).toHaveBeenCalledWith(COOKIE_NAMES.POLICY, {
@@ -63,9 +66,26 @@ describe('Cookies Plugin', () => {
         encoding: COOKIE_OPTIONS_BASE64.ENCODING,
         ttl: COOKIE_OPTIONS_BASE64.TTL,
         path: COOKIE_OPTIONS_BASE64.PATH,
-        isSecure: COOKIE_OPTIONS_BASE64.IS_SECURE,
+        isSecure: false,
         isSameSite: COOKIE_OPTIONS_BASE64.IS_SAME_SITE
       })
+      expect(config.get).toHaveBeenCalledWith('isProduction')
+    })
+
+    test('should register cookie state with secure configuration in production', () => {
+      config.get.mockReturnValue(true)
+
+      cookies.register(mockServer)
+
+      expect(mockServer.state).toHaveBeenCalledWith(COOKIE_NAMES.POLICY, {
+        clearInvalid: true,
+        encoding: COOKIE_OPTIONS_BASE64.ENCODING,
+        ttl: COOKIE_OPTIONS_BASE64.TTL,
+        path: COOKIE_OPTIONS_BASE64.PATH,
+        isSecure: true,
+        isSameSite: COOKIE_OPTIONS_BASE64.IS_SAME_SITE
+      })
+      expect(config.get).toHaveBeenCalledWith('isProduction')
     })
 
     test('should register two server extensions', () => {
