@@ -294,9 +294,7 @@ describe('Cookies Plugin', () => {
       })
 
       test('should handle redirect responses', () => {
-        const redirectResponse = createMockResponse('redirect')
-        mockRequest.response = redirectResponse
-
+        mockRequest.response = createMockResponse('redirect')
         const result = onPreResponseHandler(mockRequest, mockH)
 
         expect(getCookiePreferences).not.toHaveBeenCalled()
@@ -304,8 +302,7 @@ describe('Cookies Plugin', () => {
       })
 
       test('should handle stream responses', () => {
-        const streamResponse = createMockResponse('stream')
-        mockRequest.response = streamResponse
+        mockRequest.response = createMockResponse('stream')
 
         const result = onPreResponseHandler(mockRequest, mockH)
 

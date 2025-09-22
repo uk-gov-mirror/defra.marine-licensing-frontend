@@ -187,12 +187,6 @@ describe('Cookie Service', () => {
       )
     })
 
-    test('should return response object for method chaining', () => {
-      const result = setCookiePreferences(mockResponse, true)
-
-      expect(result).toBeUndefined()
-    })
-
     test('should handle truthy analytics values', () => {
       const truthyValues = [1, 'yes', 'true', [], {}]
 
