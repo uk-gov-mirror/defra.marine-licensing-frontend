@@ -248,7 +248,7 @@ describe('view details controller', () => {
         expect(mockH.view).toHaveBeenCalledWith(
           VIEW_DETAILS_VIEW_ROUTE,
           expect.objectContaining({
-            pageTitle: 'View notification details',
+            pageTitle: submittedExemption.projectName,
             pageCaption: 'EXE/2025/00003 - Exempt activity notification',
             backLink: '/home',
             isReadOnly: true,
@@ -259,6 +259,28 @@ describe('view details controller', () => {
             siteDetails: expect.any(Object)
           })
         )
+      })
+
+      test('should omit the back link if user is authenticated with entra ID', async () => {
+        const submittedExemption = createSubmittedExemption()
+        const mockExemptionServiceInstance = {
+          getExemptionById: jest.fn().mockResolvedValue(submittedExemption)
+        }
+
+        jest
+          .spyOn(exemptionServiceModule, 'getExemptionService')
+          .mockReturnValue(mockExemptionServiceInstance)
+
+        const mockRequest = {
+          params: { exemptionId: validExemptionId },
+          logger: { error: jest.fn() },
+          auth: { credentials: { strategy: 'entra-id' } }
+        }
+        const mockH = { view: jest.fn() }
+
+        await viewDetailsController.handler(mockRequest, mockH)
+
+        expect(mockH.view.mock.calls[0][1].backLink).toBeNull()
       })
 
       test('should handle file upload data error and use fallback', async () => {

@@ -1,12 +1,19 @@
 import { routes } from '~/src/server/common/constants/routes.js'
 
 /**
- * Determines the correct back link for the coordinates entry page based on the multipleSitesEnabled setting
- * @param {object} exemption - The exemption data from cache
- * @returns {string} The back link URL
+ * Determines back route for coordinates-entry
+ * @param {object} request - The request object
+ * @returns {string} The route to redirect to
  */
-export const getCoordinatesEntryBackLink = (exemption) => {
-  return exemption?.multipleSiteDetails?.multipleSitesEnabled
-    ? routes.SAME_ACTIVITY_DESCRIPTION
-    : routes.SITE_DETAILS_ACTIVITY_DESCRIPTION
+export const getBackRoute = (request, exemption) => {
+  const { siteIndex, queryParams } = request.site
+  const { multipleSiteDetails } = exemption
+
+  if (siteIndex === 0) {
+    return routes.SITE_DETAILS_ACTIVITY_DESCRIPTION
+  }
+
+  return multipleSiteDetails.sameActivityDescription === 'yes'
+    ? routes.SITE_NAME + queryParams
+    : routes.SITE_DETAILS_ACTIVITY_DESCRIPTION + queryParams
 }

@@ -1,51 +1,61 @@
-import { getCoordinatesEntryBackLink } from './utils.js'
+import { getBackRoute } from '~/src/server/exemption/site-details/coordinates-entry/utils.js'
 import { routes } from '~/src/server/common/constants/routes.js'
+import { mockExemption, mockSite } from '~/src/server/test-helpers/mocks.js'
 
-describe('#getCoordinatesEntryBackLink', () => {
-  test('should return correct route when multipleSitesEnabled is true', () => {
-    const exemption = {
-      multipleSiteDetails: { multipleSitesEnabled: true }
-    }
-
-    const result = getCoordinatesEntryBackLink(exemption)
-
-    expect(result).toBe(routes.SAME_ACTIVITY_DESCRIPTION)
-  })
-
-  test('should return same activity description route when multipleSitesEnabled is true and sameActivityDates is yes', () => {
-    const exemption = {
-      multipleSiteDetails: {
-        multipleSitesEnabled: true,
-        sameActivityDates: 'yes'
+describe('#coordinatesEntryUtils', () => {
+  describe('#getBackRoute', () => {
+    test('should return to correct page when first site', () => {
+      const request = {
+        site: { ...mockSite, siteIndex: 0 }
       }
-    }
 
-    const result = getCoordinatesEntryBackLink(exemption)
+      const result = getBackRoute(request, mockExemption)
 
-    expect(result).toBe(`${routes.SAME_ACTIVITY_DESCRIPTION}`)
-  })
+      expect(result).toBe(routes.SITE_DETAILS_ACTIVITY_DESCRIPTION)
+    })
 
-  test('should return correct route when multipleSitesEnabled is false', () => {
-    const exemption = {
-      multipleSiteDetails: { multipleSitesEnabled: false }
-    }
+    test('should return to correct page when same activity description for all sites is chosen', () => {
+      const request = {
+        site: {
+          ...mockSite,
+          siteIndex: 1,
+          queryParams: '?site=1'
+        }
+      }
 
-    const result = getCoordinatesEntryBackLink(exemption)
+      const exemption = {
+        ...mockExemption,
+        multipleSiteDetails: {
+          ...mockExemption.multipleSiteDetails,
+          sameActivityDescription: 'yes'
+        }
+      }
 
-    expect(result).toBe(routes.SITE_DETAILS_ACTIVITY_DESCRIPTION)
-  })
+      const result = getBackRoute(request, exemption)
 
-  test('should return correct route when multipleSiteDetails is undefined', () => {
-    const exemption = {}
+      expect(result).toBe(routes.SITE_NAME + '?site=1')
+    })
 
-    const result = getCoordinatesEntryBackLink(exemption)
+    test('should return to correct page when same activity description for all sites is not chosen', () => {
+      const request = {
+        site: {
+          ...mockSite,
+          siteIndex: 1,
+          queryParams: '?site=1'
+        }
+      }
 
-    expect(result).toBe(routes.SITE_DETAILS_ACTIVITY_DESCRIPTION)
-  })
+      const exemption = {
+        ...mockExemption,
+        multipleSiteDetails: {
+          ...mockExemption.multipleSiteDetails,
+          sameActivityDescription: 'no'
+        }
+      }
 
-  test('should return correct route when exemption is null', () => {
-    const result = getCoordinatesEntryBackLink(null)
+      const result = getBackRoute(request, exemption)
 
-    expect(result).toBe(routes.SITE_DETAILS_ACTIVITY_DESCRIPTION)
+      expect(result).toBe(routes.SITE_DETAILS_ACTIVITY_DESCRIPTION + '?site=1')
+    })
   })
 })

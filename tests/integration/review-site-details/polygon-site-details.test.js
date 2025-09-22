@@ -1,5 +1,5 @@
 import { JSDOM } from 'jsdom'
-import { within } from '@testing-library/dom'
+import { getByText, within } from '@testing-library/dom'
 import { COORDINATE_SYSTEMS } from '~/src/server/common/constants/exemptions.js'
 import { routes } from '~/src/server/common/constants/routes.js'
 import { statusCodes } from '~/src/server/common/constants/status-codes.js'
@@ -54,6 +54,10 @@ describe('Review Site Details - Polygon Coordinates Integration Tests', () => {
       validateSiteDetailsCard(document, expectedPageContent)
       validatePolygonCoordinates(document, expectedPageContent)
       validateNavigationElements(document)
+
+      if (exemption.multipleSiteDetails?.multipleSitesEnabled) {
+        validateMultipleSites(document, expectedPageContent)
+      }
     }
   )
 
@@ -62,12 +66,14 @@ describe('Review Site Details - Polygon Coordinates Integration Tests', () => {
       const emptyPolygonExemption = {
         id: 'test-exemption-empty',
         projectName: 'Empty Polygon Project',
-        siteDetails: {
-          coordinatesType: 'coordinates',
-          coordinatesEntry: 'multiple',
-          coordinateSystem: 'wgs84',
-          coordinates: []
-        }
+        siteDetails: [
+          {
+            coordinatesType: 'coordinates',
+            coordinatesEntry: 'multiple',
+            coordinateSystem: 'wgs84',
+            coordinates: []
+          }
+        ]
       }
 
       const document = await getPageDocument(emptyPolygonExemption)
@@ -88,17 +94,19 @@ describe('Review Site Details - Polygon Coordinates Integration Tests', () => {
       const incompleteCoordinatesExemption = {
         id: 'test-exemption-incomplete',
         projectName: 'Incomplete Coordinates Project',
-        siteDetails: {
-          coordinatesType: 'coordinates',
-          coordinatesEntry: 'multiple',
-          coordinateSystem: 'wgs84',
-          coordinates: [
-            { latitude: '55.123456', longitude: '55.123456' },
-            { latitude: '', longitude: '33.987654' },
-            { latitude: '78.123456', longitude: '78.123456' },
-            { latitude: null, longitude: null }
-          ]
-        }
+        siteDetails: [
+          {
+            coordinatesType: 'coordinates',
+            coordinatesEntry: 'multiple',
+            coordinateSystem: 'wgs84',
+            coordinates: [
+              { latitude: '55.123456', longitude: '55.123456' },
+              { latitude: '', longitude: '33.987654' },
+              { latitude: '78.123456', longitude: '78.123456' },
+              { latitude: null, longitude: null }
+            ]
+          }
+        ]
       }
 
       const document = await getPageDocument(incompleteCoordinatesExemption)
@@ -137,10 +145,12 @@ describe('Review Site Details - Polygon Coordinates Integration Tests', () => {
         '/exemption/site-details',
         expect.objectContaining({
           id: polygonExemption.id,
-          siteDetails: expect.objectContaining({
-            coordinatesType: 'coordinates',
-            coordinatesEntry: 'multiple'
-          })
+          siteDetails: [
+            expect.objectContaining({
+              coordinatesType: 'coordinates',
+              coordinatesEntry: 'multiple'
+            })
+          ]
         })
       )
     })
@@ -170,6 +180,37 @@ describe('Review Site Details - Polygon Coordinates Integration Tests', () => {
 
     const caption = document.querySelector('.govuk-caption-l')
     expect(caption.textContent.trim()).toBe(expected.projectName)
+
+    const backLink = document.querySelector('.govuk-back-link')
+    expect(backLink.textContent.trim()).toBe('Back')
+    expect(backLink.getAttribute('href')).toBe(
+      routes.ENTER_MULTIPLE_COORDINATES
+    )
+  }
+
+  const validateMultipleSites = (document, expected) => {
+    const heading = document.querySelector('h1')
+    expect(heading.textContent.trim()).toBe('Review site details')
+
+    const caption = document.querySelector('.govuk-caption-l')
+    expect(caption.textContent.trim()).toBe(expected.projectName)
+
+    expect(
+      within(document).getByRole('button', {
+        name: 'Save and add another site'
+      })
+    ).toHaveAttribute('type', 'submit')
+
+    expect(
+      getByText(
+        document,
+        `You can select 'Save and continue' if you're finished or you want to save your progress and return later.`
+      )
+    ).toBeInTheDocument()
+
+    expect(
+      within(document).getByRole('button', { name: 'Save and continue' })
+    ).toHaveAttribute('type', 'submit')
 
     const backLink = document.querySelector('.govuk-back-link')
     expect(backLink.textContent.trim()).toBe('Back')

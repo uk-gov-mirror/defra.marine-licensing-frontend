@@ -1,4 +1,3 @@
-import * as authRequests from '~/src/server/common/helpers/authenticated-requests.js'
 import { testScenarios } from './fixtures.js'
 import {
   validatePageStructure,
@@ -11,11 +10,11 @@ import {
 } from '../shared/summary-card-validators.js'
 import { validateReadOnlyBehavior } from '../shared/dom-helpers.js'
 import {
+  mockExemption,
   responseToDocument,
   setupTestServer,
   validateResponse
 } from '../shared/test-setup-helpers.js'
-import * as cacheUtils from '~/src/server/common/helpers/session-cache/utils.js'
 import { routes } from '~/src/server/common/constants/routes.js'
 import { statusCodes } from '~/src/server/common/constants/status-codes.js'
 
@@ -24,21 +23,8 @@ jest.mock('~/src/server/common/helpers/authenticated-requests.js')
 describe('View Details - Content Verification Integration Tests', () => {
   const getServer = setupTestServer()
 
-  beforeEach(() => {
-    jest
-      .spyOn(cacheUtils, 'setExemptionCache')
-      .mockImplementation(() => undefined)
-  })
-
   const getPageDocument = async (exemption) => {
-    jest.spyOn(cacheUtils, 'getExemptionCache').mockReturnValue(exemption)
-    jest.spyOn(authRequests, 'authenticatedGetRequest').mockResolvedValue({
-      payload: {
-        message: 'success',
-        value: exemption
-      }
-    })
-
+    mockExemption(exemption)
     const response = await getServer().inject({
       method: 'GET',
       url: `${routes.VIEW_DETAILS}/${exemption.id}`

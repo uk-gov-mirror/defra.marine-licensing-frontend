@@ -17,17 +17,24 @@ describe('#siteName', () => {
   jest.mocked(getExemptionCache).mockReturnValue(mockExemption)
   jest.mocked(updateExemptionSiteDetails).mockReturnValue({})
 
+  const sitePreHandlerHook = siteNameController.options.pre[0]
+
   describe('#siteNameController', () => {
     test('should render with correct context and call utils function', () => {
       const mockSiteName = 'Test Site Name'
       jest.mocked(getExemptionCache).mockReturnValueOnce({
         ...mockExemption,
-        siteDetails: { ...mockExemption.siteDetails, siteName: mockSiteName }
+        siteDetails: [
+          { ...mockExemption.siteDetails[0], siteName: mockSiteName }
+        ]
       })
 
       const h = { view: jest.fn() }
 
-      siteNameController.handler({}, h)
+      const request = {}
+      sitePreHandlerHook.method(request, h)
+
+      siteNameController.handler(request, h)
 
       expect(h.view).toHaveBeenCalledWith(SITE_NAME_VIEW_ROUTE, {
         pageTitle: 'Site name',
@@ -47,10 +54,12 @@ describe('#siteName', () => {
       }
       const h = { redirect: jest.fn() }
 
+      sitePreHandlerHook.method(request, h)
       siteNameSubmitController.handler(request, h)
 
       expect(jest.mocked(updateExemptionSiteDetails)).toHaveBeenCalledWith(
         request,
+        0,
         'siteName',
         'Test Site Name'
       )
@@ -96,6 +105,8 @@ describe('#siteName', () => {
         ]
       }
 
+      sitePreHandlerHook.method(request, h)
+
       siteNameSubmitController.options.validate.failAction(request, h, err)
 
       expect(h.view).toHaveBeenCalledWith(SITE_NAME_VIEW_ROUTE, {
@@ -115,6 +126,8 @@ describe('#siteName', () => {
         payload: { siteName: 'invalid' }
       }
       const h = { view: jest.fn().mockReturnValue({ takeover: jest.fn() }) }
+
+      sitePreHandlerHook.method(request, h)
 
       siteNameSubmitController.options.validate.failAction(request, h, {})
 

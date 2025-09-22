@@ -3,6 +3,11 @@ import {
   updateExemptionSiteDetails
 } from '~/src/server/common/helpers/session-cache/utils.js'
 import {
+  setSiteData,
+  setSiteDataPreHandler
+} from '~/src/server/common/helpers/session-cache/site-utils.js'
+import { getSiteDetailsBySite } from '~/src/server/common/helpers/session-cache/site-details-utils.js'
+import {
   errorDescriptionByFieldName,
   mapErrorsForDisplay
 } from '~/src/server/common/helpers/errors.js'
@@ -28,13 +33,16 @@ export const errorMessages = {
  * @satisfies {Partial<ServerRoute>}
  */
 export const coordinateSystemController = {
+  options: { pre: [setSiteDataPreHandler] },
   handler(request, h) {
     const exemption = getExemptionCache(request)
+    const { siteIndex, queryParams } = request.site
 
-    const siteDetails = exemption.siteDetails ?? {}
+    const siteDetails = getSiteDetailsBySite(exemption, siteIndex)
 
     return h.view(COORDINATE_SYSTEM_VIEW_ROUTE, {
       ...coordinateSystemSettings,
+      backLink: coordinateSystemSettings.backLink + queryParams,
       projectName: exemption.projectName,
       payload: {
         coordinateSystem: siteDetails.coordinateSystem
@@ -49,6 +57,7 @@ export const coordinateSystemController = {
  */
 export const coordinateSystemSubmitController = {
   options: {
+    pre: [setSiteDataPreHandler],
     validate: {
       payload: joi.object({
         coordinateSystem: joi
@@ -66,10 +75,14 @@ export const coordinateSystemSubmitController = {
 
         const { projectName } = getExemptionCache(request)
 
+        const site = setSiteData(request)
+        const { queryParams } = site
+
         if (!err.details) {
           return h
             .view(COORDINATE_SYSTEM_VIEW_ROUTE, {
               ...coordinateSystemSettings,
+              backLink: coordinateSystemSettings.backLink + queryParams,
               payload,
               projectName
             })
@@ -83,6 +96,8 @@ export const coordinateSystemSubmitController = {
         return h
           .view(COORDINATE_SYSTEM_VIEW_ROUTE, {
             ...coordinateSystemSettings,
+            backLink: coordinateSystemSettings.backLink + queryParams,
+
             payload,
             projectName,
             errors,
@@ -93,26 +108,34 @@ export const coordinateSystemSubmitController = {
     }
   },
   handler(request, h) {
-    const { payload } = request
+    const { payload, site } = request
+    const { siteIndex, queryParams } = site
 
     const exemption = getExemptionCache(request)
 
     updateExemptionSiteDetails(
       request,
+      siteIndex,
       'coordinateSystem',
       payload.coordinateSystem
     )
 
-    if (exemption.siteDetails?.coordinatesEntry === 'single') {
-      return h.redirect(routes.CIRCLE_CENTRE_POINT)
+    if (
+      getSiteDetailsBySite(exemption, siteIndex)?.coordinatesEntry === 'single'
+    ) {
+      return h.redirect(routes.CIRCLE_CENTRE_POINT + queryParams)
     }
 
-    if (exemption.siteDetails?.coordinatesEntry === 'multiple') {
-      return h.redirect(routes.ENTER_MULTIPLE_COORDINATES)
+    if (
+      getSiteDetailsBySite(exemption, siteIndex)?.coordinatesEntry ===
+      'multiple'
+    ) {
+      return h.redirect(routes.ENTER_MULTIPLE_COORDINATES + queryParams)
     }
 
     return h.view(COORDINATE_SYSTEM_VIEW_ROUTE, {
       ...coordinateSystemSettings,
+      backLink: coordinateSystemSettings.backLink + queryParams,
       projectName: exemption.projectName,
       payload: {
         coordinateSystem: payload.coordinateSystem

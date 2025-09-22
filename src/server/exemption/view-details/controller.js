@@ -1,10 +1,12 @@
 import Boom from '@hapi/boom'
-import { routes } from '~/src/server/common/constants/routes.js'
-import { createSiteDetailsDataJson } from '~/src/server/common/helpers/site-details.js'
-import { processSiteDetails } from '~/src/server/common/helpers/exemption-site-details.js'
 import { errorMessages } from '~/src/server/common/constants/error-messages.js'
-import { getExemptionService } from '~/src/services/exemption-service/index.js'
 import { EXEMPTION_STATUS } from '~/src/server/common/constants/exemptions.js'
+import { routes } from '~/src/server/common/constants/routes.js'
+import { processSiteDetails } from '~/src/server/common/helpers/exemption-site-details.js'
+import { createSiteDetailsDataJson } from '~/src/server/common/helpers/site-details.js'
+import { getExemptionService } from '~/src/services/exemption-service/index.js'
+import { getAuthProvider } from '~/src/server/common/helpers/authenticated-requests.js'
+import { AUTH_STRATEGIES } from '~/src/server/common/constants/auth.js'
 
 export const VIEW_DETAILS_VIEW_ROUTE = 'exemption/view-details/index'
 
@@ -37,20 +39,23 @@ export const viewDetailsController = {
       }
 
       const siteDetails = processSiteDetails(exemption, exemptionId, request)
-      const coordinateSystem = exemption.siteDetails?.coordinateSystem
+      const coordinateSystem = siteDetails?.coordinateSystem
       const siteDetailsData = createSiteDetailsDataJson(
         siteDetails,
         coordinateSystem
       )
+      const isInternalUser =
+        getAuthProvider(request) === AUTH_STRATEGIES.ENTRA_ID
 
       // Format the page caption with application reference
-      const pageCaption = `${exemption.applicationReference} - Exempt activity notification`
+      const pageCaption = `${exemption.applicationReference}${isInternalUser ? '' : ' - Exempt activity notification'}`
 
       return h.view(VIEW_DETAILS_VIEW_ROUTE, {
-        pageTitle: 'View notification details',
+        pageTitle: exemption.projectName,
         pageCaption,
-        backLink: routes.DASHBOARD,
+        backLink: isInternalUser ? null : routes.DASHBOARD,
         isReadOnly: true,
+        isInternalUser,
         ...exemption,
         siteDetails,
         siteDetailsData

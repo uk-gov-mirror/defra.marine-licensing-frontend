@@ -74,10 +74,13 @@ describe('#activityDescriptionController', () => {
 
       expect(h.view).toHaveBeenCalledWith(ACTIVITY_DESCRIPTION_VIEW_ROUTE, {
         backLink: routes.TASK_LIST,
+        isMultiSiteJourney: false,
         isSiteDetailsFlow: false,
         pageTitle: 'Activity description',
         heading: 'Activity description',
-        payload: { activityDescription: undefined }
+        payload: { activityDescription: undefined },
+        projectName: undefined,
+        siteNumber: null
       })
 
       getExemptionCacheSpy.mockResolvedValueOnce(null)
@@ -89,10 +92,13 @@ describe('#activityDescriptionController', () => {
         ACTIVITY_DESCRIPTION_VIEW_ROUTE,
         {
           backLink: routes.TASK_LIST,
+          isMultiSiteJourney: false,
           isSiteDetailsFlow: false,
           pageTitle: 'Activity description',
           heading: 'Activity description',
-          payload: { activityDescription: undefined }
+          payload: { activityDescription: undefined },
+          projectName: undefined,
+          siteNumber: null
         }
       )
     })
@@ -104,9 +110,11 @@ describe('#activityDescriptionController', () => {
       }
       const exemptionWithSiteDetails = {
         ...mockExemptionState,
-        siteDetails: {
-          activityDescription: 'Site activity description'
-        }
+        siteDetails: [
+          {
+            activityDescription: 'Site activity description'
+          }
+        ]
       }
 
       getExemptionCacheSpy.mockReturnValue(exemptionWithSiteDetails)
@@ -115,10 +123,13 @@ describe('#activityDescriptionController', () => {
 
       expect(h.view).toHaveBeenCalledWith(ACTIVITY_DESCRIPTION_VIEW_ROUTE, {
         backLink: routes.SITE_DETAILS_ACTIVITY_DATES,
+        isMultiSiteJourney: false,
         isSiteDetailsFlow: true,
         pageTitle: 'Activity description',
         heading: 'Activity description',
-        payload: { activityDescription: 'Site activity description' }
+        payload: { activityDescription: 'Site activity description' },
+        projectName: undefined,
+        siteNumber: null
       })
     })
   })
@@ -158,9 +169,11 @@ describe('#activityDescriptionController', () => {
       const exemptionWithSiteDetails = {
         ...mockExemption,
         multipleSiteDetails: { multipleSitesEnabled: false },
-        siteDetails: {
-          activityDescription: 'Existing site activity description'
-        }
+        siteDetails: [
+          {
+            activityDescription: 'Existing site activity description'
+          }
+        ]
       }
 
       getExemptionCacheSpy.mockReturnValue(exemptionWithSiteDetails)
@@ -177,6 +190,7 @@ describe('#activityDescriptionController', () => {
 
       expect(mockedUpdateExemptionSiteDetails).toHaveBeenCalledWith(
         expect.any(Object),
+        0,
         'activityDescription',
         'New site activity description.'
       )
@@ -268,6 +282,7 @@ describe('#activityDescriptionController', () => {
 
       expect(h.view).toHaveBeenCalledWith(ACTIVITY_DESCRIPTION_VIEW_ROUTE, {
         backLink: routes.TASK_LIST,
+        isMultiSiteJourney: false,
         isSiteDetailsFlow: false,
         errorSummary: [
           {
@@ -285,7 +300,9 @@ describe('#activityDescriptionController', () => {
         },
         heading: 'Activity description',
         pageTitle: 'Activity description',
-        payload: { activityDescription: '' }
+        payload: { activityDescription: '' },
+        projectName: undefined,
+        siteNumber: null
       })
 
       expect(h.view().takeover).toHaveBeenCalled()

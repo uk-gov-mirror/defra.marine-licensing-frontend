@@ -9,7 +9,7 @@ import {
   errorDescriptionByFieldName,
   mapErrorsForDisplay
 } from '~/src/server/common/helpers/errors.js'
-
+import { getSiteDetailsBySite } from '~/src/server/common/helpers/session-cache/site-details-utils.js'
 const pageSettings = {
   pageTitle: 'Choose file type',
   heading: 'Which type of file do you want to upload?'
@@ -29,10 +29,11 @@ export const errorMessages = {
 export const chooseFileTypeController = {
   handler(request, h) {
     const exemption = getExemptionCache(request)
+    const site = getSiteDetailsBySite(exemption)
 
     return h.view(CHOOSE_FILE_UPLOAD_TYPE_VIEW_ROUTE, {
       ...pageSettings,
-      payload: { fileUploadType: exemption.fileUploadType || '' },
+      payload: { fileUploadType: site.fileUploadType || '' },
       projectName: exemption.projectName,
       backLink: routes.COORDINATES_TYPE_CHOICE
     })
@@ -93,6 +94,7 @@ export const chooseFileTypeSubmitController = {
 
     updateExemptionSiteDetails(
       request,
+      0,
       'fileUploadType',
       payload.fileUploadType
     )

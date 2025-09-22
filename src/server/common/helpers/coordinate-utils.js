@@ -1,6 +1,6 @@
 import { getExemptionCache } from './session-cache/utils.js'
 import { COORDINATE_SYSTEMS } from '~/src/server/common/constants/exemptions.js'
-
+import { getSiteDetailsBySite } from '~/src/server/common/helpers/session-cache/site-details-utils.js'
 /**
  * Extract coordinate data from GeoJSON for display purposes
  * @param {object} geoJSON - GeoJSON object containing features
@@ -31,7 +31,10 @@ export function extractCoordinatesFromGeoJSON(geoJSON) {
  */
 export const getCoordinateSystem = (request) => {
   const existingCache = getExemptionCache(request)
-  const currentSystem = existingCache.siteDetails?.coordinateSystem
+  const siteIndex = request.site?.siteIndex ?? 0
+  const site = getSiteDetailsBySite(existingCache, siteIndex)
+
+  const currentSystem = site.coordinateSystem
 
   const coordinateSystem =
     currentSystem === COORDINATE_SYSTEMS.OSGB36

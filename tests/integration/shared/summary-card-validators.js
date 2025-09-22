@@ -27,11 +27,12 @@ export const validatePageStructure = (document, expected) => {
     expect(caption).toHaveTextContent(expected.pageCaption)
   }
 
-  const backLink = document.querySelector('.govuk-back-link')
-  expect(backLink.textContent.trim()).toBe(expected.backLinkText)
-
-  if (expected.backLinkHref) {
-    expect(backLink).toHaveAttribute('href', expected.backLinkHref)
+  if (expected.backLinkText) {
+    const backLink = document.querySelector('.govuk-back-link')
+    expect(backLink.textContent.trim()).toBe(expected.backLinkText)
+    if (expected.backLinkHref) {
+      expect(backLink).toHaveAttribute('href', expected.backLinkHref)
+    }
   }
 }
 
@@ -67,10 +68,21 @@ export const validateSummaryCardContent = (
 
   Object.entries(expectedContent).forEach(([key, value]) => {
     const rows = card.querySelectorAll('.govuk-summary-list__row')
-    const row = Array.from(rows).find((row) => {
-      const keyElement = row.querySelector('.govuk-summary-list__key')
+    const row = Array.from(rows).find((r) => {
+      const keyElement = r.querySelector('.govuk-summary-list__key')
       return keyElement && keyElement.textContent.trim() === key
     })
+
+    if (!row) {
+      const availableKeys = Array.from(rows).map((r) => {
+        const keyElement = r.querySelector('.govuk-summary-list__key')
+        return keyElement ? keyElement.textContent.trim() : 'NO_KEY'
+      })
+      throw new Error(
+        `Could not find row with key "${key}" in card "${cardSelector}". Available keys: ${availableKeys.join(', ')}`
+      )
+    }
+
     expect(row).toBeTruthy()
     const valueElement = row.querySelector('.govuk-summary-list__value')
     if (Array.isArray(value)) {
@@ -81,6 +93,19 @@ export const validateSummaryCardContent = (
       expect(valueElement.textContent.trim()).toBe(value)
     }
   })
+}
+
+/**
+ * Validates application details summary card
+ * @param {Document} document - JSDOM document
+ * @param {object} expected - Expected page content
+ */
+export const validateApplicationDetails = (document, expected) => {
+  validateSummaryCardContent(
+    document,
+    '#application-details-card',
+    expected.applicationDetails
+  )
 }
 
 /**
@@ -145,17 +170,19 @@ export const validateSiteDetails = (document, expectedPageContent) => {
   expect(siteCard).toBeTruthy()
 
   // Validate basic site details if present
-  if (expectedPageContent.siteDetails) {
-    Object.entries(expectedPageContent.siteDetails).forEach(([key, value]) => {
-      const rows = siteCard.querySelectorAll('.govuk-summary-list__row')
-      const row = Array.from(rows).find((row) => {
-        const keyElement = row.querySelector('.govuk-summary-list__key')
-        return keyElement && keyElement.textContent.trim() === key
-      })
-      expect(row).toBeTruthy()
-      const valueElement = row.querySelector('.govuk-summary-list__value')
-      expect(valueElement.textContent.trim()).toBe(value)
-    })
+  if (expectedPageContent.siteDetails.length) {
+    Object.entries(expectedPageContent.siteDetails[0]).forEach(
+      ([key, value]) => {
+        const rows = siteCard.querySelectorAll('.govuk-summary-list__row')
+        const row = Array.from(rows).find((r) => {
+          const keyElement = r.querySelector('.govuk-summary-list__key')
+          return keyElement && keyElement.textContent.trim() === key
+        })
+        expect(row).toBeTruthy()
+        const valueElement = row.querySelector('.govuk-summary-list__value')
+        expect(valueElement.textContent.trim()).toBe(value)
+      }
+    )
   }
 
   // Validate extended site details (coordinate points) if present

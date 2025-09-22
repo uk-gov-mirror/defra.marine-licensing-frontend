@@ -27,16 +27,18 @@ export const testScenarios = [
     coordinateSystem: COORDINATE_SYSTEMS.WGS84,
     exemption: {
       ...basePolygonExemption,
-      siteDetails: {
-        coordinatesType: 'coordinates',
-        coordinatesEntry: 'multiple',
-        coordinateSystem: 'wgs84',
-        coordinates: [
-          { latitude: '55.123456', longitude: '55.123456' },
-          { latitude: '33.987654', longitude: '33.987654' },
-          { latitude: '78.123456', longitude: '78.123456' }
-        ]
-      }
+      siteDetails: [
+        {
+          coordinatesType: 'coordinates',
+          coordinatesEntry: 'multiple',
+          coordinateSystem: 'wgs84',
+          coordinates: [
+            { latitude: '55.123456', longitude: '55.123456' },
+            { latitude: '33.987654', longitude: '33.987654' },
+            { latitude: '78.123456', longitude: '78.123456' }
+          ]
+        }
+      ]
     },
     expectedPageContent: {
       projectName: 'Hammersmith pontoon construction',
@@ -67,16 +69,18 @@ export const testScenarios = [
     coordinateSystem: COORDINATE_SYSTEMS.OSGB36,
     exemption: {
       ...basePolygonExemption,
-      siteDetails: {
-        coordinatesType: 'coordinates',
-        coordinatesEntry: 'multiple',
-        coordinateSystem: 'osgb36',
-        coordinates: [
-          { eastings: '425053', northings: '564180' },
-          { eastings: '426000', northings: '565000' },
-          { eastings: '427000', northings: '566000' }
-        ]
-      }
+      siteDetails: [
+        {
+          coordinatesType: 'coordinates',
+          coordinatesEntry: 'multiple',
+          coordinateSystem: 'osgb36',
+          coordinates: [
+            { eastings: '425053', northings: '564180' },
+            { eastings: '426000', northings: '565000' },
+            { eastings: '427000', northings: '566000' }
+          ]
+        }
+      ]
     },
     expectedPageContent: {
       projectName: 'Hammersmith pontoon construction',
@@ -106,18 +110,20 @@ export const testScenarios = [
     coordinateSystem: COORDINATE_SYSTEMS.WGS84,
     exemption: {
       ...basePolygonExemption,
-      siteDetails: {
-        coordinatesType: 'coordinates',
-        coordinatesEntry: 'multiple',
-        coordinateSystem: 'wgs84',
-        coordinates: [
-          { latitude: '55.123456', longitude: '55.123456' },
-          { latitude: '33.987654', longitude: '33.987654' },
-          { latitude: '78.123456', longitude: '78.123456' },
-          { latitude: '45.678901', longitude: '45.678901' },
-          { latitude: '56.789012', longitude: '56.789012' }
-        ]
-      }
+      siteDetails: [
+        {
+          coordinatesType: 'coordinates',
+          coordinatesEntry: 'multiple',
+          coordinateSystem: 'wgs84',
+          coordinates: [
+            { latitude: '55.123456', longitude: '55.123456' },
+            { latitude: '33.987654', longitude: '33.987654' },
+            { latitude: '78.123456', longitude: '78.123456' },
+            { latitude: '45.678901', longitude: '45.678901' },
+            { latitude: '56.789012', longitude: '56.789012' }
+          ]
+        }
+      ]
     },
     expectedPageContent: {
       projectName: 'Hammersmith pontoon construction',
@@ -156,19 +162,21 @@ export const testScenarios = [
     coordinateSystem: COORDINATE_SYSTEMS.OSGB36,
     exemption: {
       ...basePolygonExemption,
-      siteDetails: {
-        coordinatesType: 'coordinates',
-        coordinatesEntry: 'multiple',
-        coordinateSystem: 'osgb36',
-        coordinates: [
-          { eastings: '425053', northings: '564180' },
-          { eastings: '426000', northings: '565000' },
-          { eastings: '427000', northings: '566000' },
-          { eastings: '428000', northings: '567000' },
-          { eastings: '429000', northings: '568000' },
-          { eastings: '430000', northings: '569000' }
-        ]
-      }
+      siteDetails: [
+        {
+          coordinatesType: 'coordinates',
+          coordinatesEntry: 'multiple',
+          coordinateSystem: 'osgb36',
+          coordinates: [
+            { eastings: '425053', northings: '564180' },
+            { eastings: '426000', northings: '565000' },
+            { eastings: '427000', northings: '566000' },
+            { eastings: '428000', northings: '567000' },
+            { eastings: '429000', northings: '568000' },
+            { eastings: '430000', northings: '569000' }
+          ]
+        }
+      ]
     },
     expectedPageContent: {
       projectName: 'Hammersmith pontoon construction',
@@ -200,6 +208,59 @@ export const testScenarios = [
           {
             label: 'Point 6',
             value: '430000, 569000'
+          }
+        ]
+      }
+    }
+  },
+  {
+    name: 'Multiple sites scenario',
+    coordinateSystem: COORDINATE_SYSTEMS.WGS84,
+    exemption: {
+      ...basePolygonExemption,
+      multipleSiteDetails: { multipleSitesEnabled: true },
+      siteDetails: [
+        {
+          coordinatesType: 'coordinates',
+          coordinatesEntry: 'multiple',
+          coordinateSystem: 'wgs84',
+          coordinates: [
+            { latitude: '55.123456', longitude: '55.123456' },
+            { latitude: '33.987654', longitude: '33.987654' },
+            { latitude: '78.123456', longitude: '78.123456' }
+          ]
+        },
+        {
+          coordinatesType: 'coordinates',
+          coordinatesEntry: 'multiple',
+          coordinateSystem: 'wgs84',
+          coordinates: [
+            { latitude: '55.123456', longitude: '55.123456' },
+            { latitude: '33.987654', longitude: '33.987654' },
+            { latitude: '78.123456', longitude: '78.123456' }
+          ]
+        }
+      ]
+    },
+    expectedPageContent: {
+      projectName: 'Hammersmith pontoon construction',
+      siteDetails: {
+        method:
+          'Manually enter multiple sets of coordinates to mark the boundary of the site',
+        coordinateSystem:
+          'WGS84 (World Geodetic System 1984)Latitude and longitude',
+        polygonCoordinates: [
+          {
+            label: 'Start and end points',
+            value: '55.123456, 55.123456'
+          },
+          {
+            label: 'Point 2',
+            value: '33.987654, 33.987654'
+          },
+          {
+            label: 'Point 3',
+            value: '78.123456, 78.123456'
           }
         ]
       }

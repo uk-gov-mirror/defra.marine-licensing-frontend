@@ -17,7 +17,8 @@ describe('Site name page', () => {
 
   const mockExemption = {
     id: 'test-exemption-123',
-    projectName: 'Test Project'
+    projectName: 'Test Project',
+    siteDetails: [{}]
   }
 
   jest.mocked(getExemptionCache).mockReturnValue(mockExemption)
@@ -60,7 +61,7 @@ describe('Site name page', () => {
   test('should pre-populate input when siteName value exists in cache', async () => {
     jest.mocked(getExemptionCache).mockReturnValue({
       ...mockExemption,
-      siteDetails: { ...mockExemption.siteDetails, siteName: 'Test Site' }
+      siteDetails: [{ ...mockExemption.siteDetails[0], siteName: 'Test Site' }]
     })
 
     const { result, statusCode } = await getServer().inject({
@@ -177,6 +178,7 @@ describe('Site name page', () => {
 
     expect(updateExemptionSiteDetails).toHaveBeenCalledWith(
       expect.any(Object),
+      0,
       'siteName',
       'Test Site Name'
     )
@@ -194,5 +196,26 @@ describe('Site name page', () => {
 
     const cancelLink = getByRole(document, 'link', { name: 'Cancel' })
     expect(cancelLink).toHaveAttribute('href', '/exemption/task-list')
+  })
+
+  test('should show correct content for multiple site flow', async () => {
+    jest.mocked(getExemptionCache).mockReturnValueOnce({
+      mockExemption,
+      siteDetails: [...mockExemption.siteDetails, {}]
+    })
+
+    const { result, statusCode } = await getServer().inject({
+      method: 'GET',
+      url: '/exemption/site-name?site=2'
+    })
+
+    expect(statusCode).toBe(statusCodes.ok)
+
+    const { document } = new JSDOM(result).window
+
+    expect(getByText(document, 'Site 2')).toBeInTheDocument()
+
+    const backLink = getByRole(document, 'link', { name: 'Back' })
+    expect(backLink).toHaveAttribute('href', '/exemption/review-site-details')
   })
 })

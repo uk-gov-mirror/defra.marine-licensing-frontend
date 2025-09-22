@@ -26,14 +26,16 @@ export const createSubmittedExemption = (overrides = {}) => ({
 
 export const createExemptionWithSiteDetails = (siteDetailsOverrides = {}) =>
   createSubmittedExemption({
-    siteDetails: {
-      coordinatesType: 'coordinates',
-      coordinatesEntry: 'single',
-      coordinateSystem: COORDINATE_SYSTEMS.WGS84,
-      coordinates: { latitude: '51.489676', longitude: '-0.231530' },
-      circleWidth: '100',
-      ...siteDetailsOverrides
-    }
+    siteDetails: [
+      {
+        coordinatesType: 'coordinates',
+        coordinatesEntry: 'single',
+        coordinateSystem: COORDINATE_SYSTEMS.WGS84,
+        coordinates: { latitude: '51.489676', longitude: '-0.231530' },
+        circleWidth: '100',
+        ...siteDetailsOverrides
+      }
+    ]
   })
 
 export const createFileUploadExemption = (
@@ -52,7 +54,7 @@ export const createFileUploadExemption = (
           type: 'Feature',
           geometry: {
             type: 'Point',
-            coordinates: [51.5074, -0.1278]
+            coordinates: [51.5074, -0.1278] // NOSONAR
           }
         }
       ]
@@ -81,7 +83,7 @@ export const mockPolygonCoordinatesOSGB36 = [
 ]
 
 const baseExpectedContent = {
-  pageTitle: 'View notification details',
+  pageTitle: 'Test Marine Activity Project',
   pageCaption: 'EXE/2025/00003 - Exempt activity notification',
   backLinkText: 'Back',
   backLinkHref: '/home',
@@ -93,10 +95,9 @@ const baseExpectedContent = {
     'Public register'
   ],
   projectDetails: {
-    'Project name': 'Test Marine Activity Project',
     'Type of activity': 'Deposit of a substance or object',
     'Why this activity is exempt':
-      "Based on your answers from 'Check if you need a marine licence', your article is exempt under Article 17 of the Marine Licensing (Exempted Activities) Order 2011 (opens in new tab)",
+      "Based on your answers from 'Check if you need a marine licence', your activity is exempt under Article 17 of the Marine Licensing (Exempted Activities) Order 2011 (opens in new tab)",
     "Your answers from 'Check if you need a marine licence'": [
       'Download a copy of your answers (PDF)',
       "If you need to change any of your 'Check if you need a marine licence' answers:",
@@ -235,13 +236,15 @@ export const testScenarios = [
         consent: 'yes',
         reason: 'Lorem ipsum dolor sit amet'
       },
-      siteDetails: {
-        coordinatesType: 'coordinates',
-        coordinatesEntry: 'single',
-        coordinateSystem: COORDINATE_SYSTEMS.WGS84,
-        coordinates: { latitude: '51.489676', longitude: '-0.231530' },
-        circleWidth: '100'
-      }
+      siteDetails: [
+        {
+          coordinatesType: 'coordinates',
+          coordinatesEntry: 'single',
+          coordinateSystem: COORDINATE_SYSTEMS.WGS84,
+          coordinates: { latitude: '51.489676', longitude: '-0.231530' },
+          circleWidth: '100'
+        }
+      ]
     }),
     expectedPageContent: {
       ...baseExpectedContent,

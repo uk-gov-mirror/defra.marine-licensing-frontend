@@ -2,6 +2,11 @@ import {
   getExemptionCache,
   updateExemptionSiteDetails
 } from '~/src/server/common/helpers/session-cache/utils.js'
+import { getSiteDetailsBySite } from '~/src/server/common/helpers/session-cache/site-details-utils.js'
+import {
+  setSiteData,
+  setSiteDataPreHandler
+} from '~/src/server/common/helpers/session-cache/site-utils.js'
 import {
   errorDescriptionByFieldName,
   mapErrorsForDisplay
@@ -34,12 +39,18 @@ export const errorMessages = {
  * @satisfies {Partial<ServerRoute>}
  */
 export const widthOfSiteController = {
+  options: {
+    pre: [setSiteDataPreHandler]
+  },
   handler(request, h) {
     const exemption = getExemptionCache(request)
-    const siteDetails = exemption.siteDetails ?? {}
+    const { site } = request
+    const { siteIndex, queryParams } = site
+    const siteDetails = getSiteDetailsBySite(exemption, siteIndex)
 
     return h.view(WIDTH_OF_SITE_VIEW_ROUTE, {
       ...widthOfSiteSettings,
+      backLink: widthOfSiteSettings.backLink + queryParams,
       projectName: exemption.projectName,
       payload: {
         width: siteDetails.circleWidth
@@ -54,16 +65,21 @@ export const widthOfSiteController = {
  */
 export const widthOfSiteSubmitController = {
   options: {
+    pre: [setSiteDataPreHandler],
     validate: {
       payload: circleWidthValidationSchema,
       failAction: (request, h, err) => {
         const { payload } = request
         const { projectName } = getExemptionCache(request)
 
+        const site = setSiteData(request)
+        const { queryParams } = site
+
         if (!err.details) {
           return h
             .view(WIDTH_OF_SITE_VIEW_ROUTE, {
               ...widthOfSiteSettings,
+              backLink: widthOfSiteSettings.backLink + queryParams,
               payload,
               projectName
             })
@@ -76,6 +92,7 @@ export const widthOfSiteSubmitController = {
         return h
           .view(WIDTH_OF_SITE_VIEW_ROUTE, {
             ...widthOfSiteSettings,
+            backLink: routes.CIRCLE_CENTRE_POINT + queryParams,
             payload,
             projectName,
             errors,
@@ -88,8 +105,10 @@ export const widthOfSiteSubmitController = {
   handler(request, h) {
     const { payload } = request
 
-    updateExemptionSiteDetails(request, 'circleWidth', payload.width)
+    const { siteIndex, queryParams } = request.site
 
-    return h.redirect(routes.REVIEW_SITE_DETAILS)
+    updateExemptionSiteDetails(request, siteIndex, 'circleWidth', payload.width)
+
+    return h.redirect(routes.REVIEW_SITE_DETAILS + queryParams)
   }
 }

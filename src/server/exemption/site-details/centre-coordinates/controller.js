@@ -2,6 +2,11 @@ import {
   getExemptionCache,
   updateExemptionSiteDetails
 } from '~/src/server/common/helpers/session-cache/utils.js'
+import { getSiteDetailsBySite } from '~/src/server/common/helpers/session-cache/site-details-utils.js'
+import {
+  setSiteData,
+  setSiteDataPreHandler
+} from '~/src/server/common/helpers/session-cache/site-utils.js'
 import { getCoordinateSystem } from '~/src/server/common/helpers/coordinate-utils.js'
 import {
   errorDescriptionByFieldName,
@@ -10,8 +15,7 @@ import {
 import { routes } from '~/src/server/common/constants/routes.js'
 import { COORDINATE_SYSTEMS } from '~/src/server/common/constants/exemptions.js'
 import { getPayload } from '~/src/server/exemption/site-details/centre-coordinates/utils.js'
-import { wgs84ValidationSchema } from '~/src/server/common/schemas/wgs84.js'
-import { osgb36ValidationSchema } from '~/src/server/common/schemas/osgb36.js'
+import { validateCentreCoordinates } from '~/src/server/exemption/site-details/centre-coordinates/validate.js'
 
 export const COORDINATE_SYSTEM_VIEW_ROUTES = {
   [COORDINATE_SYSTEMS.WGS84]: 'exemption/site-details/centre-coordinates/wgs84',
@@ -57,28 +61,35 @@ export const errorMessages = {
  * @satisfies {Partial<ServerRoute>}
  */
 export const centreCoordinatesController = {
+  options: {
+    pre: [setSiteDataPreHandler]
+  },
   handler(request, h) {
     const exemption = getExemptionCache(request)
+    const { siteIndex, queryParams } = request.site
     const { coordinateSystem } = getCoordinateSystem(request)
 
-    const siteDetails = exemption.siteDetails ?? {}
+    const siteDetails = getSiteDetailsBySite(exemption, siteIndex)
 
     return h.view(COORDINATE_SYSTEM_VIEW_ROUTES[coordinateSystem], {
       ...centreCoordinatesPageData,
+      backLink: centreCoordinatesPageData.backLink + queryParams,
       projectName: exemption.projectName,
       payload: getPayload(siteDetails, coordinateSystem)
     })
   }
 }
 
-export const centreCoordinatesSubmitFailHandler = (
-  request,
-  h,
-  error,
-  coordinateSystem
-) => {
+export const centreCoordinatesSubmitFailHandler = (request, h, error) => {
   const { payload } = request
+
+  const site = setSiteData(request)
+
   const exemption = getExemptionCache(request)
+
+  const { queryParams } = site
+
+  const { coordinateSystem } = getCoordinateSystem(request)
 
   const { projectName } = exemption
 
@@ -86,6 +97,7 @@ export const centreCoordinatesSubmitFailHandler = (
     return h
       .view(COORDINATE_SYSTEM_VIEW_ROUTES[coordinateSystem], {
         ...centreCoordinatesPageData,
+        backLink: centreCoordinatesPageData.backLink + queryParams,
         projectName,
         payload
       })
@@ -101,6 +113,7 @@ export const centreCoordinatesSubmitFailHandler = (
   return h
     .view(COORDINATE_SYSTEM_VIEW_ROUTES[coordinateSystem], {
       ...centreCoordinatesPageData,
+      backLink: centreCoordinatesPageData.backLink + queryParams,
       projectName,
       payload,
       errors,
@@ -114,31 +127,24 @@ export const centreCoordinatesSubmitFailHandler = (
  * @satisfies {Partial<ServerRoute>}
  */
 export const centreCoordinatesSubmitController = {
+  options: {
+    pre: [setSiteDataPreHandler]
+  },
   handler(request, h) {
     const { payload } = request
 
+    const { queryParams, siteIndex } = request.site
+
     const { coordinateSystem } = getCoordinateSystem(request)
 
-    const schema =
-      coordinateSystem === COORDINATE_SYSTEMS.OSGB36
-        ? osgb36ValidationSchema
-        : wgs84ValidationSchema
-
-    const { error } = schema.validate(payload, {
-      abortEarly: false
-    })
+    const { error } = validateCentreCoordinates(payload, coordinateSystem)
 
     if (error) {
-      return centreCoordinatesSubmitFailHandler(
-        request,
-        h,
-        error,
-        coordinateSystem
-      )
+      return centreCoordinatesSubmitFailHandler(request, h, error)
     }
 
-    updateExemptionSiteDetails(request, 'coordinates', payload)
+    updateExemptionSiteDetails(request, siteIndex, 'coordinates', payload)
 
-    return h.redirect(routes.WIDTH_OF_SITE)
+    return h.redirect(routes.WIDTH_OF_SITE + queryParams)
   }
 }

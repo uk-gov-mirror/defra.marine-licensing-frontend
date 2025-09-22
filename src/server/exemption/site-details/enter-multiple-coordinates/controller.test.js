@@ -18,6 +18,7 @@ import {
   handleValidationFailure
 } from '~/src/server/exemption/site-details/enter-multiple-coordinates/utils.js'
 import { validateCoordinates } from '~/src/server/exemption/site-details/enter-multiple-coordinates/validation/validation.js'
+import { mockSite } from '~/src/server/test-helpers/mocks.js'
 
 jest.mock('~/src/server/common/helpers/session-cache/utils.js')
 jest.mock(
@@ -144,7 +145,7 @@ describe('#multipleCoordinates', () => {
     test('should render WGS84 template with correct context', () => {
       normaliseCoordinatesForDisplay.mockReturnValueOnce(mockCoordinates.wgs84)
 
-      multipleCoordinatesController.handler({}, mockH)
+      multipleCoordinatesController.handler({ site: mockSite }, mockH)
 
       expect(mockH.view).toHaveBeenCalledWith(
         MULTIPLE_COORDINATES_VIEW_ROUTES[COORDINATE_SYSTEMS.WGS84],
@@ -159,14 +160,16 @@ describe('#multipleCoordinates', () => {
     test('should render OSGB36 template with correct context', () => {
       getExemptionCacheSpy.mockReturnValueOnce({
         ...mockExemption,
-        siteDetails: {
-          coordinateSystem: COORDINATE_SYSTEMS.OSGB36,
-          coordinates: mockCoordinates.osgb36
-        }
+        siteDetails: [
+          {
+            coordinateSystem: COORDINATE_SYSTEMS.OSGB36,
+            coordinates: mockCoordinates.osgb36
+          }
+        ]
       })
       normaliseCoordinatesForDisplay.mockReturnValueOnce(mockCoordinates.osgb36)
 
-      multipleCoordinatesController.handler({}, mockH)
+      multipleCoordinatesController.handler({ site: mockSite }, mockH)
 
       expect(mockH.view).toHaveBeenCalledWith(
         MULTIPLE_COORDINATES_VIEW_ROUTES[COORDINATE_SYSTEMS.OSGB36],
@@ -182,7 +185,7 @@ describe('#multipleCoordinates', () => {
       getExemptionCacheSpy.mockReturnValueOnce(undefined)
       normaliseCoordinatesForDisplay.mockReturnValueOnce([])
 
-      multipleCoordinatesController.handler({}, mockH)
+      multipleCoordinatesController.handler({ site: mockSite }, mockH)
 
       expect(mockH.view).toHaveBeenCalledWith(
         MULTIPLE_COORDINATES_VIEW_ROUTES[COORDINATE_SYSTEMS.WGS84],
@@ -221,7 +224,7 @@ describe('#multipleCoordinates', () => {
         'coordinates[0][latitude]': '51.5074',
         'coordinates[0][longitude]': '-0.1278'
       }
-      const request = { payload }
+      const request = { payload, site: mockSite }
       const expectedCoordinates = [
         { latitude: '51.5074', longitude: '-0.1278' },
         paddedCoordinates.wgs84,
@@ -244,6 +247,7 @@ describe('#multipleCoordinates', () => {
       )
       expect(updateExemptionSiteDetails).toHaveBeenCalledWith(
         request,
+        0,
         'coordinates',
         expectedCoordinates
       )
@@ -254,7 +258,7 @@ describe('#multipleCoordinates', () => {
       const payload = {
         'coordinates[0][latitude]': 'invalid'
       }
-      const request = { payload }
+      const request = { payload, site: mockSite }
       const mockValidationError = {
         details: [{ path: ['coordinates', 0, 'latitude'], message: 'Invalid' }]
       }
@@ -282,7 +286,7 @@ describe('#multipleCoordinates', () => {
         'coordinates[0][eastings]': '530000',
         'coordinates[0][northings]': '181000'
       }
-      const request = { payload }
+      const request = { payload, site: mockSite }
       const expectedCoordinates = [
         { eastings: '530000', northings: '181000' },
         paddedCoordinates.osgb36,
@@ -306,6 +310,7 @@ describe('#multipleCoordinates', () => {
       )
       expect(updateExemptionSiteDetails).toHaveBeenCalledWith(
         request,
+        0,
         'coordinates',
         expectedCoordinates
       )
@@ -316,7 +321,7 @@ describe('#multipleCoordinates', () => {
       const payload = {
         'coordinates[0][latitude]': '51.5074'
       }
-      const request = { payload }
+      const request = { payload, site: mockSite }
 
       isWGS84.mockReturnValueOnce(false)
 
@@ -339,7 +344,7 @@ describe('#multipleCoordinates', () => {
         'coordinates[2][longitude]': '-0.1477',
         add: 'add'
       }
-      const request = { payload }
+      const request = { payload, site: mockSite }
 
       const existingCoordinates = [
         { latitude: '51.5074', longitude: '-0.1278' },
@@ -379,7 +384,7 @@ describe('#multipleCoordinates', () => {
         'coordinates[2][northings]': '181200',
         add: 'add'
       }
-      const request = { payload }
+      const request = { payload, site: mockSite }
 
       const existingCoordinates = [
         { eastings: '530000', northings: '181000' },
@@ -418,7 +423,7 @@ describe('#multipleCoordinates', () => {
         'coordinates[2][northings]': '181200',
         remove: '3'
       }
-      const request = { payload }
+      const request = { payload, site: mockSite }
 
       const existingCoordinates = [
         { eastings: '530000', northings: '181000' },

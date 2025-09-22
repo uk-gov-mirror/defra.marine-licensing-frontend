@@ -1,5 +1,5 @@
 import { clone } from '@hapi/hoek'
-
+import { getSiteDetailsBySite } from '~/src/server/common/helpers/session-cache/site-details-utils.js'
 export const EXEMPTION_CACHE_KEY = 'exemption'
 
 /**
@@ -28,17 +28,25 @@ export const setExemptionCache = (request, value) => {
 
 /**
  * @param { Request } request
+ * @param { number } siteIndex
  * @param { string } key
  * @param { {} } value
  */
-export const updateExemptionSiteDetails = (request, key, value) => {
+export const updateExemptionSiteDetails = (request, siteIndex, key, value) => {
   const existingCache = getExemptionCache(request)
-  const existingSiteDetails = existingCache.siteDetails
+  const existingSiteDetails = existingCache.siteDetails || []
   const cacheValue = value ?? null
+
+  const updatedSiteDetails = [...existingSiteDetails]
+
+  updatedSiteDetails[siteIndex] = {
+    ...updatedSiteDetails[siteIndex],
+    [key]: cacheValue
+  }
 
   request.yar.set(EXEMPTION_CACHE_KEY, {
     ...existingCache,
-    siteDetails: { ...existingSiteDetails, [key]: cacheValue }
+    siteDetails: updatedSiteDetails
   })
 
   return { [key]: cacheValue }
@@ -79,7 +87,8 @@ export const resetExemptionSiteDetails = (request) => {
  */
 export const updateExemptionSiteDetailsBatch = (request, updates) => {
   const existingCache = getExemptionCache(request)
-  const existingSiteDetails = existingCache.siteDetails || {}
+
+  const existingSiteDetails = getSiteDetailsBySite(existingCache)
 
   // Apply all updates in a single operation
   const updatedSiteDetails = {
@@ -89,7 +98,7 @@ export const updateExemptionSiteDetailsBatch = (request, updates) => {
 
   request.yar.set(EXEMPTION_CACHE_KEY, {
     ...existingCache,
-    siteDetails: updatedSiteDetails
+    siteDetails: [updatedSiteDetails]
   })
 
   return updatedSiteDetails
