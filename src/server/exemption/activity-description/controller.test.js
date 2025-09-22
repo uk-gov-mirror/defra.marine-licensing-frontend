@@ -63,7 +63,9 @@ describe('#activityDescriptionController', () => {
       expect(document.querySelector('#activityDescription').value).toBe('')
       expect(document.querySelector('form').method).toBe('post')
       expect(
-        document.querySelector('button[type="submit"]').textContent.trim()
+        document
+          .querySelector('form:has(textarea) button[type="submit"]')
+          .textContent.trim()
       ).toBe('Save and continue')
     })
 
@@ -149,6 +151,9 @@ describe('#activityDescriptionController', () => {
       const { statusCode, headers } = await server.inject({
         method: 'POST',
         url: routes.ACTIVITY_DESCRIPTION,
+        headers: {
+          cookie: 'cookies_preferences_set=true'
+        },
         payload
       })
 
@@ -206,6 +211,9 @@ describe('#activityDescriptionController', () => {
       const { result, statusCode } = await server.inject({
         method: 'POST',
         url: routes.ACTIVITY_DESCRIPTION,
+        headers: {
+          cookie: 'cookies_preferences_set=true'
+        },
         payload
       })
 
@@ -353,6 +361,9 @@ describe('#activityDescriptionController', () => {
       const { result, statusCode } = await server.inject({
         method: 'POST',
         url: routes.ACTIVITY_DESCRIPTION,
+        headers: {
+          cookie: 'cookies_preferences_set=true'
+        },
         payload: { activityDescription: 'test' }
       })
 
