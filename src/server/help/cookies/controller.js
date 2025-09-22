@@ -7,7 +7,8 @@ import {
 import {
   storeReferrer,
   getBackUrl,
-  clearStoredReferrer
+  clearStoredReferrer,
+  getValidatedReferrerPath
 } from '~/src/server/common/helpers/referrer-validation.js'
 import { getCookiePreferences } from '~/src/server/common/helpers/cookie-preferences.js'
 import {
@@ -120,7 +121,10 @@ export const cookiesSubmitController = {
 
     try {
       const redirectUrl = isFromBanner
-        ? request.headers.referer || '/'
+        ? (getValidatedReferrerPath(
+            request.headers.referer,
+            EXCLUDED_REFERRER_PATHS
+          ) ?? '/')
         : `${routes.COOKIES}?success=true`
 
       const response = h.redirect(redirectUrl)

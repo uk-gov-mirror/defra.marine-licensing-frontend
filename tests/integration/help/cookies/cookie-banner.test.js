@@ -142,7 +142,7 @@ describe('Cookie Banner Integration', () => {
       })
 
       expect(response.statusCode).toBe(statusCodes.redirect)
-      expect(response.headers.location).toBe('http://localhost/help/privacy')
+      expect(response.headers.location).toBe('/help/privacy')
 
       const setCookieHeaders = response.headers['set-cookie']
       expect(setCookieHeaders).toBeDefined()
@@ -174,7 +174,7 @@ describe('Cookie Banner Integration', () => {
       })
 
       expect(response.statusCode).toBe(statusCodes.redirect)
-      expect(response.headers.location).toBe('http://localhost/help/privacy')
+      expect(response.headers.location).toBe('/help/privacy')
 
       const setCookieHeaders = response.headers['set-cookie']
       const cookieString = Array.isArray(setCookieHeaders)
@@ -220,7 +220,7 @@ describe('Cookie Banner Integration', () => {
       })
 
       expect(response.statusCode).toBe(statusCodes.redirect)
-      expect(response.headers.location).toBe('http://localhost/help/privacy')
+      expect(response.headers.location).toBe('/help/privacy')
     })
 
     test('Should redirect to success page when submitted from cookies page', async () => {
