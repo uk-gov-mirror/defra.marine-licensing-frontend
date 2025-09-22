@@ -13,7 +13,6 @@ export const FLASH_MESSAGE_KEYS = {
 export const COOKIE_OPTIONS = {
   TTL: oneYearInMilliseconds,
   PATH: '/',
-  IS_SECURE: process.env.NODE_ENV === 'production',
   IS_SAME_SITE: 'Strict'
 }
 

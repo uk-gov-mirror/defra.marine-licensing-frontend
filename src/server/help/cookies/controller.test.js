@@ -2,9 +2,11 @@ import joi from 'joi'
 import { cookiesController, cookiesSubmitController } from './controller.js'
 import * as cookiePreferences from '~/src/server/common/helpers/cookie-preferences.js'
 import * as referrerValidation from '~/src/server/common/helpers/referrer-validation.js'
+import { config } from '~/src/config/config.js'
 
 jest.mock('~/src/server/common/helpers/cookie-preferences.js')
 jest.mock('~/src/server/common/helpers/referrer-validation.js')
+jest.mock('~/src/config/config.js')
 
 const createMockRequest = (overrides = {}) => ({
   headers: {},
@@ -33,6 +35,7 @@ const setupMocks = (preferences = DEFAULT_PREFERENCES) => {
   referrerValidation.storeReferrer.mockReturnValue(undefined)
   referrerValidation.getBackUrl.mockReturnValue('/')
   referrerValidation.clearStoredReferrer.mockReturnValue(undefined)
+  config.get.mockReturnValue(false)
 }
 
 describe('Cookies Controller', () => {
@@ -270,12 +273,12 @@ describe('Cookies Controller', () => {
       })
 
       it('should set secure cookies in production environment', () => {
-        const originalEnv = process.env.NODE_ENV
-        process.env.NODE_ENV = 'production'
+        config.get.mockReturnValue(true)
         mockRequest.payload = { analytics: 'yes' }
 
         cookiesSubmitController.handler(mockRequest, mockH)
 
+        expect(config.get).toHaveBeenCalledWith('isProduction')
         expect(mockResponse.state).toHaveBeenCalledWith(
           'cookies_policy',
           expect.any(Object),
@@ -290,8 +293,6 @@ describe('Cookies Controller', () => {
             isSecure: true
           })
         )
-
-        process.env.NODE_ENV = originalEnv
       })
     })
 

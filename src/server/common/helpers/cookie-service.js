@@ -4,6 +4,7 @@ import {
   COOKIE_OPTIONS_BASE64,
   FLASH_MESSAGE_KEYS
 } from '~/src/server/common/constants/cookies.js'
+import { config } from '~/src/config/config.js'
 
 export function createCookiePolicy(analytics) {
   return {
@@ -15,19 +16,20 @@ export function createCookiePolicy(analytics) {
 
 export function setCookiePreferences(response, analytics) {
   const cookiesPolicy = createCookiePolicy(analytics)
+  const isSecure = config.get('isProduction')
 
   response.state(COOKIE_NAMES.POLICY, cookiesPolicy, {
     encoding: COOKIE_OPTIONS_BASE64.ENCODING,
     ttl: COOKIE_OPTIONS_BASE64.TTL,
     path: COOKIE_OPTIONS_BASE64.PATH,
-    isSecure: COOKIE_OPTIONS_BASE64.IS_SECURE,
+    isSecure,
     isSameSite: COOKIE_OPTIONS_BASE64.IS_SAME_SITE
   })
 
   response.state(COOKIE_NAMES.PREFERENCES_SET, 'true', {
     ttl: COOKIE_OPTIONS.TTL,
     path: COOKIE_OPTIONS.PATH,
-    isSecure: COOKIE_OPTIONS.IS_SECURE,
+    isSecure,
     isSameSite: COOKIE_OPTIONS.IS_SAME_SITE
   })
 }
