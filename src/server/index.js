@@ -66,8 +66,6 @@ export async function createServer() {
     segment: 'session'
   })
 
-  // Cookie state configuration is now handled by the cookie-policy plugin
-
   await server.register([
     requestLogger,
     requestTracing,
