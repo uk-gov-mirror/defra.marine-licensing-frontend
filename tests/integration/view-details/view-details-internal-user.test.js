@@ -32,7 +32,10 @@ describe('View Details - Content Verification Integration Tests', () => {
     jest.mocked(getAuthProvider).mockReturnValue(AUTH_STRATEGIES.ENTRA_ID)
     const response = await getServer().inject({
       method: 'GET',
-      url: `${routes.VIEW_DETAILS_INTERNAL_USER}/${exemption.id}`
+      url: `${routes.VIEW_DETAILS_INTERNAL_USER}/${exemption.id}`,
+      headers: {
+        cookie: 'cookies_preferences_set=true'
+      }
     })
 
     validateResponse(response, statusCodes.ok)

@@ -27,7 +27,10 @@ describe('View Details - Content Verification Integration Tests', () => {
     mockExemption(exemption)
     const response = await getServer().inject({
       method: 'GET',
-      url: `${routes.VIEW_DETAILS}/${exemption.id}`
+      url: `${routes.VIEW_DETAILS}/${exemption.id}`,
+      headers: {
+        cookie: 'cookies_preferences_set=true'
+      }
     })
 
     validateResponse(response, statusCodes.ok)

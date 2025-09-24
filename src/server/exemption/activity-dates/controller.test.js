@@ -46,7 +46,10 @@ describe('#activityDatesController', () => {
     test('should render the activity dates page', async () => {
       const { result, statusCode } = await server.inject({
         method: 'GET',
-        url: routes.ACTIVITY_DATES
+        url: routes.ACTIVITY_DATES,
+        headers: {
+          cookie: 'cookies_preferences_set=true'
+        }
       })
 
       expect(statusCode).toBe(statusCodes.ok)
@@ -130,6 +133,9 @@ describe('#activityDatesController', () => {
       const { statusCode, headers } = await server.inject({
         method: 'POST',
         url: routes.ACTIVITY_DATES,
+        headers: {
+          cookie: 'cookies_preferences_set=true'
+        },
         payload
       })
 
