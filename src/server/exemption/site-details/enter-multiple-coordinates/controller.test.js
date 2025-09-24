@@ -1,4 +1,3 @@
-import { createServer } from '~/src/server/index.js'
 import {
   multipleCoordinatesController,
   multipleCoordinatesSubmitController
@@ -30,8 +29,6 @@ jest.mock(
 )
 
 describe('#multipleCoordinates', () => {
-  /** @type {Server} */
-  let server
   let getExemptionCacheSpy
   let getCoordinateSystemSpy
 
@@ -62,11 +59,6 @@ describe('#multipleCoordinates', () => {
     ]
   }
 
-  beforeAll(async () => {
-    server = await createServer()
-    await server.initialize()
-  })
-
   beforeEach(() => {
     jest.resetAllMocks()
     getExemptionCacheSpy = jest
@@ -91,10 +83,6 @@ describe('#multipleCoordinates', () => {
         })
         .takeover()
     })
-  })
-
-  afterAll(async () => {
-    await server.stop({ timeout: 0 })
   })
 
   describe('#multipleCoordinatesController', () => {

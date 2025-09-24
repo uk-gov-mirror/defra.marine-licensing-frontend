@@ -9,24 +9,23 @@ import {
   activityDatesController,
   activityDatesSubmitController
 } from '~/src/server/exemption/activity-dates/controller.js'
-import { createServer } from '~/src/server/index.js'
+import { setupTestServer } from '~/tests/integration/shared/test-setup-helpers.js'
 import { mockExemption, mockSite } from '~/src/server/test-helpers/mocks.js'
+import {
+  makeGetRequest,
+  makePostRequest
+} from '~/src/server/test-helpers/server-requests.js'
 
 jest.mock('~/src/server/common/helpers/session-cache/utils.js')
 
 describe('#activityDatesController', () => {
-  let server
+  const getServer = setupTestServer()
   let getExemptionCacheSpy
 
   const mockExemptionState = {
     id: 'test-exemption-id',
     projectName: 'Test Project'
   }
-
-  beforeAll(async () => {
-    server = await createServer()
-    await server.initialize()
-  })
 
   beforeEach(() => {
     getExemptionCacheSpy = jest
@@ -38,15 +37,11 @@ describe('#activityDatesController', () => {
       .mockResolvedValue({ payload: { id: mockExemption.id } })
   })
 
-  afterAll(async () => {
-    await server.stop({ timeout: 0 })
-  })
-
   describe('activityDatesController GET', () => {
     test('should render the activity dates page', async () => {
-      const { result, statusCode } = await server.inject({
-        method: 'GET',
+      const { result, statusCode } = await makeGetRequest({
         url: routes.ACTIVITY_DATES,
+        server: getServer(),
         headers: {
           cookie: 'cookies_preferences_set=true'
         }
@@ -130,13 +125,13 @@ describe('#activityDatesController', () => {
         'activity-end-date-year': (currentYear + 1).toString()
       }
 
-      const { statusCode, headers } = await server.inject({
-        method: 'POST',
+      const { statusCode, headers } = await makePostRequest({
         url: routes.ACTIVITY_DATES,
+        server: getServer(),
+        formData: payload,
         headers: {
           cookie: 'cookies_preferences_set=true'
-        },
-        payload
+        }
       })
 
       expect(authRequests.authenticatedPatchRequest).toHaveBeenCalledWith(
@@ -165,10 +160,10 @@ describe('#activityDatesController', () => {
         'activity-end-date-year': (currentYear + 1).toString()
       }
 
-      await server.inject({
-        method: 'POST',
+      await makePostRequest({
         url: routes.ACTIVITY_DATES,
-        payload
+        server: getServer(),
+        formData: payload
       })
 
       expect(mockedSetExemptionCache).toHaveBeenCalledWith(
@@ -209,10 +204,10 @@ describe('#activityDatesController', () => {
         'activity-end-date-year': (currentYear + 1).toString()
       }
 
-      const { statusCode, headers } = await server.inject({
-        method: 'POST',
+      const { statusCode, headers } = await makePostRequest({
         url: routes.SITE_DETAILS_ACTIVITY_DATES,
-        payload
+        server: getServer(),
+        formData: payload
       })
 
       expect(mockedUpdateExemptionSiteDetails).toHaveBeenCalledWith(
@@ -254,10 +249,10 @@ describe('#activityDatesController', () => {
         'activity-end-date-year': (currentYear + 1).toString()
       }
 
-      const { statusCode, headers } = await server.inject({
-        method: 'POST',
+      const { statusCode, headers } = await makePostRequest({
         url: routes.SITE_DETAILS_ACTIVITY_DATES,
-        payload
+        server: getServer(),
+        formData: payload
       })
 
       expect(mockedUpdateExemptionSiteDetails).toHaveBeenCalledWith(
@@ -283,10 +278,10 @@ describe('#activityDatesController', () => {
         'activity-end-date-year': '2025'
       }
 
-      const { result, statusCode } = await server.inject({
-        method: 'POST',
+      const { result, statusCode } = await makePostRequest({
         url: routes.ACTIVITY_DATES,
-        payload
+        server: getServer(),
+        formData: payload
       })
 
       expect(statusCode).toBe(statusCodes.ok)
@@ -307,10 +302,10 @@ describe('#activityDatesController', () => {
         'activity-end-date-year': (currentYear + 1).toString()
       }
 
-      const { result, statusCode } = await server.inject({
-        method: 'POST',
+      const { result, statusCode } = await makePostRequest({
         url: routes.ACTIVITY_DATES,
-        payload
+        server: getServer(),
+        formData: payload
       })
 
       expect(statusCode).toBe(statusCodes.ok)
@@ -338,10 +333,10 @@ describe('#activityDatesController', () => {
         'activity-end-date-year': '2025'
       }
 
-      const { result, statusCode } = await server.inject({
-        method: 'POST',
+      const { result, statusCode } = await makePostRequest({
         url: routes.ACTIVITY_DATES,
-        payload
+        server: getServer(),
+        formData: payload
       })
 
       expect(statusCode).toBe(statusCodes.ok)
@@ -373,10 +368,10 @@ describe('#activityDatesController', () => {
         'activity-end-date-year': '2025'
       }
 
-      const { result, statusCode } = await server.inject({
-        method: 'POST',
+      const { result, statusCode } = await makePostRequest({
         url: routes.ACTIVITY_DATES,
-        payload
+        server: getServer(),
+        formData: payload
       })
 
       expect(statusCode).toBe(statusCodes.ok)
@@ -411,10 +406,10 @@ describe('#activityDatesController', () => {
         'activity-end-date-year': (currentYear + 1).toString() // Future year
       }
 
-      const { result, statusCode } = await server.inject({
-        method: 'POST',
+      const { result, statusCode } = await makePostRequest({
         url: routes.ACTIVITY_DATES,
-        payload
+        server: getServer(),
+        formData: payload
       })
 
       expect(statusCode).toBe(statusCodes.ok)
@@ -446,10 +441,10 @@ describe('#activityDatesController', () => {
         'activity-end-date-year': (currentYear + 1).toString()
       }
 
-      const { result, statusCode } = await server.inject({
-        method: 'POST',
+      const { result, statusCode } = await makePostRequest({
         url: routes.ACTIVITY_DATES,
-        payload
+        server: getServer(),
+        formData: payload
       })
 
       expect(statusCode).toBe(statusCodes.ok)
@@ -460,10 +455,10 @@ describe('#activityDatesController', () => {
     })
 
     test('should handle validation errors for past dates', async () => {
-      const { result, statusCode } = await server.inject({
-        method: 'POST',
+      const { result, statusCode } = await makePostRequest({
         url: routes.ACTIVITY_DATES,
-        payload: {
+        server: getServer(),
+        formData: {
           'activity-start-date-day': '15',
           'activity-start-date-month': '6',
           'activity-start-date-year': '2020',
@@ -499,10 +494,10 @@ describe('#activityDatesController', () => {
     })
 
     test('should not show duplicate error messages for past dates', async () => {
-      const { result, statusCode } = await server.inject({
-        method: 'POST',
+      const { result, statusCode } = await makePostRequest({
         url: routes.ACTIVITY_DATES,
-        payload: {
+        server: getServer(),
+        formData: {
           'activity-start-date-day': '15',
           'activity-start-date-month': '6',
           'activity-start-date-year': '2025',
@@ -541,10 +536,10 @@ describe('#activityDatesController', () => {
         'activity-end-date-year': (currentYear + 1).toString()
       }
 
-      const { result, statusCode } = await server.inject({
-        method: 'POST',
+      const { result, statusCode } = await makePostRequest({
         url: routes.ACTIVITY_DATES,
-        payload
+        server: getServer(),
+        formData: payload
       })
 
       expect(statusCode).toBe(statusCodes.internalServerError)
@@ -579,10 +574,10 @@ describe('#activityDatesController', () => {
         'activity-end-date-year': (currentYear + 1).toString()
       }
 
-      const { result, statusCode } = await server.inject({
-        method: 'POST',
+      const { result, statusCode } = await makePostRequest({
         url: routes.ACTIVITY_DATES,
-        payload
+        server: getServer(),
+        formData: payload
       })
 
       expect(statusCode).toBe(statusCodes.ok)
@@ -601,10 +596,10 @@ describe('#activityDatesController', () => {
       }
 
       const { result: resultMonth14, statusCode: statusCodeMonth14 } =
-        await server.inject({
-          method: 'POST',
+        await makePostRequest({
           url: routes.ACTIVITY_DATES,
-          payload: payloadMonth14
+          server: getServer(),
+          formData: payloadMonth14
         })
 
       expect(statusCodeMonth14).toBe(statusCodes.ok)
@@ -637,10 +632,10 @@ describe('#activityDatesController', () => {
       }
 
       const { result: resultDay32, statusCode: statusCodeDay32 } =
-        await server.inject({
-          method: 'POST',
+        await makePostRequest({
           url: routes.ACTIVITY_DATES,
-          payload: payloadDay32
+          server: getServer(),
+          formData: payloadDay32
         })
 
       expect(statusCodeDay32).toBe(statusCodes.ok)
@@ -1025,10 +1020,10 @@ describe('#activityDatesController', () => {
         'activity-end-date-year': (currentYear + 1).toString()
       }
 
-      const { statusCode } = await server.inject({
-        method: 'POST',
+      const { statusCode } = await makePostRequest({
         url: routes.ACTIVITY_DATES,
-        payload
+        server: getServer(),
+        formData: payload
       })
 
       expect(statusCode).toBe(statusCodes.internalServerError)
