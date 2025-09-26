@@ -78,3 +78,4 @@ jobs:
         with:
           marine-licensing-frontend: ${{github.sha}}
           branch: main
+          path: ./marine-licensing-journey-tests
