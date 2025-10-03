@@ -157,7 +157,7 @@ describe('contentSecurityPolicy', () => {
       expect(mockResponse.header).toHaveBeenCalledWith(
         'Content-Security-Policy',
         expect.stringContaining(
-          "script-src 'self' 'sha256-GUQ5ad8JK5KmEWmROf3LZd9ge94daqNvd8xy9YS1iDw='"
+          "script-src 'self' 'sha256-GUQ5ad8JK5KmEWmROf3LZd9ge94daqNvd8xy9YS1iDw=' 'nonce-"
         )
       )
     })
