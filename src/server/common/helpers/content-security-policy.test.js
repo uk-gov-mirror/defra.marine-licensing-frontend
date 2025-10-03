@@ -2,7 +2,9 @@ import { contentSecurityPolicy } from './content-security-policy.js'
 
 jest.mock('~/src/config/config.js', () => ({
   config: {
-    get: jest.fn(() => '123') // clarityProjectId
+    get: jest.fn((key) =>
+      key === 'cdpUploader.cdpUploadServiceBaseUrl' ? 'http://uploader' : '123'
+    ) // clarityProjectId
   }
 }))
 
@@ -97,7 +99,7 @@ describe('contentSecurityPolicy', () => {
 
       expect(mockResponse.header).toHaveBeenCalledWith(
         'Content-Security-Policy',
-        expect.stringContaining("form-action 'self' http://localhost:7337")
+        expect.stringContaining("form-action 'self' http://uploader")
       )
     })
 
