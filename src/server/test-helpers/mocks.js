@@ -38,7 +38,12 @@ export const mockExemption = {
       coordinateSystem: COORDINATE_SYSTEMS.WGS84,
       coordinates: { latitude: '51.489676', longitude: '-0.231530' },
       circleWidth: '100',
-      siteName: 'Mock site'
+      siteName: 'Mock site',
+      activityDates: {
+        start: '2025-01-01T00:00:00.000Z',
+        end: '2025-01-01T00:00:00.000Z'
+      },
+      activityDescription: 'Test activity description'
     },
     {
       coordinatesType: 'coordinates',
@@ -46,7 +51,12 @@ export const mockExemption = {
       coordinateSystem: COORDINATE_SYSTEMS.OSGB36,
       coordinates: { eastings: '532000', northings: '182000' },
       circleWidth: '50',
-      siteName: 'Mock site 2'
+      siteName: 'Mock site 2',
+      activityDates: {
+        start: '2025-02-01T00:00:00.000Z',
+        end: '2025-02-01T00:00:00.000Z'
+      },
+      activityDescription: 'Test activity description 2'
     }
   ],
   taskList: mockExemptionTaskList,
@@ -57,6 +67,50 @@ export const mockExemptionWithShapefile = {
   ...mockExemption,
   siteDetails: [
     { ...mockExemption.siteDetails[0], fileUploadType: 'shapefile' }
+  ]
+}
+export const mockFileUploadExemption = {
+  ...mockExemption,
+  siteDetails: [
+    {
+      coordinatesType: 'file',
+      fileUploadType: 'kml',
+      uploadConfig: {
+        uploadId: 'test-upload-id',
+        statusUrl: 'test-status-url',
+        fileType: 'kml'
+      },
+      s3Location: {
+        checksumSha256: 'test-checksum',
+        s3Bucket: 'test-bucket',
+        s3Key: 'test-key'
+      },
+      geoJSON: {
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            geometry: {
+              type: 'Polygon',
+              coordinates: [
+                [
+                  [-1.2345, 50.9876],
+                  [-1.2335, 50.9876],
+                  [-1.2335, 50.9886],
+                  [-1.2345, 50.9886],
+                  [-1.2345, 50.9876]
+                ]
+              ]
+            }
+          }
+        ]
+      },
+      activityDates: {
+        start: '2025-01-01T00:00:00.000Z',
+        end: '2025-01-01T00:00:00.000Z'
+      },
+      activityDescription: 'Test activity description'
+    }
   ]
 }
 

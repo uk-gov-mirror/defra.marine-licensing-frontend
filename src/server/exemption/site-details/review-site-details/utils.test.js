@@ -2,6 +2,7 @@ import Boom from '@hapi/boom'
 import { COORDINATE_SYSTEMS } from '~/src/server/common/constants/exemptions.js'
 import { routes } from '~/src/server/common/constants/routes.js'
 import {
+  buildManualCoordinateMultipleSitesSummaryData,
   buildManualCoordinateSummaryData,
   getCoordinateDisplayText,
   getCoordinateSystemText,
@@ -193,16 +194,18 @@ describe('siteDetails utils', () => {
 
     test('getFileUploadSummaryData handles invalid file type', () => {
       const exemption = {
-        siteDetails: {
-          fileUploadType: 'invalid',
-          uploadedFile: {
-            filename: 'test-site.xyz'
-          },
-          geoJSON: {
-            type: 'FeatureCollection',
-            features: []
+        siteDetails: [
+          {
+            fileUploadType: 'invalid',
+            uploadedFile: {
+              filename: 'test-site.xyz'
+            },
+            geoJSON: {
+              type: 'FeatureCollection',
+              features: []
+            }
           }
-        }
+        ]
       }
 
       expect(() => getFileUploadSummaryData(exemption)).toThrow(
@@ -422,10 +425,12 @@ describe('siteDetails utils', () => {
       )
     })
 
-    test('getFileUploadBackLink correctly returns file upload when coming from other pages', () => {
+    test('getFileUploadBackLink correctly returns file upload route', () => {
       expect(
-        getFileUploadBackLink(`http://hostname${routes.WIDTH_OF_SITE}`)
-      ).toBe(routes.FILE_UPLOAD)
+        getFileUploadBackLink(
+          `http://hostname${routes.SITE_DETAILS_ACTIVITY_DESCRIPTION}`
+        )
+      ).toBe(routes.SITE_DETAILS_ACTIVITY_DESCRIPTION)
     })
 
     test('getFileUploadBackLink correctly returns file upload as fallback', () => {
@@ -438,76 +443,243 @@ describe('siteDetails utils', () => {
   })
 
   describe('buildManualCoordinateSummaryData util', () => {
-    test('buildManualCoordinateSummaryData correctly builds summary data with all fields', () => {
-      const siteDetails = {
-        coordinatesEntry: 'single',
-        coordinatesType: 'coordinates',
-        coordinates: {
-          latitude: '51.5074',
-          longitude: '-0.1278'
-        },
-        circleWidth: '1'
-      }
+    test('buildManualCoordinateSummaryData correctly builds summary data for single site with all fields', () => {
+      const siteDetails = [
+        {
+          coordinateSystem: COORDINATE_SYSTEMS.WGS84,
+          activityDates: {
+            start: '2025-01-01T00:00:00.000Z',
+            end: '2025-01-01T00:00:00.000Z'
+          },
+          activityDescription: 'Test activity description',
+          coordinatesEntry: 'single',
+          coordinatesType: 'coordinates',
+          coordinates: {
+            latitude: '51.5074',
+            longitude: '-0.1278'
+          },
+          circleWidth: '1'
+        }
+      ]
       const coordinateSystem = COORDINATE_SYSTEMS.WGS84
 
       const result = buildManualCoordinateSummaryData(
         siteDetails,
+        {},
         coordinateSystem
       )
 
-      expect(result).toEqual({
-        method:
-          'Manually enter one set of coordinates and a width to create a circular site',
-        coordinateSystem:
-          'WGS84 (World Geodetic System 1984)\nLatitude and longitude',
-        coordinates: '51.5074, -0.1278',
-        width: '1 metre'
-      })
+      expect(result).toEqual([
+        {
+          activityDates: '1 January 2025 to 1 January 2025',
+          activityDescription: 'Test activity description',
+          method:
+            'Manually enter one set of coordinates and a width to create a circular site',
+          showActivityDates: true,
+          showActivityDescription: true,
+          siteName: '',
+          coordinateSystem:
+            'WGS84 (World Geodetic System 1984)\nLatitude and longitude',
+          coordinates: '51.5074, -0.1278',
+          width: '1 metre',
+          siteNumber: 1,
+          siteDetailsData: expect.stringContaining(
+            '"coordinatesType":"coordinates"'
+          )
+        }
+      ])
+    })
+
+    test('buildManualCoordinateSummaryData correctly builds summary data for multiple sites with all fields', () => {
+      const siteDetails = [
+        {
+          coordinateSystem: COORDINATE_SYSTEMS.WGS84,
+          activityDates: {
+            start: '2025-01-01T00:00:00.000Z',
+            end: '2025-01-01T00:00:00.000Z'
+          },
+          activityDescription: 'Test activity description',
+          coordinatesEntry: 'single',
+          coordinatesType: 'coordinates',
+          coordinates: {
+            latitude: '51.5074',
+            longitude: '-0.1278'
+          },
+          circleWidth: '1'
+        }
+      ]
+
+      const multipleSiteDetails = {
+        multipleSitesEnabled: true,
+        sameActivityDates: 'yes',
+        sameActivityDescription: 'yes'
+      }
+
+      const result = buildManualCoordinateSummaryData(
+        siteDetails,
+        multipleSiteDetails,
+        COORDINATE_SYSTEMS.WGS84
+      )
+
+      expect(result).toEqual([
+        {
+          activityDates: '',
+          activityDescription: '',
+          method:
+            'Manually enter one set of coordinates and a width to create a circular site',
+          showActivityDates: false,
+          showActivityDescription: false,
+          siteName: '',
+          coordinateSystem:
+            'WGS84 (World Geodetic System 1984)\nLatitude and longitude',
+          coordinates: '51.5074, -0.1278',
+          width: '1 metre',
+          siteNumber: 1,
+          siteDetailsData: expect.stringContaining(
+            '"coordinatesType":"coordinates"'
+          )
+        }
+      ])
     })
 
     test('buildManualCoordinateSummaryData correctly handles OSGB36 coordinates', () => {
-      const siteDetails = {
-        coordinatesEntry: 'single',
-        coordinatesType: 'coordinates',
-        coordinates: {
-          eastings: '425053',
-          northings: '564180'
-        },
-        circleWidth: '200'
-      }
-      const coordinateSystem = COORDINATE_SYSTEMS.OSGB36
+      const siteDetails = [
+        {
+          coordinateSystem: COORDINATE_SYSTEMS.OSGB36,
+          coordinatesEntry: 'single',
+          coordinatesType: 'coordinates',
+          coordinates: {
+            eastings: '425053',
+            northings: '564180'
+          },
+          circleWidth: '200',
+          activityDates: {
+            start: '2025-01-01T00:00:00.000Z',
+            end: '2025-01-01T00:00:00.000Z'
+          },
+          activityDescription: 'Test activity description'
+        }
+      ]
+
+      const result = buildManualCoordinateSummaryData(siteDetails, {})
+
+      expect(result).toEqual([
+        {
+          activityDates: '1 January 2025 to 1 January 2025',
+          activityDescription: 'Test activity description',
+          method:
+            'Manually enter one set of coordinates and a width to create a circular site',
+          showActivityDates: true,
+          showActivityDescription: true,
+          siteName: '',
+          coordinateSystem: 'OSGB36 (National Grid)\nEastings and Northings',
+          coordinates: '425053, 564180',
+          width: '200 metres',
+          siteNumber: 1,
+          siteDetailsData: expect.stringContaining(
+            '"coordinatesType":"coordinates"'
+          )
+        }
+      ])
+    })
+
+    test('buildManualCoordinateSummaryData correctly handles missing data', () => {
+      const siteDetails = [
+        {
+          coordinateSystem: COORDINATE_SYSTEMS.WGS84,
+          coordinatesEntry: 'single',
+          coordinatesType: 'coordinates',
+          coordinates: {
+            latitude: '51.5074',
+            longitude: '-0.1278'
+          }
+        }
+      ]
 
       const result = buildManualCoordinateSummaryData(
         siteDetails,
-        coordinateSystem
+        {
+          multipleSitesEnabled: true,
+          sameActivityDates: 'no'
+        },
+        COORDINATE_SYSTEMS.WGS84
       )
 
+      expect(result[0].activityDates).toBe('')
+      expect(result[0].activityDescription).toBe('')
+      expect(result[0].width).toBe('')
+    })
+  })
+
+  describe('buildManualCoordinateMultipleSitesSummaryData util', () => {
+    test('buildManualCoordinateMultipleSitesSummaryData correctly handles multiple sites', () => {
+      const result = buildManualCoordinateMultipleSitesSummaryData({
+        multipleSitesEnabled: true,
+        sameActivityDates: 'no',
+        sameActivityDescription: 'no'
+      })
+
       expect(result).toEqual({
-        method:
-          'Manually enter one set of coordinates and a width to create a circular site',
-        coordinateSystem: 'OSGB36 (National Grid)\nEastings and Northings',
-        coordinates: '425053, 564180',
-        width: '200 metres'
+        method: 'Enter the coordinates of the site manually',
+        multipleSiteDetails: 'Yes',
+        sameActivityDates: 'No',
+        sameActivityDescription: 'No'
       })
     })
 
-    test('buildManualCoordinateSummaryData correctly handles missing width', () => {
-      const siteDetails = {
-        coordinatesEntry: 'single',
-        coordinatesType: 'coordinates',
-        coordinates: {
-          latitude: '51.5074',
-          longitude: '-0.1278'
-        }
-      }
-      const coordinateSystem = COORDINATE_SYSTEMS.WGS84
-
-      const result = buildManualCoordinateSummaryData(
-        siteDetails,
-        coordinateSystem
+    test('buildManualCoordinateMultipleSitesSummaryData correctly empty sites', () => {
+      const result = buildManualCoordinateMultipleSitesSummaryData(
+        {
+          multipleSitesEnabled: true
+        },
+        {}
       )
 
-      expect(result.width).toBe('')
+      expect(result).toEqual({})
+    })
+
+    test('buildManualCoordinateMultipleSitesSummaryData correctly handles multiple sites with same dates and description', () => {
+      const result = buildManualCoordinateMultipleSitesSummaryData(
+        {
+          multipleSitesEnabled: true,
+          sameActivityDates: 'yes',
+          sameActivityDescription: 'yes'
+        },
+        mockExemption.siteDetails
+      )
+
+      expect(result).toEqual({
+        method: 'Enter the coordinates of the site manually',
+        multipleSiteDetails: 'Yes',
+        sameActivityDates: 'Yes',
+        sameActivityDescription: 'Yes',
+        activityDates: '1 January 2025 to 1 January 2025',
+        activityDescription: 'Test activity description'
+      })
+    })
+
+    test('buildManualCoordinateMultipleSitesSummaryData correctly handles single site', () => {
+      const result = buildManualCoordinateMultipleSitesSummaryData({
+        multipleSitesEnabled: false
+      })
+
+      expect(result).toEqual({
+        method: 'Enter the coordinates of the site manually',
+        multipleSiteDetails: 'No',
+        sameActivityDates: 'No',
+        sameActivityDescription: 'No'
+      })
+    })
+
+    test('buildManualCoordinateMultipleSitesSummaryData correctly handles empty object', () => {
+      const result = buildManualCoordinateMultipleSitesSummaryData({})
+
+      expect(result).toEqual({
+        method: 'Enter the coordinates of the site manually',
+        multipleSiteDetails: 'No',
+        sameActivityDates: 'No',
+        sameActivityDescription: 'No'
+      })
     })
   })
 
@@ -541,7 +713,7 @@ describe('siteDetails utils', () => {
         mockAuthenticatedGetRequest
       )
 
-      expect(result).toEqual(exemption.siteDetails[0])
+      expect(result).toEqual(exemption.siteDetails)
       expect(mockAuthenticatedGetRequest).not.toHaveBeenCalled()
     })
 
@@ -572,7 +744,7 @@ describe('siteDetails utils', () => {
         mockAuthenticatedGetRequest
       )
 
-      expect(result).toEqual(mockMongoResponse.payload.value.siteDetails[0])
+      expect(result).toEqual([mockMongoResponse.payload.value.siteDetails[0]])
       expect(mockAuthenticatedGetRequest).toHaveBeenCalledWith(
         mockRequest,
         '/exemption/test-exemption-id'
@@ -601,7 +773,7 @@ describe('siteDetails utils', () => {
         mockAuthenticatedGetRequest
       )
 
-      expect(result).toEqual({})
+      expect(result).toBeUndefined()
       expect(mockRequest.logger.error).toHaveBeenCalledWith(
         {
           error: 'MongoDB connection failed',
@@ -642,7 +814,7 @@ describe('siteDetails utils', () => {
         mockAuthenticatedGetRequest
       )
 
-      expect(result).toEqual({})
+      expect(result).toBeUndefined()
       expect(mockAuthenticatedGetRequest).toHaveBeenCalledWith(
         mockRequest,
         '/exemption/test-exemption-id'
@@ -665,7 +837,7 @@ describe('siteDetails utils', () => {
         mockAuthenticatedGetRequest
       )
 
-      expect(result).toEqual({})
+      expect(result).toBeUndefined()
       expect(mockAuthenticatedGetRequest).not.toHaveBeenCalled()
     })
   })
@@ -699,12 +871,12 @@ describe('siteDetails utils', () => {
           },
           featureCount: 1,
           uploadedFile: {
-            filename: 'test-site.kml',
-            s3Location: {
-              s3Bucket: 'test-bucket',
-              s3Key: 'test-key',
-              checksumSha256: 'test-checksum'
-            }
+            filename: 'test-site.kml'
+          },
+          s3Location: {
+            s3Bucket: 'test-bucket',
+            s3Key: 'test-key',
+            checksumSha256: 'test-checksum'
           }
         }
       ]
@@ -742,12 +914,12 @@ describe('siteDetails utils', () => {
           fileUploadType: 'shapefile',
           geoJSON: { type: 'FeatureCollection', features: [] },
           uploadedFile: {
-            filename: 'test.shp',
-            s3Location: {
-              s3Bucket: 'bucket',
-              s3Key: 'key',
-              checksumSha256: 'checksum'
-            }
+            filename: 'test.shp'
+          },
+          s3Location: {
+            s3Bucket: 'bucket',
+            s3Key: 'key',
+            checksumSha256: 'checksum'
           }
         }
       ]
@@ -866,7 +1038,6 @@ describe('siteDetails utils', () => {
     const mockH = {
       view: jest.fn()
     }
-    const mockRequest = {}
 
     beforeEach(() => {
       jest.clearAllMocks()
@@ -877,24 +1048,34 @@ describe('siteDetails utils', () => {
     })
 
     test('renderManualCoordinateReview renders correct view with data', () => {
-      const exemption = {
-        projectName: 'Test Project'
-      }
-      const siteDetails = {
-        coordinatesEntry: 'single',
-        coordinatesType: 'coordinates',
-        coordinates: {
-          latitude: '51.5074',
-          longitude: '-0.1278'
-        },
-        circleWidth: '100'
-      }
+      const siteDetails = [
+        {
+          activityDates: {
+            start: '2025-01-01T00:00:00.000Z',
+            end: '2025-01-01T00:00:00.000Z'
+          },
+          activityDescription: 'Test activity description',
+          coordinatesEntry: 'single',
+          coordinatesType: 'coordinates',
+          coordinates: {
+            latitude: '51.5074',
+            longitude: '-0.1278'
+          },
+          circleWidth: '100'
+        }
+      ]
       const previousPage = `http://hostname${routes.WIDTH_OF_SITE}`
       const reviewSiteDetailsPageData = {
         pageTitle: 'Review site details'
       }
 
-      renderManualCoordinateReview(mockH, mockRequest, {
+      const exemption = {
+        projectName: 'Test Project',
+        multipleSiteDetails: {},
+        siteDetails: [siteDetails]
+      }
+
+      renderManualCoordinateReview(mockH, {
         exemption,
         siteDetails,
         previousPage,
@@ -903,30 +1084,29 @@ describe('siteDetails utils', () => {
 
       expect(mockH.view).toHaveBeenCalledWith(
         'exemption/site-details/review-site-details/index',
-        {
+        expect.objectContaining({
           pageTitle: 'Review site details',
           backLink: routes.WIDTH_OF_SITE,
           isMultiSiteJourney: false,
           projectName: 'Test Project',
-          summaryData: {
-            method:
-              'Manually enter one set of coordinates and a width to create a circular site',
-            coordinateSystem:
-              'WGS84 (World Geodetic System 1984)\nLatitude and longitude',
-            coordinates: '51.5074, -0.1278',
-            width: '100 metres'
-          },
-          siteDetailsData: JSON.stringify({
-            coordinatesType: 'coordinates',
-            coordinateSystem: 'wgs84',
-            coordinatesEntry: 'single',
-            coordinates: {
-              latitude: '51.5074',
-              longitude: '-0.1278'
-            },
-            circleWidth: '100'
+          summaryData: expect.arrayContaining([
+            expect.objectContaining({
+              activityDates: '1 January 2025 to 1 January 2025',
+              activityDescription: 'Test activity description',
+              method:
+                'Manually enter one set of coordinates and a width to create a circular site',
+              showActivityDates: true,
+              showActivityDescription: true,
+              siteName: ''
+            })
+          ]),
+          multipleSiteDetailsData: expect.objectContaining({
+            method: 'Enter the coordinates of the site manually',
+            multipleSiteDetails: 'No',
+            sameActivityDates: 'No',
+            sameActivityDescription: 'No'
           })
-        }
+        })
       )
     })
   })
