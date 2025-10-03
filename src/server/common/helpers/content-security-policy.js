@@ -14,7 +14,7 @@ const contentSecurityPolicy = {
     const clarityProjectId = config.get('clarityProjectId')
     const cspDirectives = {
       'base-uri': "'self'",
-      'connect-src': "'self' https://l.clarity.ms/collect",
+      'connect-src': "'self' https://*.clarity.ms/collect",
       'default-src': "'self'",
       'font-src': "'self'",
       'form-action': `'self' ${uploaderServiceHost}`,

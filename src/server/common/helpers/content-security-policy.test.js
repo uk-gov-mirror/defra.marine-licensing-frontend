@@ -81,7 +81,9 @@ describe('contentSecurityPolicy', () => {
 
       expect(mockResponse.header).toHaveBeenCalledWith(
         'Content-Security-Policy',
-        expect.stringContaining("connect-src 'self'")
+        expect.stringContaining(
+          "connect-src 'self' https://*.clarity.ms/collect"
+        )
       )
     })
 
