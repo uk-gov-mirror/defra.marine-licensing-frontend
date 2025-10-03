@@ -1,5 +1,11 @@
 import { contentSecurityPolicy } from './content-security-policy.js'
 
+jest.mock('~/src/config/config.js', () => ({
+  config: {
+    get: jest.fn(() => '123') // clarityProjectId
+  }
+}))
+
 describe('contentSecurityPolicy', () => {
   let server
   let mockResponse
@@ -157,7 +163,7 @@ describe('contentSecurityPolicy', () => {
       expect(mockResponse.header).toHaveBeenCalledWith(
         'Content-Security-Policy',
         expect.stringContaining(
-          "script-src 'self' 'sha256-GUQ5ad8JK5KmEWmROf3LZd9ge94daqNvd8xy9YS1iDw=' 'nonce-"
+          "script-src 'self' 'sha256-GUQ5ad8JK5KmEWmROf3LZd9ge94daqNvd8xy9YS1iDw=' https://www.clarity.ms/tag/123 https://scripts.clarity.ms 'nonce-"
         )
       )
     })
