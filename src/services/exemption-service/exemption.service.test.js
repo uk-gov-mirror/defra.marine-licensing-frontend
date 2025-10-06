@@ -104,6 +104,7 @@ describe('ExemptionService', () => {
             ...mockExemption.mcmsContext,
             activityType: {
               label: 'Deposit of a substance or object',
+              purpose: 'Scientific instruments and associated equipment',
               value: 'DEPOSIT'
             }
           }
