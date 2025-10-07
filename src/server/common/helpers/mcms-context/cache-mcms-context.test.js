@@ -2,6 +2,7 @@ import {
   cacheMcmsContextFromQueryParams,
   getMcmsContextFromCache
 } from './cache-mcms-context.js'
+import { mcmsAnswersDownloadUrl } from '~/src/server/test-helpers/mocks.js'
 
 describe('Cache / get MCMS context', () => {
   let mockRequest
@@ -27,7 +28,7 @@ describe('Cache / get MCMS context', () => {
       mockRequest.query = {
         ACTIVITY_TYPE: 'CON',
         ARTICLE: '17',
-        pdfDownloadUrl: 'https://example.com/test.pdf',
+        pdfDownloadUrl: mcmsAnswersDownloadUrl,
         EXE_ACTIVITY_SUBTYPE_CONSTRUCTION: 'maintenance'
       }
 
@@ -37,7 +38,7 @@ describe('Cache / get MCMS context', () => {
         activityType: 'CON',
         activitySubtype: 'maintenance',
         article: '17',
-        pdfDownloadUrl: 'https://example.com/test.pdf'
+        pdfDownloadUrl: mcmsAnswersDownloadUrl
       }
 
       expect(mockRequest.yar.flash).toHaveBeenCalledWith(
@@ -51,7 +52,7 @@ describe('Cache / get MCMS context', () => {
       mockRequest.query = {
         ACTIVITY_TYPE: 'INVALID_TYPE',
         ARTICLE: '17',
-        pdfDownloadUrl: 'https://example.com/test.pdf'
+        pdfDownloadUrl: mcmsAnswersDownloadUrl
       }
 
       cacheMcmsContextFromQueryParams(mockRequest)
@@ -85,7 +86,7 @@ describe('Cache / get MCMS context', () => {
       mockRequest.query = {
         ACTIVITY_TYPE: 'INCINERATION',
         ARTICLE: '34',
-        pdfDownloadUrl: 'https://example.com/incineration.pdf'
+        pdfDownloadUrl: mcmsAnswersDownloadUrl
       }
 
       cacheMcmsContextFromQueryParams(mockRequest)
@@ -93,7 +94,7 @@ describe('Cache / get MCMS context', () => {
       expect(mockRequest.yar.flash).toHaveBeenCalledWith('mcmsContext', {
         activityType: 'INCINERATION',
         article: '34',
-        pdfDownloadUrl: 'https://example.com/incineration.pdf'
+        pdfDownloadUrl: mcmsAnswersDownloadUrl
       })
     })
   })
@@ -104,7 +105,7 @@ describe('Cache / get MCMS context', () => {
         activityType: 'CON',
         activitySubtype: 'maintenance',
         article: '17',
-        pdfDownloadUrl: 'https://example.com/test.pdf'
+        pdfDownloadUrl: mcmsAnswersDownloadUrl
       }
 
       mockRequest.yar.flash.mockReturnValue([cachedContext])
@@ -133,13 +134,13 @@ describe('Cache / get MCMS context', () => {
         activityType: 'CON',
         activitySubtype: 'maintenance',
         article: '17',
-        pdfDownloadUrl: 'https://example.com/test1.pdf'
+        pdfDownloadUrl: mcmsAnswersDownloadUrl
       }
       const secondContext = {
         activityType: 'DEPOSIT',
         activitySubtype: 'dredgedMaterial',
         article: '18A',
-        pdfDownloadUrl: 'https://example.com/test2.pdf'
+        pdfDownloadUrl: mcmsAnswersDownloadUrl
       }
 
       mockRequest.yar.flash.mockReturnValue([firstContext, secondContext])
