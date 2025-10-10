@@ -1,5 +1,8 @@
 {% if params.applicantOrganisationName %}
 <div class="app-border-bottom govuk-!-padding-top-2 govuk-!-padding-bottom-2">
-  <span class="govuk-body-s govuk-!-font-weight-bold">{{ params.applicantOrganisationName }}</span>
+  <span class="govuk-body-s govuk-!-font-weight-bold govuk-!-padding-right-1">{{ params.applicantOrganisationName }}</span>
+  {%  if params.hasMultipleOrganisations %}
+  <a href="/change-organisation">Change organisation</a>
+  {% endif %}
 </div>
 {% endif %}

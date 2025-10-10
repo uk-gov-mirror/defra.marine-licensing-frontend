@@ -5,6 +5,6 @@ export const getPageViewCommonData = async (request) => {
   if (!userSession) {
     return {}
   }
-  const { applicantOrganisationName } = userSession
-  return { applicantOrganisationName }
+  const { applicantOrganisationName, hasMultipleOrganisations } = userSession
+  return { applicantOrganisationName, hasMultipleOrganisations }
 }

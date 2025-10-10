@@ -43,6 +43,46 @@ describe('getPageViewCommonData', () => {
     expect(mockGetUserSession).toHaveBeenCalledWith(mockRequest, 'mock-session')
   })
 
+  test('should return hasMultipleOrganisations as false when user has single organisation', async () => {
+    const mockUserSession = {
+      applicantOrganisationName: 'Test Organisation Ltd',
+      hasMultipleOrganisations: false
+    }
+    mockGetUserSession.mockResolvedValue(mockUserSession)
+
+    const mockRequest = {
+      state: { userSession: 'mock-session' }
+    }
+
+    const result = await getPageViewCommonData(mockRequest)
+
+    expect(result).toEqual({
+      applicantOrganisationName: 'Test Organisation Ltd',
+      hasMultipleOrganisations: false
+    })
+    expect(mockGetUserSession).toHaveBeenCalledWith(mockRequest, 'mock-session')
+  })
+
+  test('should return hasMultipleOrganisations as true when user has multiple organisations', async () => {
+    const mockUserSession = {
+      applicantOrganisationName: 'Test Organisation Ltd',
+      hasMultipleOrganisations: true
+    }
+    mockGetUserSession.mockResolvedValue(mockUserSession)
+
+    const mockRequest = {
+      state: { userSession: 'mock-session' }
+    }
+
+    const result = await getPageViewCommonData(mockRequest)
+
+    expect(result).toEqual({
+      applicantOrganisationName: 'Test Organisation Ltd',
+      hasMultipleOrganisations: true
+    })
+    expect(mockGetUserSession).toHaveBeenCalledWith(mockRequest, 'mock-session')
+  })
+
   test('should handle request without userSession state', async () => {
     mockGetUserSession.mockResolvedValue(null)
 
