@@ -1,7 +1,8 @@
 import Jwt from '@hapi/jwt'
 import { config } from '#src/config/config.js'
 import { getOidcConfig } from '#src/server/common/plugins/auth/get-oidc-config.js'
-import { getApplicantOrganisationFromToken } from '#src/server/common/plugins/auth/utils.js'
+
+import { getApplicantOrganisationFromToken } from '#src/server/common/plugins/auth/get-applicant-organisation.js'
 
 export const openIdProvider = async (name) => {
   const authConfig = config.get(name)

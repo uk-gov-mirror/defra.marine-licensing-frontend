@@ -83,7 +83,7 @@ describe('#openIdProvider', () => {
     )
   })
 
-  test('When relationships array is empty or undefined', async () => {
+  test('When relationships array is empty', async () => {
     const token = jwt.token.generate(
       {
         sub: 'testSub',
@@ -119,8 +119,45 @@ describe('#openIdProvider', () => {
 
     await provider.profile(credentials, { id_token: 'test-id-token' }, {})
 
-    expect(credentials.profile.applicantOrganisationId).toBeUndefined()
-    expect(credentials.profile.applicantOrganisationName).toBeUndefined()
+    expect(credentials.profile.applicantOrganisationId).toBeNull()
+    expect(credentials.profile.applicantOrganisationName).toBeNull()
+    expect(credentials.profile.hasMultipleOrganisations).toEqual(false)
+  })
+
+  test('When relationships array is undefined (eg Entra ID token)', async () => {
+    const token = jwt.token.generate(
+      {
+        sub: 'testSub',
+        correlationId: 'testCorrelationId',
+        sessionId: 'testSessionId',
+        contactId: 'testContactId',
+        serviceId: 'testServiceId',
+        firstName: 'Test',
+        lastName: 'User',
+        email: 'testEmail',
+        uniqueReference: 'testUniqueRef',
+        loa: 'testLoa',
+        aal: 'testAal',
+        aud: 'test',
+        iss: 'test',
+        user: 'Test User'
+      },
+      {
+        key: 'test',
+        algorithm: 'HS256'
+      },
+      {
+        ttlSec: 1
+      }
+    )
+
+    const credentials = { token }
+
+    await provider.profile(credentials, { id_token: 'test-id-token' }, {})
+
+    expect(credentials.profile.applicantOrganisationId).toBeNull()
+    expect(credentials.profile.applicantOrganisationName).toBeNull()
+    expect(credentials.profile.hasMultipleOrganisations).toEqual(false)
   })
 
   test('When credential do not exist', () => {
