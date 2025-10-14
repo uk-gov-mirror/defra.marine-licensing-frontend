@@ -3,10 +3,8 @@ export const getApplicantOrganisationFromToken = (decodedToken) => {
     decodedToken
   if (
     !currentRelationshipId ||
-    !relationships ||
-    !Array.isArray(relationships) ||
     !enrolmentCount ||
-    !roles ||
+    !Array.isArray(relationships) ||
     !Array.isArray(roles)
   ) {
     return {
