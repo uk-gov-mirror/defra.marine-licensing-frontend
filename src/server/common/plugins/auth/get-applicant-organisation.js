@@ -1,4 +1,8 @@
 export const getApplicantOrganisationFromToken = (decodedToken) => {
+  // currentRelationshipId is the relationship the user is signing into the service in the context of, based on what they selected in the organisation picker (either themselves, or a linked org)
+  // relationships - The relationships the user has selected to sign into the service in, within their current session.
+  // enrolmentCount - The number of enrolments assigned to the user for this service, across all organisations.
+  // The roles related to the relationship the user has selected within their current session.
   const { currentRelationshipId, relationships, enrolmentCount, roles } =
     decodedToken
   if (

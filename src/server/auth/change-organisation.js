@@ -1,4 +1,5 @@
 import {
+  changeOrganisationQueryParam,
   redirectPathCacheKey,
   routes
 } from '#src/server/common/constants/routes.js'
@@ -11,6 +12,6 @@ export const changeOrganisationController = {
   },
   handler: (request, h) => {
     request.yar.flash(redirectPathCacheKey, routes.DASHBOARD, true)
-    return h.redirect(`${routes.SIGNIN}?change-organisation=true`)
+    return h.redirect(`${routes.SIGNIN}?${changeOrganisationQueryParam}=true`)
   }
 }

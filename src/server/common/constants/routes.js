@@ -52,3 +52,5 @@ export const isEntraIdRoute = (route) => {
 }
 
 export const redirectPathCacheKey = 'redirectPath'
+
+export const changeOrganisationQueryParam = 'change-organisation'
