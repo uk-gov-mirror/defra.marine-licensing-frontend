@@ -20,23 +20,27 @@ describe('appOrganisationHeading Component', () => {
     expect(within($component).queryByText('Test Org')).not.toBeInTheDocument()
   })
 
-  test('should show a Change organisation link if param set to true', () => {
+  test('should show a Change who you’re representing link if param set to true', () => {
     $component = renderComponentJSDOM('organisation-heading', {
       orgOrUserName: 'Test Org',
       showChangeOrganisationLink: true
     })
     expect(
-      within($component).getByRole('link', { name: 'Change organisation' })
+      within($component).getByRole('link', {
+        name: 'Change who you’re representing'
+      })
     ).toBeInTheDocument()
   })
 
-  test('should not show a Change organisation link if param set to false', () => {
+  test('should not show a Change who you’re representing link if param set to false', () => {
     $component = renderComponentJSDOM('organisation-heading', {
       orgOrUserName: 'Test Org',
       hasMultipleOrganisations: false
     })
     expect(
-      within($component).queryByRole('link', { name: 'Change organisation' })
+      within($component).queryByRole('link', {
+        name: 'Change who you’re representing'
+      })
     ).not.toBeInTheDocument()
   })
 })
