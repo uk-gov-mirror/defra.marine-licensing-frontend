@@ -6,13 +6,32 @@ import {
   getPolygonCoordinatesDisplayData
 } from '#src/server/exemption/site-details/review-site-details/utils.js'
 import { getSiteDetailsBySite } from '#src/server/common/helpers/session-cache/site-details-utils.js'
+import { formatDate } from '#src/server/common/helpers/dates/date-utils.js'
+import { createSiteDetailsDataJson } from '#src/server/common/helpers/site-details.js'
+
 export const errorMessages = {
   FILE_UPLOAD_DATA_ERROR: 'Error getting file upload summary data'
 }
-export const processFileUploadSiteDetails = (exemption, id, request) => {
+
+const getActivityDatesText = (activityDates) => {
+  if (!activityDates?.start || !activityDates?.end) {
+    return null
+  }
+  return `${formatDate(activityDates.start)} to ${formatDate(activityDates.end)}`
+}
+
+export const processFileUploadSiteDetails = (
+  exemption,
+  id,
+  request,
+  siteIndex = 0
+) => {
   try {
-    const siteDetails = getSiteDetailsBySite(exemption)
-    const fileUploadData = getFileUploadSummaryData(exemption)
+    const siteDetails = getSiteDetailsBySite(exemption, siteIndex)
+    const fileUploadData = getFileUploadSummaryData({
+      ...exemption,
+      siteDetails
+    })
 
     return {
       ...siteDetails,
@@ -30,7 +49,7 @@ export const processFileUploadSiteDetails = (exemption, id, request) => {
       errorMessages.FILE_UPLOAD_DATA_ERROR
     )
     // Fallback to basic site details if file upload data unavailable
-    const siteDetails = getSiteDetailsBySite(exemption)
+    const siteDetails = getSiteDetailsBySite(exemption, siteIndex)
 
     return {
       ...siteDetails,
@@ -41,8 +60,9 @@ export const processFileUploadSiteDetails = (exemption, id, request) => {
     }
   }
 }
-export const processManualSiteDetails = (exemption) => {
-  const siteDetails = getSiteDetailsBySite(exemption)
+
+export const processManualSiteDetails = (exemption, siteIndex = 0) => {
+  const siteDetails = getSiteDetailsBySite(exemption, siteIndex)
   const { coordinateSystem, coordinatesEntry } = siteDetails
 
   const baseData = {
@@ -79,18 +99,53 @@ export const processManualSiteDetails = (exemption) => {
     circleWidth: siteDetails.circleWidth
   }
 }
+
 export const processSiteDetails = (exemption, id, request) => {
   if (!exemption.siteDetails?.length) {
-    return null
+    return []
   }
 
-  const siteDetails = getSiteDetailsBySite(exemption)
+  const { multipleSiteDetails, siteDetails } = exemption
+  const { multipleSitesEnabled, sameActivityDates, sameActivityDescription } =
+    multipleSiteDetails
 
-  const { coordinatesType } = siteDetails
+  const showActivityDates = !multipleSitesEnabled || sameActivityDates === 'no'
+  const showActivityDescription =
+    !multipleSitesEnabled || sameActivityDescription === 'no'
 
-  if (coordinatesType === 'file') {
-    return processFileUploadSiteDetails(exemption, id, request)
-  }
+  return siteDetails.map((site, index) => {
+    const { coordinatesType } = site
 
-  return processManualSiteDetails(exemption)
+    let processedSite
+
+    if (coordinatesType === 'file') {
+      processedSite = processFileUploadSiteDetails(
+        exemption,
+        id,
+        request,
+        index
+      )
+    } else {
+      processedSite = processManualSiteDetails(exemption, index)
+    }
+
+    if (multipleSitesEnabled) {
+      processedSite.siteName = site.siteName
+    }
+
+    processedSite.activityDates = getActivityDatesText(site.activityDates)
+    processedSite.showActivityDates = showActivityDates
+
+    processedSite.activityDescription = site.activityDescription
+    processedSite.showActivityDescription = showActivityDescription
+
+    processedSite.siteNumber = index + 1
+
+    processedSite.siteDetailsData = createSiteDetailsDataJson(
+      processedSite,
+      processedSite.coordinateSystem
+    )
+
+    return processedSite
+  })
 }

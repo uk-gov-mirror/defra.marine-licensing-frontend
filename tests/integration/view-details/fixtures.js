@@ -10,7 +10,10 @@ const baseSubmittedExemption = {
   publicRegister: {
     consent: 'no'
   },
-  mcmsContext: mockExemptionMcmsContext
+  mcmsContext: mockExemptionMcmsContext,
+  multipleSiteDetails: {
+    multipleSitesEnabled: false
+  }
 }
 
 export const createSubmittedExemption = (overrides = {}) => ({
@@ -27,6 +30,11 @@ export const createExemptionWithSiteDetails = (siteDetailsOverrides = {}) =>
         coordinateSystem: COORDINATE_SYSTEMS.WGS84,
         coordinates: { latitude: '51.489676', longitude: '-0.231530' },
         circleWidth: '100',
+        activityDates: {
+          startDate: { day: '1', month: '1', year: '2025' },
+          endDate: { day: '31', month: '1', year: '2025' }
+        },
+        activityDescription: 'Test activity description',
         ...siteDetailsOverrides
       }
     ]

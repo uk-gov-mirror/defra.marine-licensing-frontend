@@ -149,29 +149,53 @@ export const validatePublicRegister = (document, expected) => {
  * @param {object} expectedPageContent - Expected page content
  */
 export const validateSiteDetails = (document, expectedPageContent) => {
-  const siteCard = document.querySelector('#site-details-card')
-  expect(siteCard).toBeTruthy()
+  const siteDetailsData = expectedPageContent.siteDetails
 
-  // Validate basic site details if present
-  if (expectedPageContent.siteDetails.length) {
-    for (const [key, value] of Object.entries(
-      expectedPageContent.siteDetails[0]
-    )) {
-      const rows = siteCard.querySelectorAll('.govuk-summary-list__row')
-      const row = Array.from(rows).find((r) => {
-        const keyElement = r.querySelector(GOV_UK_SUMMARY_LIST_KEY)
-        return keyElement && keyElement.textContent.trim() === key
-      })
-      expect(row).toBeTruthy()
-      const valueElement = row.querySelector('.govuk-summary-list__value')
-      expect(valueElement.textContent.trim()).toBe(value)
+  const multipleSiteDetails =
+    expectedPageContent.multipleSiteDetails?.multipleSitesEnabled
+
+  if (multipleSiteDetails) {
+    siteDetailsData.forEach((siteDetails, index) => {
+      const siteCards = document.querySelectorAll('#site-details-card')
+      const siteCard = siteCards[index]
+      expect(siteCard).toBeTruthy()
+
+      for (const [key, value] of Object.entries(siteDetails)) {
+        const rows = siteCard.querySelectorAll('.govuk-summary-list__row')
+        const row = Array.from(rows).find((r) => {
+          const keyElement = r.querySelector(GOV_UK_SUMMARY_LIST_KEY)
+          return keyElement && keyElement.textContent.trim() === key
+        })
+        expect(row).toBeTruthy()
+        const valueElement = row.querySelector('.govuk-summary-list__value')
+        expect(valueElement.textContent.trim()).toBe(value)
+      }
+    })
+  } else {
+    // Single site validation
+    const siteCard = document.querySelector('#site-details-card')
+    expect(siteCard).toBeTruthy()
+
+    // Validate basic site details if present
+    if (siteDetailsData.length) {
+      for (const [key, value] of Object.entries(siteDetailsData[0])) {
+        const rows = siteCard.querySelectorAll('.govuk-summary-list__row')
+        const row = Array.from(rows).find((r) => {
+          const keyElement = r.querySelector(GOV_UK_SUMMARY_LIST_KEY)
+          return keyElement && keyElement.textContent.trim() === key
+        })
+        expect(row).toBeTruthy()
+        const valueElement = row.querySelector('.govuk-summary-list__value')
+        expect(valueElement.textContent.trim()).toBe(value)
+      }
     }
-  }
 
-  // Validate extended site details (coordinate points) if present
-  const coords = expectedPageContent.siteDetailsExtended?.coordinatePoints ?? []
-  for (const point of coords) {
-    const pointText = siteCard.textContent.includes(point)
-    expect(pointText).toBe(true)
+    // Validate extended site details (coordinate points) if present
+    const coords =
+      expectedPageContent.siteDetailsExtended?.coordinatePoints ?? []
+    for (const point of coords) {
+      const pointText = siteCard.textContent.includes(point)
+      expect(pointText).toBe(true)
+    }
   }
 }

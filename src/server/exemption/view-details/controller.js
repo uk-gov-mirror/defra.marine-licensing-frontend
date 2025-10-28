@@ -34,11 +34,7 @@ export const viewDetailsController = {
       }
 
       const siteDetails = processSiteDetails(exemption, exemptionId, request)
-      const coordinateSystem = siteDetails?.coordinateSystem
-      const siteDetailsData = createSiteDetailsDataJson(
-        siteDetails,
-        coordinateSystem
-      )
+      const { multipleSiteDetails } = exemption
       const isInternalUser =
         getAuthProvider(request) === AUTH_STRATEGIES.ENTRA_ID
 
@@ -53,7 +49,7 @@ export const viewDetailsController = {
         isInternalUser,
         ...exemption,
         siteDetails,
-        siteDetailsData
+        multipleSiteDetails
       })
     } catch (error) {
       if (error.isBoom) {

@@ -78,12 +78,14 @@ describe('exemption-site-details helper', () => {
       const result = processFileUploadSiteDetails(
         baseFileUploadExemption,
         mockExemptionId,
-        mockRequest
+        mockRequest,
+        0
       )
 
-      expect(getFileUploadSummaryData).toHaveBeenCalledWith(
-        baseFileUploadExemption
-      )
+      expect(getFileUploadSummaryData).toHaveBeenCalledWith({
+        ...baseFileUploadExemption,
+        siteDetails: baseFileUploadExemption.siteDetails[0]
+      })
       expect(result).toEqual({
         ...baseFileUploadExemption.siteDetails[0],
         isFileUpload: true,
@@ -131,7 +133,8 @@ describe('exemption-site-details helper', () => {
       const result = processFileUploadSiteDetails(
         shapefileExemption,
         mockExemptionId,
-        mockRequest
+        mockRequest,
+        0
       )
 
       expect(result).toEqual({
@@ -164,7 +167,8 @@ describe('exemption-site-details helper', () => {
       const result = processFileUploadSiteDetails(
         exemptionWithKml,
         mockExemptionId,
-        mockRequest
+        mockRequest,
+        0
       )
 
       expect(mockLogger.error).toHaveBeenCalledWith(
@@ -204,7 +208,8 @@ describe('exemption-site-details helper', () => {
       const result = processFileUploadSiteDetails(
         exemptionWithShapefile,
         mockExemptionId,
-        mockRequest
+        mockRequest,
+        0
       )
 
       expect(result).toEqual({
@@ -234,7 +239,8 @@ describe('exemption-site-details helper', () => {
       const result = processFileUploadSiteDetails(
         exemptionWithMissingFilename,
         mockExemptionId,
-        mockRequest
+        mockRequest,
+        0
       )
 
       expect(result.filename).toBe('Unknown file')
@@ -419,8 +425,8 @@ describe('exemption-site-details helper', () => {
   describe('processSiteDetails', () => {
     const mockExemptionId = 'test-exemption-456'
 
-    test('should return null when exemption has no siteDetails', () => {
-      const exemptionWithoutSiteDetails = []
+    test('should return empty array when exemption has no siteDetails', () => {
+      const exemptionWithoutSiteDetails = { siteDetails: [] }
 
       const result = processSiteDetails(
         exemptionWithoutSiteDetails,
@@ -428,26 +434,34 @@ describe('exemption-site-details helper', () => {
         mockRequest
       )
 
-      expect(result).toBeNull()
+      expect(result).toEqual([])
     })
 
-    test('should route to processFileUploadSiteDetails for file coordinates', () => {
+    test('should return array with single file upload site', () => {
       const fileExemption = {
+        multipleSiteDetails: {
+          multipleSitesEnabled: false
+        },
         siteDetails: [
           {
             coordinatesType: 'file',
             fileUploadType: 'kml',
             uploadedFile: {
               filename: 'test.kml'
-            }
+            },
+            activityDates: {
+              start: '2025-01-01T00:00:00.000Z',
+              end: '2025-01-31T00:00:00.000Z'
+            },
+            activityDescription: 'Test description'
           }
         ]
       }
 
       const mockFileUploadData = {
         method: 'Upload a file with the coordinates of the site',
-        fileType: 'KML',
-        filename: 'test.kml'
+        fileUploadType: 'KML',
+        uploadedFile: { filename: 'test.kml' }
       }
 
       getFileUploadSummaryData.mockReturnValue(mockFileUploadData)
@@ -458,13 +472,22 @@ describe('exemption-site-details helper', () => {
         mockRequest
       )
 
-      expect(result.isFileUpload).toBe(true)
-      expect(result.fileType).toBe('KML')
-      expect(result.filename).toBe('test.kml')
+      expect(result).toHaveLength(1)
+      expect(result[0].isFileUpload).toBe(true)
+      expect(result[0].fileType).toBe('KML')
+      expect(result[0].filename).toBe('test.kml')
+      expect(result[0].activityDates).toBe('1 January 2025 to 31 January 2025')
+      expect(result[0].showActivityDates).toBe(true)
+      expect(result[0].activityDescription).toBe('Test description')
+      expect(result[0].showActivityDescription).toBe(true)
+      expect(result[0].siteNumber).toBe(1)
     })
 
-    test('should route to processManualSiteDetails for manual coordinates', () => {
+    test('should return array with single manual coordinate site', () => {
       const manualExemption = {
+        multipleSiteDetails: {
+          multipleSitesEnabled: false
+        },
         siteDetails: [
           {
             coordinatesType: 'coordinates',
@@ -474,7 +497,12 @@ describe('exemption-site-details helper', () => {
               latitude: '51.5074',
               longitude: '-0.1278'
             },
-            circleWidth: '100'
+            circleWidth: '100',
+            activityDates: {
+              start: '2025-01-01T00:00:00.000Z',
+              end: '2025-01-31T00:00:00.000Z'
+            },
+            activityDescription: 'Test description'
           }
         ]
       }
@@ -489,23 +517,104 @@ describe('exemption-site-details helper', () => {
         mockRequest
       )
 
-      expect(result.isFileUpload).toBe(false)
-      expect(result.coordinateSystem).toBe('wgs84')
-      expect(result.coordinatesEntry).toBe('single')
+      expect(result).toHaveLength(1)
+      expect(result[0].isFileUpload).toBe(false)
+      expect(result[0].coordinateSystem).toBe('wgs84')
+      expect(result[0].coordinatesEntry).toBe('single')
+      expect(result[0].activityDates).toBe('1 January 2025 to 31 January 2025')
+      expect(result[0].showActivityDates).toBe(true)
+      expect(result[0].activityDescription).toBe('Test description')
+      expect(result[0].showActivityDescription).toBe(true)
+      expect(result[0].siteNumber).toBe(1)
     })
 
-    test('should default to processManualSiteDetails for unknown coordinatesType', () => {
-      const unknownTypeExemption = {
+    test('should handle multiple sites with activity dates conditionally displayed', () => {
+      const multiSiteExemption = {
+        multipleSiteDetails: {
+          multipleSitesEnabled: true,
+          sameActivityDates: 'no',
+          sameActivityDescription: 'yes'
+        },
         siteDetails: [
           {
-            coordinatesType: 'unknown',
+            coordinatesType: 'coordinates',
             coordinateSystem: 'wgs84',
             coordinatesEntry: 'single',
-            coordinates: {
-              latitude: '51.5074',
-              longitude: '-0.1278'
+            coordinates: { latitude: '51.5074', longitude: '-0.1278' },
+            circleWidth: '100',
+            siteName: 'Site 1',
+            activityDates: {
+              start: '2025-01-01T00:00:00.000Z',
+              end: '2025-01-31T00:00:00.000Z'
             },
-            circleWidth: '100'
+            activityDescription: 'Shared description'
+          },
+          {
+            coordinatesType: 'coordinates',
+            coordinateSystem: 'wgs84',
+            coordinatesEntry: 'single',
+            coordinates: { latitude: '52.1234', longitude: '-1.5678' },
+            circleWidth: '200',
+            siteName: 'Site 2',
+            activityDates: {
+              start: '2025-02-01T00:00:00.000Z',
+              end: '2025-02-28T00:00:00.000Z'
+            },
+            activityDescription: 'Shared description'
+          }
+        ]
+      }
+
+      getCoordinateSystemText.mockReturnValue('WGS84 (latitude and longitude)')
+      getReviewSummaryText.mockReturnValue('Single circular site')
+      getCoordinateDisplayText
+        .mockReturnValueOnce('51.5074, -0.1278')
+        .mockReturnValueOnce('52.1234, -1.5678')
+
+      const result = processSiteDetails(
+        multiSiteExemption,
+        mockExemptionId,
+        mockRequest
+      )
+
+      expect(result).toHaveLength(2)
+      expect(result[0].siteName).toBe('Site 1')
+      expect(result[0].activityDates).toBe('1 January 2025 to 31 January 2025')
+      expect(result[0].showActivityDates).toBe(true)
+      expect(result[0].activityDescription).toBe('Shared description')
+      expect(result[0].showActivityDescription).toBe(false)
+      expect(result[0].siteNumber).toBe(1)
+
+      expect(result[1].siteName).toBe('Site 2')
+      expect(result[1].activityDates).toBe(
+        '1 February 2025 to 28 February 2025'
+      )
+      expect(result[1].showActivityDates).toBe(true)
+      expect(result[1].activityDescription).toBe('Shared description')
+      expect(result[1].showActivityDescription).toBe(false)
+      expect(result[1].siteNumber).toBe(2)
+    })
+
+    test('should include site name only for multi-site journeys', () => {
+      const multiSiteExemption = {
+        multipleSiteDetails: {
+          multipleSitesEnabled: true,
+          sameActivityDates: 'yes',
+          sameActivityDescription: 'yes'
+        },
+        siteDetails: [
+          {
+            coordinatesType: 'coordinates',
+            coordinateSystem: 'wgs84',
+            coordinatesEntry: 'single',
+            coordinates: { latitude: '51.5074', longitude: '-0.1278' },
+            circleWidth: '100',
+            siteName: 'Site 1',
+            activityDates: {
+              start: '2025-01-01T00:00:00.000Z',
+              end: '2025-01-31T00:00:00.000Z'
+            },
+            activityDescription: 'Test activity description'
           }
         ]
       }
@@ -515,13 +624,16 @@ describe('exemption-site-details helper', () => {
       getCoordinateDisplayText.mockReturnValue('51.5074, -0.1278')
 
       const result = processSiteDetails(
-        unknownTypeExemption,
+        multiSiteExemption,
         mockExemptionId,
         mockRequest
       )
 
-      expect(result.isFileUpload).toBe(false)
-      expect(result.coordinatesType).toBe('coordinates')
+      expect(result[0].siteName).toBe('Site 1')
+      expect(result[0].activityDates).toBe('1 January 2025 to 31 January 2025')
+      expect(result[0].showActivityDates).toBe(false)
+      expect(result[0].activityDescription).toBe('Test activity description')
+      expect(result[0].showActivityDescription).toBe(false)
     })
   })
 })
