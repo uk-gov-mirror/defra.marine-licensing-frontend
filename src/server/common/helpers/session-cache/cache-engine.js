@@ -10,7 +10,10 @@ export function getCacheEngine(engine) {
   if (engine === 'redis') {
     logger.info('Using Redis session cache')
     const redisClient = buildRedisClient(config.get('redis'))
-    return new CatboxRedis({ client: redisClient })
+    return new CatboxRedis({
+      client: redisClient,
+      partition: 'hapi-cache' // Explicit partition for cache isolation
+    })
   }
 
   if (config.get('isProduction')) {
