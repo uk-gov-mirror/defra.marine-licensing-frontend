@@ -7,6 +7,7 @@ export const sessionCache = {
   plugin: yar,
   options: {
     name: sessionConfig.cache.name,
+    lazy: false,
     cache: {
       cache: sessionConfig.cache.name,
       expiresIn: sessionConfig.cache.ttl
