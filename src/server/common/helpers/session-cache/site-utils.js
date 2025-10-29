@@ -1,16 +1,30 @@
 import { getSiteDetailsBySite } from '#src/server/common/helpers/session-cache/site-details-utils.js'
 import { getExemptionCache } from '#src/server/common/helpers/session-cache/utils.js'
 import { getSiteNumber } from '#src/server/exemption/site-details/utils/site-number.js'
-export const setSiteData = (request) => {
+import { routes } from '#src/server/common/constants/routes.js'
+import { getUserSession } from '#src/server/common/plugins/auth/utils.js'
+export const setSiteData = async (request) => {
   const exemption = getExemptionCache(request)
-  request.logger.info('Logging exemption from cache')
-  request.logger.info({ exemption })
 
-  const siteNumber = getSiteNumber(exemption, request)
+  const userSession = await getUserSession(request, request.state?.userSession)
+  const contactId = userSession?.contactId
+  const email = userSession?.email
 
-  request.logger.info(
-    `siteNumber has been set to ${siteNumber} by getSiteNumber`
-  )
+  if (request.path === routes.SITE_NAME) {
+    request.logger.info(
+      { contactId, email, exemption },
+      'Logging exemption from cache'
+    )
+  }
+
+  const siteNumber = await getSiteNumber(exemption, request)
+
+  if (request.path === routes.SITE_NAME) {
+    request.logger.info(
+      { contactId, email },
+      `siteNumber has been set to ${siteNumber} by getSiteNumber`
+    )
+  }
 
   const siteIndex = siteNumber - 1
 
@@ -22,8 +36,8 @@ export const setSiteData = (request) => {
   }
 }
 export const setSiteDataPreHandler = {
-  method: (request, h) => {
-    request.site = setSiteData(request)
+  method: async (request, h) => {
+    request.site = await setSiteData(request)
 
     return h.continue
   }
