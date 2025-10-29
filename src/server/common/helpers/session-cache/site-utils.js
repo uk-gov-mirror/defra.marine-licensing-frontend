@@ -3,8 +3,14 @@ import { getExemptionCache } from '#src/server/common/helpers/session-cache/util
 import { getSiteNumber } from '#src/server/exemption/site-details/utils/site-number.js'
 export const setSiteData = (request) => {
   const exemption = getExemptionCache(request)
+  request.logger.info('Logging exemption from cache')
+  request.logger.info({ exemption })
 
   const siteNumber = getSiteNumber(exemption, request)
+
+  request.logger.info(
+    `siteNumber has been set to ${siteNumber} by getSiteNumber`
+  )
 
   const siteIndex = siteNumber - 1
 
