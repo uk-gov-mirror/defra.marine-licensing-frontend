@@ -117,17 +117,29 @@ export const validateProjectDetails = (document, expected) => {
   )
 }
 
+export const validateSiteLocation = (document, expected) => {
+  if (expected.siteLocation) {
+    validateSummaryCardContent(
+      document,
+      '#site-location-card',
+      expected.siteLocation
+    )
+  }
+}
+
 /**
  * Validates activity details summary card
  * @param {Document} document - JSDOM document
  * @param {object} expected - Expected page content
  */
 export const validateActivityDetails = (document, expected) => {
-  validateSummaryCardContent(
-    document,
-    '#activity-details-card',
-    expected.activityDetails
-  )
+  if (expected.activityDetails) {
+    validateSummaryCardContent(
+      document,
+      '#activity-details-card',
+      expected.activityDetails
+    )
+  }
 }
 
 /**

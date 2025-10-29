@@ -3,6 +3,7 @@
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "project-details-card/macro.njk" import appProjectDetailsCard %}
 {% from "site-location-card/macro.njk" import appSiteLocationCard %}
+{% from "activity-details-card/macro.njk" import appActivityDetailsCard %}
 {% from "site-details-card/macro.njk" import appSiteDetailsCard %}
 {% from "public-register-card/macro.njk" import appPublicRegisterCard %}
 
@@ -36,6 +37,11 @@
     
     {{ appSiteLocationCard({
       siteLocationData: siteLocationData,
+      isReadOnly: isReadOnly
+    }) }}
+
+    {{ appActivityDetailsCard({
+      activityDetailsData: siteLocationData,
       isReadOnly: isReadOnly
     }) }}
 

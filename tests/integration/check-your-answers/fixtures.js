@@ -423,12 +423,24 @@ export const testScenarios = [
       backLinkText: 'Go back to your project',
       summaryCards: [
         'Project summary',
+        'Providing the site location',
+        'Activity details',
         'Site 1 details',
         'Site 2 details',
         'Sharing your project information publicly'
       ],
       projectDetails: {
         'Project name': 'Hammersmith pontoon construction'
+      },
+      siteLocation: {
+        'Method of providing site location':
+          'Enter the coordinates of the site manually',
+        'More than one site': 'Yes'
+      },
+      activityDetails: {
+        'Are the activity dates the same for every site?': 'No',
+        'Is the activity description the same for every site?': 'Yes',
+        'Activity description': 'Pontoon construction works'
       },
       siteDetails: [
         {
@@ -525,12 +537,26 @@ export const testScenarios = [
       backLinkText: 'Go back to your project',
       summaryCards: [
         'Project summary',
+        'Providing the site location',
+        'Activity details',
         'Site 1 details',
         'Site 2 details',
         'Sharing your project information publicly'
       ],
       projectDetails: {
         'Project name': 'Hammersmith pontoon construction'
+      },
+      siteLocation: {
+        'Adding multiple sites': 'Yes',
+        'Method of providing site location':
+          'Upload a file with the coordinates of the site',
+        'File type': 'KML',
+        'File uploaded': 'site1.kml'
+      },
+      activityDetails: {
+        'Are the activity dates the same for every site?': 'Yes',
+        'Activity dates': '1 January 2025 to 31 December 2025',
+        'Is the activity description the same for every site?': 'No'
       },
       siteDetails: [
         {
