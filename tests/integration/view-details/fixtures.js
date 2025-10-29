@@ -89,7 +89,11 @@ const baseExpectedContent = {
   pageCaption: 'EXE/2025/00003 - Exempt activity notification',
   backLinkText: 'Back',
   backLinkHref: '/home',
-  summaryCards: ['Project summary', 'Site details', 'Public register'],
+  summaryCards: [
+    'Project summary',
+    'Site details',
+    'Sharing your project information publicly'
+  ],
   projectDetails: {
     'Type of activity': 'Deposit of a substance or object',
     'Why this activity is exempt':
@@ -104,7 +108,7 @@ const baseExpectedContent = {
     ]
   },
   publicRegister: {
-    'Information withheld from public register': 'No'
+    'Consent to publish your project information': 'No'
   }
 }
 
@@ -223,7 +227,7 @@ export const testScenarios = [
     name: 'Exemption with no public register inclusion',
     exemption: createSubmittedExemption({
       publicRegister: {
-        consent: 'yes',
+        consent: 'no',
         reason: 'Lorem ipsum dolor sit amet'
       },
       siteDetails: [
@@ -247,8 +251,8 @@ export const testScenarios = [
         'Width of circular site': '100 metres'
       },
       publicRegister: {
-        'Information withheld from public register': 'Yes',
-        'Why the information should be withheld': 'Lorem ipsum dolor sit amet'
+        'Consent to publish your project information': 'No',
+        'Why you do not consent': 'Lorem ipsum dolor sit amet'
       }
     }
   }
