@@ -36,7 +36,7 @@ export const processFileUploadSiteDetails = (
     return {
       ...siteDetails,
       isFileUpload: true,
-      method: fileUploadData.method,
+      method: 'Upload a file with the coordinates of the site',
       fileType: fileUploadData.fileUploadType,
       filename: fileUploadData.uploadedFile.filename
     }
@@ -67,6 +67,7 @@ export const processManualSiteDetails = (exemption, siteIndex = 0) => {
 
   const baseData = {
     isFileUpload: false,
+    method: 'Enter the coordinates of the site manually',
     coordinateSystemText: getCoordinateSystemText(coordinateSystem),
     reviewSummaryText: getReviewSummaryText(siteDetails),
     coordinatesType: 'coordinates',

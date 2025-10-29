@@ -294,7 +294,8 @@ describe('exemption-site-details helper', () => {
         },
         circleWidth: '100',
         isPolygonSite: false,
-        coordinateDisplayText: '51.5074, -0.1278'
+        coordinateDisplayText: '51.5074, -0.1278',
+        method: 'Enter the coordinates of the site manually'
       })
     })
 
@@ -332,6 +333,7 @@ describe('exemption-site-details helper', () => {
         },
         circleWidth: '250',
         isPolygonSite: false,
+        method: 'Enter the coordinates of the site manually',
         coordinateDisplayText: '425053, 564180'
       })
     })
@@ -373,6 +375,7 @@ describe('exemption-site-details helper', () => {
         isFileUpload: false,
         coordinateSystemText: 'WGS84 (latitude and longitude)',
         reviewSummaryText: 'Multiple polygon site',
+        method: 'Enter the coordinates of the site manually',
         coordinatesType: 'coordinates',
         coordinateSystem: 'wgs84',
         coordinatesEntry: 'multiple',

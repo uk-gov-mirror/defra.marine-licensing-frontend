@@ -5,6 +5,7 @@ import { routes } from '#src/server/common/constants/routes.js'
 import { createSiteDetailsDataJson } from '#src/server/common/helpers/site-details.js'
 import { formatDate } from '#src/server/common/helpers/dates/date-utils.js'
 import { getSiteDetailsBySite } from '#src/server/common/helpers/session-cache/site-details-utils.js'
+import { buildSiteLocationData } from '#src/server/common/helpers/site-location-data.js'
 const isWGS84 = (coordinateSystem) =>
   coordinateSystem === COORDINATE_SYSTEMS.WGS84
 
@@ -162,17 +163,6 @@ const extractCoordinateData = (feature) => ({
   coordinates: feature.geometry.coordinates
 })
 
-const getFileTypeText = (fileUploadType) => {
-  const typeMap = { kml: 'KML', shapefile: 'Shapefile' }
-  const fileType = typeMap[fileUploadType]
-
-  if (!fileType) {
-    throw new Error('Unsupported file type for site details')
-  }
-
-  return fileType
-}
-
 export const getFileUploadBackLink = (previousPage) => {
   if (!previousPage || !URL.canParse(previousPage)) {
     return routes.FILE_UPLOAD
@@ -294,52 +284,12 @@ export const buildManualCoordinateSummaryData = (
   return summaryData
 }
 
-export const buildMultipleSitesSummaryData = (
-  multipleSiteDetails,
-  siteDetails
-) => {
-  if (!siteDetails?.[0]) {
-    return {}
-  }
-
-  const { multipleSitesEnabled, sameActivityDates, sameActivityDescription } =
-    multipleSiteDetails ?? {}
-
-  const multipleSiteData = {
-    multipleSiteDetails: multipleSitesEnabled ? 'Yes' : 'No',
-    sameActivityDates: sameActivityDates === 'yes' ? 'Yes' : 'No',
-    sameActivityDescription: sameActivityDescription === 'yes' ? 'Yes' : 'No'
-  }
-
-  const firstSite = siteDetails[0]
-
-  multipleSiteData.method =
-    firstSite.coordinatesType === 'coordinates'
-      ? 'Enter the coordinates of the site manually'
-      : 'Upload a file with the coordinates of the site'
-
-  if (sameActivityDates === 'yes') {
-    multipleSiteData.activityDates = `${formatDate(firstSite.activityDates?.start)} to ${formatDate(firstSite.activityDates?.end)}`
-  }
-
-  if (sameActivityDescription === 'yes') {
-    multipleSiteData.activityDescription = firstSite.activityDescription
-  }
-
-  if (firstSite.coordinatesType === 'file') {
-    multipleSiteData.fileType = getFileTypeText(firstSite.fileUploadType)
-    multipleSiteData.filename = firstSite.uploadedFile.filename
-  }
-
-  return multipleSiteData
-}
-
 export const renderFileUploadReview = (h, options) => {
   const { exemption, previousPage, siteDetails, reviewSiteDetailsPageData } =
     options
   const { multipleSiteDetails } = exemption
 
-  const multipleSiteDetailsData = buildMultipleSitesSummaryData(
+  const multipleSiteDetailsData = buildSiteLocationData(
     multipleSiteDetails,
     siteDetails
   )
@@ -404,7 +354,7 @@ export const renderManualCoordinateReview = (h, options) => {
     multipleSiteDetails
   )
 
-  const multipleSiteDetailsData = buildMultipleSitesSummaryData(
+  const multipleSiteDetailsData = buildSiteLocationData(
     multipleSiteDetails,
     exemption.siteDetails
   )

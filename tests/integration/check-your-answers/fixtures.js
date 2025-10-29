@@ -63,7 +63,12 @@ export const testScenarios = [
     expectedPageContent: {
       pageTitle: 'Check your answers before sending your information',
       backLinkText: 'Go back to your project',
-      summaryCards: ['Project summary', 'Site details', 'Public register'],
+      summaryCards: [
+        'Project summary',
+        'Providing the site location',
+        'Site details',
+        'Public register'
+      ],
       projectDetails: {
         'Project name': 'Hammersmith pontoon construction',
         'Type of activity': 'Deposit of a substance or object',
@@ -105,7 +110,12 @@ export const testScenarios = [
     expectedPageContent: {
       pageTitle: 'Check your answers before sending your information',
       backLinkText: 'Go back to your project',
-      summaryCards: ['Project summary', 'Site details', 'Public register'],
+      summaryCards: [
+        'Project summary',
+        'Providing the site location',
+        'Site details',
+        'Public register'
+      ],
       projectDetails: {
         'Project name': 'Hammersmith pontoon construction'
       },
@@ -136,7 +146,12 @@ export const testScenarios = [
     expectedPageContent: {
       pageTitle: 'Check your answers before sending your information',
       backLinkText: 'Go back to your project',
-      summaryCards: ['Project summary', 'Site details', 'Public register'],
+      summaryCards: [
+        'Project summary',
+        'Providing the site location',
+        'Site details',
+        'Public register'
+      ],
       projectDetails: {
         'Project name': 'Hammersmith pontoon construction'
       },
@@ -176,7 +191,12 @@ export const testScenarios = [
     expectedPageContent: {
       pageTitle: 'Check your answers before sending your information',
       backLinkText: 'Go back to your project',
-      summaryCards: ['Project summary', 'Site details', 'Public register'],
+      summaryCards: [
+        'Project summary',
+        'Providing the site location',
+        'Site details',
+        'Public register'
+      ],
       projectDetails: {
         'Project name': 'Hammersmith pontoon construction'
       },
@@ -222,7 +242,12 @@ export const testScenarios = [
     expectedPageContent: {
       pageTitle: 'Check your answers before sending your information',
       backLinkText: 'Go back to your project',
-      summaryCards: ['Project summary', 'Site details', 'Public register'],
+      summaryCards: [
+        'Project summary',
+        'Providing the site location',
+        'Site details',
+        'Public register'
+      ],
       projectDetails: {
         'Project name': 'Hammersmith pontoon construction'
       },
@@ -269,7 +294,12 @@ export const testScenarios = [
     expectedPageContent: {
       pageTitle: 'Check your answers before sending your information',
       backLinkText: 'Go back to your project',
-      summaryCards: ['Project summary', 'Site details', 'Public register'],
+      summaryCards: [
+        'Project summary',
+        'Providing the site location',
+        'Site details',
+        'Public register'
+      ],
       projectDetails: {
         'Project name': 'Hammersmith pontoon construction'
       },
@@ -317,7 +347,12 @@ export const testScenarios = [
     expectedPageContent: {
       pageTitle: 'Check your answers before sending your information',
       backLinkText: 'Go back to your project',
-      summaryCards: ['Project summary', 'Site details', 'Public register'],
+      summaryCards: [
+        'Project summary',
+        'Providing the site location',
+        'Site details',
+        'Public register'
+      ],
       projectDetails: {
         'Project name': 'Hammersmith pontoon construction'
       },
