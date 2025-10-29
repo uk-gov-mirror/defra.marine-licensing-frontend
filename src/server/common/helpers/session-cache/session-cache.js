@@ -14,11 +14,13 @@ export const sessionCache = {
     },
     storeBlank: false,
     errorOnCacheNotReady: true,
+    maxCookieSize: 0, // Force all session data to server-side storage instead of cookie
     cookieOptions: {
       password: sessionConfig.cookie.password,
       ttl: sessionConfig.cookie.ttl,
       isSecure: config.get('session.cookie.secure'),
-      clearInvalid: true
+      clearInvalid: true,
+      isSameSite: 'Lax' // Ensure cookies are sent on same-site requests
     }
   }
 }
