@@ -425,7 +425,7 @@ export const testScenarios = [
         'Project summary',
         'Site 1 details',
         'Site 2 details',
-        'Public register'
+        'Sharing your project information publicly'
       ],
       projectDetails: {
         'Project name': 'Hammersmith pontoon construction'
@@ -455,7 +455,7 @@ export const testScenarios = [
         }
       ],
       publicRegister: {
-        'Information withheld from public register': 'No'
+        'Consent to publish your project information': 'No'
       },
       submitButton: 'Confirm and send'
     }
@@ -527,7 +527,7 @@ export const testScenarios = [
         'Project summary',
         'Site 1 details',
         'Site 2 details',
-        'Public register'
+        'Sharing your project information publicly'
       ],
       projectDetails: {
         'Project name': 'Hammersmith pontoon construction'
@@ -545,7 +545,7 @@ export const testScenarios = [
         }
       ],
       publicRegister: {
-        'Information withheld from public register': 'No'
+        'Consent to publish your project information': 'No'
       },
       submitButton: 'Confirm and send'
     }
