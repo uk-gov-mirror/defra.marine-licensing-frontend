@@ -181,7 +181,8 @@ const expectRejectedStatusHandling = async (
   getExemptionCacheSpy,
   mockCdpService,
   updateExemptionSiteDetailsSpy,
-  rejectedMessage,
+  errorCode,
+  rawMessage,
   expectedErrorMessage,
   fileType = 'kml'
 ) => {
@@ -193,7 +194,8 @@ const expectRejectedStatusHandling = async (
   )
   mockCdpService.getStatus.mockResolvedValue({
     status: 'rejected',
-    message: rejectedMessage
+    errorCode,
+    message: rawMessage
   })
 
   const h = createMockResponseHandler()
@@ -605,6 +607,7 @@ describe('#uploadAndWait', () => {
           getExemptionCacheSpy,
           mockCdpService,
           updateExemptionSiteDetailsSpy,
+          'VIRUS_DETECTED',
           'The selected file contains a virus',
           'The selected file contains a virus'
         )
@@ -649,20 +652,28 @@ describe('#uploadAndWait', () => {
 
       test('should handle different error message types correctly', async () => {
         const testCases = [
-          { message: 'file is empty', expected: 'The selected file is empty' },
           {
+            errorCode: 'FILE_EMPTY',
+            message: 'file is empty',
+            expected: 'The selected file is empty'
+          },
+          {
+            errorCode: 'FILE_TOO_LARGE',
             message: 'file must be smaller than 50MB',
             expected: 'The selected file must be smaller than 50 MB'
           },
           {
+            errorCode: 'INVALID_FILE_TYPE',
             message: 'must be a kml file',
             expected: 'The selected file must be a KML file'
           },
           {
+            errorCode: 'NO_FILE_SELECTED',
             message: 'Select a file to upload',
             expected: 'Select a file to upload'
           },
           {
+            errorCode: 'UPLOAD_ERROR',
             message: 'unknown error',
             expected: 'The selected file could not be uploaded – try again'
           }
@@ -674,6 +685,7 @@ describe('#uploadAndWait', () => {
             getExemptionCacheSpy,
             mockCdpService,
             updateExemptionSiteDetailsSpy,
+            testCase.errorCode,
             testCase.message,
             testCase.expected
           )
@@ -686,6 +698,7 @@ describe('#uploadAndWait', () => {
           getExemptionCacheSpy,
           mockCdpService,
           updateExemptionSiteDetailsSpy,
+          null,
           'must be a foo file',
           'The selected file could not be uploaded – try again',
           'foo'
@@ -698,6 +711,7 @@ describe('#uploadAndWait', () => {
           getExemptionCacheSpy,
           mockCdpService,
           updateExemptionSiteDetailsSpy,
+          'INVALID_FILE_TYPE',
           'must be a shapefile',
           'The selected file must be a Shapefile',
           'shapefile'
@@ -740,12 +754,15 @@ describe('#uploadAndWait', () => {
           }
         )
 
-        // And error is logged
+        // And error is logged with error code and mapped message
         expect(mockRequest.logger.error).toHaveBeenCalledWith(
           {
             error: new Error('Geo-parser service unavailable'),
             filename: 'test.kml',
-            fileType: 'kml'
+            fileType: 'kml',
+            errorCode: null,
+            mappedMessage:
+              'The selected file could not be processed – try again'
           },
           'FileUpload: ERROR: Failed to extract coordinates from uploaded file'
         )
