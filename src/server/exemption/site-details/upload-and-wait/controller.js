@@ -137,7 +137,7 @@ function handleGeoParserError(request, error, filename, fileType) {
 
   if (error.data?.payload?.message) {
     errorCode = error.data.payload.message
-   }
+  }
   const message = getGeoParserErrorMessage(errorCode)
 
   const errorDetails = {
