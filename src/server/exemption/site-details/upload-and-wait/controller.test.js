@@ -938,7 +938,11 @@ describe('#uploadAndWait', () => {
       test('should handle SHAPEFILE_MISSING_CORE_FILES error from geo-parser', async () => {
         getExemptionCacheSpy.mockReturnValue(
           createMockExemption({
-            siteDetails: [{ uploadConfig: createMockUploadConfig({ fileType: 'shapefile' }) }]
+            siteDetails: [
+              {
+                uploadConfig: createMockUploadConfig({ fileType: 'shapefile' })
+              }
+            ]
           })
         )
         const statusResponse = createMockStatusResponse('ready', {
@@ -970,7 +974,8 @@ describe('#uploadAndWait', () => {
             filename: 'coordinates.zip',
             fileType: 'shapefile',
             errorCode: 'SHAPEFILE_MISSING_CORE_FILES',
-            mappedMessage: 'The selected file must include .shp .shx and .dbf files'
+            mappedMessage:
+              'The selected file must include .shp .shx and .dbf files'
           },
           'FileUpload: ERROR: Failed to extract coordinates from uploaded file'
         )
@@ -999,7 +1004,11 @@ describe('#uploadAndWait', () => {
       test('should handle SHAPEFILE_MISSING_PRJ_FILE error from geo-parser', async () => {
         getExemptionCacheSpy.mockReturnValue(
           createMockExemption({
-            siteDetails: [{ uploadConfig: createMockUploadConfig({ fileType: 'shapefile' }) }]
+            siteDetails: [
+              {
+                uploadConfig: createMockUploadConfig({ fileType: 'shapefile' })
+              }
+            ]
           })
         )
         const statusResponse = createMockStatusResponse('ready', {
@@ -1060,7 +1069,11 @@ describe('#uploadAndWait', () => {
       test('should handle SHAPEFILE_PRJ_FILE_TOO_LARGE error from geo-parser', async () => {
         getExemptionCacheSpy.mockReturnValue(
           createMockExemption({
-            siteDetails: [{ uploadConfig: createMockUploadConfig({ fileType: 'shapefile' }) }]
+            siteDetails: [
+              {
+                uploadConfig: createMockUploadConfig({ fileType: 'shapefile' })
+              }
+            ]
           })
         )
         const statusResponse = createMockStatusResponse('ready', {
@@ -1092,7 +1105,8 @@ describe('#uploadAndWait', () => {
             filename: 'coordinates.zip',
             fileType: 'shapefile',
             errorCode: 'SHAPEFILE_PRJ_FILE_TOO_LARGE',
-            mappedMessage: "The selected file's .prj file must be smaller than 50KB"
+            mappedMessage:
+              "The selected file's .prj file must be smaller than 50KB"
           },
           'FileUpload: ERROR: Failed to extract coordinates from uploaded file'
         )

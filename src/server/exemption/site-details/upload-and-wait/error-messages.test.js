@@ -78,9 +78,7 @@ describe('error-messages', () => {
     })
 
     it('should have message for FILE_EMPTY', () => {
-      expect(CDP_ERROR_MESSAGES.FILE_EMPTY).toBe(
-        'The selected file is empty'
-      )
+      expect(CDP_ERROR_MESSAGES.FILE_EMPTY).toBe('The selected file is empty')
     })
 
     it('should have message for FILE_TOO_LARGE', () => {
