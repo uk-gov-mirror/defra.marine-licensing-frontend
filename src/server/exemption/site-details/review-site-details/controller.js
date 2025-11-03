@@ -40,7 +40,7 @@ export const reviewSiteDetailsController = {
     const { projectName, publicRegister, multipleSiteDetails, siteDetails } =
       completeExemption
 
-    setExemptionCache(request, {
+    await setExemptionCache(request, h, {
       id: exemption.id,
       projectName,
       publicRegister,
@@ -90,7 +90,7 @@ export const reviewSiteDetailsSubmitController = {
         ...siteDetails,
         { coordinatesType: siteDetails[0].coordinatesType }
       ]
-      setExemptionCache(request, {
+      await setExemptionCache(request, h, {
         ...completeExemption,
         siteDetails: updatedSiteDetails
       })

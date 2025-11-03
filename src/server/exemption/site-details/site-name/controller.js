@@ -137,7 +137,7 @@ export const siteNameSubmitController = {
       : routes.SAME_ACTIVITY_DATES + queryParams
 
     if (action) {
-      await saveSiteDetailsToBackend(request)
+      await saveSiteDetailsToBackend(request, h)
     }
 
     return h.redirect(redirectRoute)

@@ -150,7 +150,7 @@ export const activityDescriptionSubmitController = {
         : getNextRoute(request.site)
 
       if (nextRoute === routes.REVIEW_SITE_DETAILS || action) {
-        await saveSiteDetailsToBackend(request)
+        await saveSiteDetailsToBackend(request, h)
       }
 
       return h.redirect(nextRoute)

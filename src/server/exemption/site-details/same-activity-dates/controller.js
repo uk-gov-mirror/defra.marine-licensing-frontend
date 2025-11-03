@@ -156,7 +156,7 @@ export const sameActivityDatesSubmitController = {
 
       if (answerChangedFromYesToNo(previousAnswer, payload)) {
         copySameActivityDatesToAllSites(request)
-        await saveSiteDetailsToBackend(request)
+        await saveSiteDetailsToBackend(request, h)
         return h.redirect(routes.REVIEW_SITE_DETAILS)
       }
     }

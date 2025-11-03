@@ -159,7 +159,7 @@ export const sameActivityDescriptionSubmitController = {
 
       if (answerChangedFromYesToNo(previousAnswer, payload)) {
         copySameActivityDescriptionToAllSites(request)
-        await saveSiteDetailsToBackend(request)
+        await saveSiteDetailsToBackend(request, h)
         return h.redirect(routes.REVIEW_SITE_DETAILS)
       }
     }
@@ -168,7 +168,7 @@ export const sameActivityDescriptionSubmitController = {
       siteDetails.coordinatesType === 'file' &&
       payload.sameActivityDescription === 'no'
     ) {
-      await saveSiteDetailsToBackend(request)
+      await saveSiteDetailsToBackend(request, h)
       return h.redirect(routes.REVIEW_SITE_DETAILS)
     }
 

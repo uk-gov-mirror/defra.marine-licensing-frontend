@@ -49,10 +49,10 @@ export const deleteExemptionController = {
   }
 }
 export const deleteExemptionSelectController = {
-  handler(request, h) {
+  async handler(request, h) {
     const { exemptionId } = request.params
     clearExemptionCache(request)
-    setExemptionCache(request, { id: exemptionId })
+    await setExemptionCache(request, h, { id: exemptionId })
     return h.redirect(routes.DELETE_EXEMPTION)
   }
 }

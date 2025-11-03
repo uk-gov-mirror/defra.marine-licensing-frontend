@@ -7,9 +7,10 @@ export const clearExemptionCache = (request) => {
 export const getExemptionCache = (request) => {
   return clone(request.yar.get(EXEMPTION_CACHE_KEY) || {})
 }
-export const setExemptionCache = (request, value) => {
+export const setExemptionCache = async (request, h, value) => {
   const cacheValue = value || {}
   request.yar.set(EXEMPTION_CACHE_KEY, value || {})
+  await request.yar.commit(h)
   return cacheValue
 }
 export const updateExemptionSiteDetails = (request, siteIndex, key, value) => {

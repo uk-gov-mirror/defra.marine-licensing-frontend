@@ -191,7 +191,7 @@ export const centreCoordinatesSubmitController = {
         : routes.WIDTH_OF_SITE + queryParams
 
     if (action && hasCircleWidthEntry) {
-      await saveSiteDetailsToBackend(request)
+      await saveSiteDetailsToBackend(request, h)
     }
 
     return h.redirect(nextRoute)
