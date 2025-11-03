@@ -91,7 +91,7 @@ export const multipleSitesSubmitController = {
       failAction: createValidationFailAction
     }
   },
-  handler(request, h) {
+  async handler(request, h) {
     const { payload } = request
     const exemption = getExemptionCache(request)
 
