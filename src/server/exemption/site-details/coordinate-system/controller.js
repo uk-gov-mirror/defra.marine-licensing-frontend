@@ -134,15 +134,16 @@ export const coordinateSystemSubmitController = {
       }
     }
   },
-  handler(request, h) {
+  async handler(request, h) {
     const { payload, site } = request
     const { siteIndex, queryParams, siteDetails } = site
     const action = request.query.action
 
     const exemption = getExemptionCache(request)
 
-    updateExemptionSiteDetails(
+    await updateExemptionSiteDetails(
       request,
+      h,
       siteIndex,
       'coordinateSystem',
       payload.coordinateSystem
@@ -164,8 +165,20 @@ export const coordinateSystemSubmitController = {
       }
 
       if (isStartOfChangeJourney) {
-        updateExemptionSiteDetails(request, siteIndex, 'coordinates', null)
-        updateExemptionSiteDetails(request, siteIndex, 'circleWidth', null)
+        await updateExemptionSiteDetails(
+          request,
+          h,
+          siteIndex,
+          'coordinates',
+          null
+        )
+        await updateExemptionSiteDetails(
+          request,
+          h,
+          siteIndex,
+          'circleWidth',
+          null
+        )
       }
     }
 

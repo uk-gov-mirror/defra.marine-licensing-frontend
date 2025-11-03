@@ -13,7 +13,13 @@ export const setExemptionCache = async (request, h, value) => {
   await request.yar.commit(h)
   return cacheValue
 }
-export const updateExemptionSiteDetails = (request, siteIndex, key, value) => {
+export const updateExemptionSiteDetails = async (
+  request,
+  h,
+  siteIndex,
+  key,
+  value
+) => {
   const existingCache = getExemptionCache(request)
   const existingSiteDetails = existingCache.siteDetails || []
   const cacheValue = value ?? null
@@ -33,6 +39,8 @@ export const updateExemptionSiteDetails = (request, siteIndex, key, value) => {
     ...existingCache,
     siteDetails: updatedSiteDetails
   })
+
+  await request.yar.commit(h)
 
   return { [key]: cacheValue }
 }

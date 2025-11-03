@@ -124,8 +124,9 @@ export const widthOfSiteSubmitController = {
     const { siteIndex, siteNumber, queryParams } = request.site
     const action = request.query.action
 
-    updateExemptionSiteDetails(
+    await updateExemptionSiteDetails(
       request,
+      h,
       siteIndex,
       'circleWidth',
       payload.width.trim()

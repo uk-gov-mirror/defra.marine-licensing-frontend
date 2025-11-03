@@ -123,16 +123,16 @@ const logExtractionError = (request, error, fileContext) => {
   )
 }
 
-function handleValidationError(request, validation, fileType) {
+async function handleValidationError(request, h, validation, fileType) {
   const errorDetails = {
     message: validation.errorMessage,
     fieldName: 'file'
   }
-  storeUploadError(request, errorDetails, fileType)
+  await storeUploadError(request, h, errorDetails, fileType)
   return { redirect: routes.FILE_UPLOAD }
 }
 
-function handleGeoParserError(request, error, filename, fileType) {
+async function handleGeoParserError(request, h, error, filename, fileType) {
   let errorCode = null
 
   if (error.data?.payload?.message) {
@@ -143,10 +143,10 @@ function handleGeoParserError(request, error, filename, fileType) {
   const errorDetails = {
     message,
     fieldName: 'file',
-    fileType
+    filename
   }
 
-  storeUploadError(request, errorDetails, fileType)
+  await storeUploadError(request, h, errorDetails, fileType)
 
   request.logger.error(
     {
@@ -162,7 +162,7 @@ function handleGeoParserError(request, error, filename, fileType) {
   return { redirect: routes.FILE_UPLOAD }
 }
 
-function handleCdpRejectionError(request, status, fileType) {
+async function handleCdpRejectionError(request, h, status, fileType) {
   const errorMessage = status.errorCode
     ? getCdpErrorMessageFromCode(status.errorCode, fileType)
     : DEFAULT_ERROR_MESSAGE
@@ -182,21 +182,21 @@ function handleCdpRejectionError(request, status, fileType) {
     'FileUpload: CDP rejection error'
   )
 
-  storeUploadError(request, errorDetails, fileType)
+  await storeUploadError(request, h, errorDetails, fileType)
   return { redirect: routes.FILE_UPLOAD }
 }
 
-function clearUploadSession(request) {
-  updateExemptionSiteDetails(request, 0, 'uploadConfig', null)
+async function clearUploadSession(request, h) {
+  await updateExemptionSiteDetails(request, h, 0, 'uploadConfig', null)
 }
 
-function storeUploadError(request, errorDetails, fileType) {
-  updateExemptionSiteDetails(request, 0, 'uploadError', {
+async function storeUploadError(request, h, errorDetails, fileType) {
+  await updateExemptionSiteDetails(request, h, 0, 'uploadError', {
     message: errorDetails.message,
     fieldName: errorDetails.fieldName,
     fileType
   })
-  clearUploadSession(request)
+  await clearUploadSession(request, h)
 }
 
 function storeSuccessfulUpload(request, status, coordinateData, s3Location) {
@@ -222,7 +222,12 @@ function handleProcessingStatus(status, exemption, h) {
 }
 
 async function handleReadyStatus(status, uploadConfig, request, h) {
-  const validationResult = validateUploadedFile(status, uploadConfig, request)
+  const validationResult = await validateUploadedFile(
+    status,
+    uploadConfig,
+    request,
+    h
+  )
   if (!validationResult.isValid) {
     return h.redirect(routes.FILE_UPLOAD)
   }
@@ -230,7 +235,7 @@ async function handleReadyStatus(status, uploadConfig, request, h) {
   return processValidatedFile(status, uploadConfig, request, h)
 }
 
-const validateUploadedFile = (status, uploadConfig, request) => {
+const validateUploadedFile = async (status, uploadConfig, request, h) => {
   const fileValidationService = getFileValidationService(request.logger)
   const allowedExtensions = getAllowedExtensions(uploadConfig.fileType)
   const validation = fileValidationService.validateFileExtension(
@@ -239,7 +244,7 @@ const validateUploadedFile = (status, uploadConfig, request) => {
   )
 
   if (!validation.isValid) {
-    handleValidationError(request, validation, uploadConfig.fileType)
+    await handleValidationError(request, h, validation, uploadConfig.fileType)
   }
 
   return validation
@@ -260,7 +265,13 @@ const processValidatedFile = async (status, uploadConfig, request, h) => {
 
     return h.redirect(routes.ACTIVITY_DATES)
   } catch (error) {
-    handleGeoParserError(request, error, status.filename, uploadConfig.fileType)
+    await handleGeoParserError(
+      request,
+      h,
+      error,
+      status.filename,
+      uploadConfig.fileType
+    )
     return h.redirect(routes.FILE_UPLOAD)
   }
 }
@@ -296,9 +307,9 @@ const logSuccessfulProcessing = (
     }
   )
 }
-function handleRejectedStatus(status, uploadConfig, request, h) {
+async function handleRejectedStatus(status, uploadConfig, request, h) {
   // Handle CDP rejection/error and redirect
-  handleCdpRejectionError(request, status, uploadConfig.fileType)
+  await handleCdpRejectionError(request, h, status, uploadConfig.fileType)
   return h.redirect(routes.FILE_UPLOAD)
 }
 
@@ -379,7 +390,7 @@ export const uploadAndWaitController = {
       )
 
       // Clear upload config and redirect to file type selection
-      updateExemptionSiteDetails(request, 0, 'uploadConfig', null)
+      await updateExemptionSiteDetails(request, h, 0, 'uploadConfig', null)
       return h.redirect(routes.CHOOSE_FILE_UPLOAD_TYPE)
     }
   }

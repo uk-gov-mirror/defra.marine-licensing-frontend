@@ -135,8 +135,9 @@ export const activityDescriptionSubmitController = {
     try {
       const { siteIndex } = request.site
 
-      updateExemptionSiteDetails(
+      await updateExemptionSiteDetails(
         request,
+        h,
         siteIndex,
         'activityDescription',
         payload.activityDescription

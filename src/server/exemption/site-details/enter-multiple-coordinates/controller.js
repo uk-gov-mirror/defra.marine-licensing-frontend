@@ -152,8 +152,9 @@ export const multipleCoordinatesSubmitController = {
     }
 
     let validatedCoordinates = validationResult.value.coordinates
-    updateExemptionSiteDetails(
+    await updateExemptionSiteDetails(
       request,
+      h,
       siteIndex,
       'coordinates',
       validatedCoordinates

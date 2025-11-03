@@ -166,7 +166,7 @@ export const activityDatesSubmitController = {
       )
 
       const { siteIndex } = request.site
-      updateExemptionSiteDetails(request, siteIndex, 'activityDates', {
+      await updateExemptionSiteDetails(request, h, siteIndex, 'activityDates', {
         start,
         end
       })

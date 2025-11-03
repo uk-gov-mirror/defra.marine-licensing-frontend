@@ -78,7 +78,7 @@ export const sameActivityDescriptionController = {
   options: {
     pre: [setSiteDataPreHandler]
   },
-  handler(request, h) {
+  async handler(request, h) {
     const { siteIndex, siteDetails, queryParams } = request.site
     const exemption = getExemptionCache(request)
     const action = request.query.action
@@ -89,8 +89,9 @@ export const sameActivityDescriptionController = {
       siteIndex > 0 &&
       multipleSiteDetails.sameActivityDescription === 'yes'
     ) {
-      updateExemptionSiteDetails(
+      await updateExemptionSiteDetails(
         request,
+        h,
         siteIndex,
         'activityDescription',
         exemption.siteDetails[0].activityDescription
@@ -158,7 +159,7 @@ export const sameActivityDescriptionSubmitController = {
       }
 
       if (answerChangedFromYesToNo(previousAnswer, payload)) {
-        copySameActivityDescriptionToAllSites(request)
+        await copySameActivityDescriptionToAllSites(request, h)
         await saveSiteDetailsToBackend(request, h)
         return h.redirect(routes.REVIEW_SITE_DETAILS)
       }
