@@ -162,52 +162,35 @@ export const validatePublicRegister = (document, expected) => {
  */
 export const validateSiteDetails = (document, expectedPageContent) => {
   const siteDetailsData = expectedPageContent.siteDetails
-
   const multipleSiteDetails =
     expectedPageContent.multipleSiteDetails?.multipleSitesEnabled
 
   if (multipleSiteDetails) {
     siteDetailsData.forEach((siteDetails, index) => {
-      const siteCards = document.querySelectorAll('#site-details-card')
-      const siteCard = siteCards[index]
-      expect(siteCard).toBeTruthy()
-
-      for (const [key, value] of Object.entries(siteDetails)) {
-        const rows = siteCard.querySelectorAll('.govuk-summary-list__row')
-        const row = Array.from(rows).find((r) => {
-          const keyElement = r.querySelector(GOV_UK_SUMMARY_LIST_KEY)
-          return keyElement && keyElement.textContent.trim() === key
-        })
-        expect(row).toBeTruthy()
-        const valueElement = row.querySelector('.govuk-summary-list__value')
-        expect(valueElement.textContent.trim()).toBe(value)
-      }
+      validateSummaryCardContent(
+        document,
+        `#site-details-card:nth-of-type(${index + 1})`,
+        siteDetails
+      )
     })
   } else {
-    // Single site validation
     const siteCard = document.querySelector('#site-details-card')
     expect(siteCard).toBeTruthy()
 
     // Validate basic site details if present
     if (siteDetailsData.length) {
-      for (const [key, value] of Object.entries(siteDetailsData[0])) {
-        const rows = siteCard.querySelectorAll('.govuk-summary-list__row')
-        const row = Array.from(rows).find((r) => {
-          const keyElement = r.querySelector(GOV_UK_SUMMARY_LIST_KEY)
-          return keyElement && keyElement.textContent.trim() === key
-        })
-        expect(row).toBeTruthy()
-        const valueElement = row.querySelector('.govuk-summary-list__value')
-        expect(valueElement.textContent.trim()).toBe(value)
-      }
+      validateSummaryCardContent(
+        document,
+        '#site-details-card',
+        siteDetailsData[0]
+      )
     }
 
     // Validate extended site details (coordinate points) if present
     const coords =
       expectedPageContent.siteDetailsExtended?.coordinatePoints ?? []
     for (const point of coords) {
-      const pointText = siteCard.textContent.includes(point)
-      expect(pointText).toBe(true)
+      expect(siteCard).toHaveTextContent(point)
     }
   }
 }

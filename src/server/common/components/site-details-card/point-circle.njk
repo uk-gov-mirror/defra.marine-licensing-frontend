@@ -11,7 +11,7 @@
 
 {% set siteDetailsRows = [] %}
 
-{% if params.multipleSiteDetails.multipleSitesEnabled %}
+{% if params.multipleSiteDetails and params.multipleSiteDetails.multipleSitesEnabled %}
   {% set siteDetailsRows = (siteDetailsRows.push({
     key: {
       text: "Site name"

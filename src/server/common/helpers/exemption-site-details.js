@@ -107,12 +107,10 @@ export const processSiteDetails = (exemption, id, request) => {
   }
 
   const { multipleSiteDetails, siteDetails } = exemption
-  const { multipleSitesEnabled, sameActivityDates, sameActivityDescription } =
-    multipleSiteDetails
+  const { multipleSitesEnabled } = multipleSiteDetails
 
-  const showActivityDates = !multipleSitesEnabled || sameActivityDates === 'no'
-  const showActivityDescription =
-    !multipleSitesEnabled || sameActivityDescription === 'no'
+  const showActivityDates = siteHasUniqueDate(multipleSiteDetails)
+  const showActivityDescription = siteHasUniqueDescription(multipleSiteDetails)
 
   return siteDetails.map((site, index) => {
     const { coordinatesType } = site
@@ -150,3 +148,11 @@ export const processSiteDetails = (exemption, id, request) => {
     return processedSite
   })
 }
+
+const siteHasUniqueDate = (multipleSiteDetails) =>
+  !multipleSiteDetails.multipleSitesEnabled ||
+  multipleSiteDetails.sameActivityDates === 'no'
+
+const siteHasUniqueDescription = (multipleSiteDetails) =>
+  !multipleSiteDetails.multipleSitesEnabled ||
+  multipleSiteDetails.sameActivityDescription === 'no'
