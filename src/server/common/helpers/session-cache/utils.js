@@ -12,6 +12,9 @@ export const setExemptionCache = async (request, h, value) => {
   const cacheValue = value || {}
   request.yar.set(EXEMPTION_CACHE_KEY, value || {})
   await request.yar.commit(h)
+
+  // Try adding a delay for debugging.
+  await new Promise((resolve) => setTimeout(resolve, 50))
   return cacheValue
 }
 export const updateExemptionSiteDetails = async (
