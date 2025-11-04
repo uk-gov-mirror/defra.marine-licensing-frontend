@@ -96,7 +96,9 @@ export const reviewSiteDetailsSubmitController = {
         siteDetails: updatedSiteDetails
       })
 
-      return h.redirect(`${routes.SITE_NAME}?site=${updatedSiteDetails.length}`)
+      return h
+        .redirect(`${routes.SITE_NAME}?site=${updatedSiteDetails.length}`)
+        .takeover()
     }
 
     resetExemptionSiteDetails(request)
