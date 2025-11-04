@@ -11,16 +11,26 @@ export const getExemptionCache = (request) => {
 }
 
 const verifyCacheWrite = async (request, expectedValue) => {
-  const maxAttempts = 5
-  const expectedSiteCount = expectedValue.siteDetails?.length || 0
+  const maxAttempts = 7
+  const retryDelay = 200
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       const sessionStorageValue = await request.yar._cache.get(request.yar.id)
-      const writtenSiteCount =
-        sessionStorageValue?.[EXEMPTION_CACHE_KEY]?.siteDetails?.length || 0
+      const writtenValue = sessionStorageValue?.[EXEMPTION_CACHE_KEY]
 
-      if (writtenSiteCount >= expectedSiteCount) {
+      if (!writtenValue) {
+        if (attempt < maxAttempts) {
+          await new Promise((resolve) => setTimeout(resolve, retryDelay))
+          continue
+        }
+        break
+      }
+
+      const expectedJson = JSON.stringify(expectedValue)
+      const writtenJson = JSON.stringify(writtenValue)
+
+      if (expectedJson === writtenJson) {
         if (attempt > 1) {
           request.logger.info(`Cache verified on attempt ${attempt}`)
         }
@@ -29,12 +39,12 @@ const verifyCacheWrite = async (request, expectedValue) => {
     } catch (err) {}
 
     if (attempt < maxAttempts) {
-      await new Promise((resolve) => setTimeout(resolve, 100))
+      await new Promise((resolve) => setTimeout(resolve, retryDelay))
     }
   }
 
   request.logger.warn(
-    `Cache verification failed: expected ${expectedSiteCount} sites after ${maxAttempts} attempts`
+    `Cache verification failed: written value does not match expected value after ${maxAttempts} attempts`
   )
   return false
 }
