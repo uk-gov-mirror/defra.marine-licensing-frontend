@@ -9,38 +9,40 @@ export const clearExemptionCache = (request) => {
 export const getExemptionCache = (request) => {
   return clone(request.yar.get(EXEMPTION_CACHE_KEY) || {})
 }
+
 export const getExemptionCacheTest = async (request, options = {}) => {
-  const { retry = true } = options
+  const { retryInPreHandler = true, maxRetries = 3, retry = 100 } = options
 
-  const maxRetries = 3
-  const retryDelayMs = 100
+  const expectedSiteCount = request?.query?.site
 
-  if (!retry) {
+  if (!retryInPreHandler) {
     return clone(request.yar.get(EXEMPTION_CACHE_KEY) || {})
   }
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    const data = request.yar.get(EXEMPTION_CACHE_KEY)
+    const data = request.yar.get(EXEMPTION_CACHE_KEY) || {}
+    const siteDetails = data.siteDetails || []
 
-    if (data && Object.keys(data).length > 0) {
+    if (expectedSiteCount === null || siteDetails.length >= expectedSiteCount) {
       if (attempt > 1) {
-        console.warn(`Cache data found on retry attempt ${attempt}`)
+        console.warn(`Fresh cache data found on attempt ${attempt}`)
       }
       return clone(data)
     }
 
     if (attempt < maxRetries) {
       console.warn(
-        `Cache empty in pre handler, retrying (${attempt}/${maxRetries})`
+        `Cache has ${siteDetails.length} sites, expected ${expectedSiteCount}, retrying (${attempt}/${maxRetries})`
       )
-      await new Promise((resolve) => setTimeout(resolve, retryDelayMs))
+      await new Promise((resolve) => setTimeout(resolve, retry))
     }
   }
 
+  const data = request.yar.get(EXEMPTION_CACHE_KEY) || {}
   console.warn(
-    `Cache still empty after ${maxRetries} retry attempts in pre handler`
+    `Cache still has ${data.siteDetails?.length || 0} sites after ${maxRetries} attempts, expected ${expectedSiteCount}`
   )
-  return {}
+  return clone(data)
 }
 
 export const setExemptionCache = async (request, h, value) => {

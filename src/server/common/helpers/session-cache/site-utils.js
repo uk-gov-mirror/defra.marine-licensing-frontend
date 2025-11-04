@@ -4,7 +4,9 @@ import { getSiteNumber } from '#src/server/exemption/site-details/utils/site-num
 import { routes } from '#src/server/common/constants/routes.js'
 import { getUserSession } from '#src/server/common/plugins/auth/utils.js'
 export const setSiteData = async (request) => {
-  const exemption = await getExemptionCacheTest(request, { retry: true })
+  const exemption = await getExemptionCacheTest(request, {
+    retryInPreHandler: true
+  })
 
   const userSession = await getUserSession(request, request.state?.userSession)
   const contactId = userSession?.contactId
