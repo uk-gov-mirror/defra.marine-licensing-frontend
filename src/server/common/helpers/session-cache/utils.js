@@ -10,47 +10,41 @@ export const getExemptionCache = (request) => {
   return clone(request.yar.get(EXEMPTION_CACHE_KEY) || {})
 }
 
-export const getExemptionCacheTest = async (request, options = {}) => {
-  const { retryInPreHandler = true, maxRetries = 3, retry = 100 } = options
+const verifyCacheWrite = async (request, expectedValue) => {
+  const maxAttempts = 5
+  const expectedSiteCount = expectedValue.siteDetails?.length || 0
 
-  const expectedSiteCount = request?.query?.site
-    ? Number.parseInt(request.query.site, 10)
-    : null
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      const sessionStorageValue = await request.yar._cache.get(request.yar.id)
+      const writtenSiteCount =
+        sessionStorageValue?.[EXEMPTION_CACHE_KEY]?.siteDetails?.length || 0
 
-  if (!retryInPreHandler) {
-    return clone(request.yar.get(EXEMPTION_CACHE_KEY) || {})
-  }
-
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    const data = request.yar.get(EXEMPTION_CACHE_KEY) || {}
-    const siteDetails = data.siteDetails || []
-
-    if (expectedSiteCount === null || siteDetails.length >= expectedSiteCount) {
-      if (attempt > 1) {
-        console.warn(`Fresh cache data found on attempt ${attempt}`)
+      if (writtenSiteCount >= expectedSiteCount) {
+        if (attempt > 1) {
+          request.logger.info(`Cache verified on attempt ${attempt}`)
+        }
+        return true
       }
-      return clone(data)
-    }
+    } catch (err) {}
 
-    if (attempt < maxRetries) {
-      console.warn(
-        `Cache has ${siteDetails.length} sites, expected ${expectedSiteCount}, retrying (${attempt}/${maxRetries})`
-      )
-      await new Promise((resolve) => setTimeout(resolve, retry))
+    if (attempt < maxAttempts) {
+      await new Promise((resolve) => setTimeout(resolve, 100))
     }
   }
 
-  const data = request.yar.get(EXEMPTION_CACHE_KEY) || {}
-  console.warn(
-    `Cache still has ${data.siteDetails?.length || 0} sites after ${maxRetries} attempts, expected ${expectedSiteCount}`
+  request.logger.warn(
+    `Cache verification failed: expected ${expectedSiteCount} sites after ${maxAttempts} attempts`
   )
-  return clone(data)
+  return false
 }
 
 export const setExemptionCache = async (request, h, value) => {
   const cacheValue = value || {}
   request.yar.set(EXEMPTION_CACHE_KEY, value || {})
   await request.yar.commit(h)
+
+  await verifyCacheWrite(request, cacheValue)
 
   return cacheValue
 }

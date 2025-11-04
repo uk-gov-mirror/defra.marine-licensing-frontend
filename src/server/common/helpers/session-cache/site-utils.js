@@ -1,12 +1,10 @@
 import { getSiteDetailsBySite } from '#src/server/common/helpers/session-cache/site-details-utils.js'
-import { getExemptionCacheTest } from '#src/server/common/helpers/session-cache/utils.js'
+import { getExemptionCache } from '#src/server/common/helpers/session-cache/utils.js'
 import { getSiteNumber } from '#src/server/exemption/site-details/utils/site-number.js'
 import { routes } from '#src/server/common/constants/routes.js'
 import { getUserSession } from '#src/server/common/plugins/auth/utils.js'
 export const setSiteData = async (request) => {
-  const exemption = await getExemptionCacheTest(request, {
-    retryInPreHandler: true
-  })
+  const exemption = getExemptionCache(request)
 
   const userSession = await getUserSession(request, request.state?.userSession)
   const contactId = userSession?.contactId
