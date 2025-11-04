@@ -13,6 +13,20 @@
 {% endblock %}
 {% block content %}
 
+  {# Debug output #}
+  <div style="background: #f3f2f1; padding: 20px; border: 2px solid #d4351c; font-family: monospace; font-size: 14px; max-width: 100%; overflow-wrap: break-word; word-wrap: break-word;">
+    <p style="margin: 0 0 10px 0; overflow-wrap: break-word; word-wrap: break-word;">Previous Page URL: {{ debugInfo.previousPage }}</p>
+    <p style="margin: 0 0 10px 0; overflow-wrap: break-word; word-wrap: break-word;">Site Index = {{ debugInfo.siteIndex }}, Site Number = {{ debugInfo.siteNumber }}, queryParams: {{ debugInfo.queryParams }}</p>
+    <p style="margin: 0 0 10px 0; font-weight: bold;">Full siteDetails object:</p>
+    <pre style="margin: 0 0 10px 0; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; max-width: 100%; overflow-x: auto;">{{ debugInfo.siteDetails }}</pre>
+    <p style="margin: 0 0 10px 0; font-weight: bold;">Exemption from getExemptionCache:</p>
+    <p style="margin: 0 0 5px 0; overflow-wrap: break-word; word-wrap: break-word;">projectName: {{ debugInfo.exemptionProjectName }}</p>
+    <p style="margin: 0 0 5px 0; font-weight: bold;">multipleSiteDetails:</p>
+    <pre style="margin: 0 0 10px 0; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; max-width: 100%; overflow-x: auto;">{{ debugInfo.exemptionMultipleSiteDetails }}</pre>
+    <p style="margin: 0 0 5px 0; font-weight: bold;">siteDetails:</p>
+    <p style="margin: 0 0 10px 0; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; max-width: 100%; overflow-x: auto;">{{ debugInfo.exemptionSiteDetails }}</p>
+  </div>
+
   {{ appRadioPage({
       name: "sameActivityDates",
       errorSummary: errorSummary,
