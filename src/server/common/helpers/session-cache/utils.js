@@ -14,7 +14,7 @@ export const setExemptionCache = async (request, h, value) => {
   await request.yar.commit(h)
 
   // Try adding a delay for debugging.
-  await new Promise((resolve) => setTimeout(resolve, 50))
+  await new Promise((resolve) => setTimeout(resolve, 10))
   return cacheValue
 }
 export const updateExemptionSiteDetails = async (
