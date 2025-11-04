@@ -5,18 +5,52 @@ export const SAVED_SITE_DETAILS_CACHE_KEY = 'savedSiteDetails'
 export const clearExemptionCache = (request) => {
   request.yar.clear(EXEMPTION_CACHE_KEY)
 }
+
 export const getExemptionCache = (request) => {
   return clone(request.yar.get(EXEMPTION_CACHE_KEY) || {})
 }
+export const getExemptionCacheTest = async (request, options = {}) => {
+  const { retry = true } = options
+
+  const maxRetries = 3
+  const retryDelayMs = 100
+
+  if (!retry) {
+    return clone(request.yar.get(EXEMPTION_CACHE_KEY) || {})
+  }
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    const data = request.yar.get(EXEMPTION_CACHE_KEY)
+
+    if (data && Object.keys(data).length > 0) {
+      if (attempt > 1) {
+        console.warn(`Cache data found on retry attempt ${attempt}`)
+      }
+      return clone(data)
+    }
+
+    if (attempt < maxRetries) {
+      console.warn(
+        `Cache empty in pre handler, retrying (${attempt}/${maxRetries})`
+      )
+      await new Promise((resolve) => setTimeout(resolve, retryDelayMs))
+    }
+  }
+
+  console.warn(
+    `Cache still empty after ${maxRetries} retry attempts in pre handler`
+  )
+  return {}
+}
+
 export const setExemptionCache = async (request, h, value) => {
   const cacheValue = value || {}
   request.yar.set(EXEMPTION_CACHE_KEY, value || {})
   await request.yar.commit(h)
 
-  // Try adding a delay for debugging.
-  await new Promise((resolve) => setTimeout(resolve, 10))
   return cacheValue
 }
+
 export const updateExemptionSiteDetails = async (
   request,
   h,
