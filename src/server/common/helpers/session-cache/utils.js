@@ -14,6 +14,8 @@ export const getExemptionCacheTest = async (request, options = {}) => {
   const { retryInPreHandler = true, maxRetries = 3, retry = 100 } = options
 
   const expectedSiteCount = request?.query?.site
+    ? Number.parseInt(request.query.site, 10)
+    : null
 
   if (!retryInPreHandler) {
     return clone(request.yar.get(EXEMPTION_CACHE_KEY) || {})

@@ -113,16 +113,9 @@ export const sameActivityDatesController = {
       cancelLink: getCancelLink(action),
       projectName: exemption.projectName,
       debugInfo: {
-        previousPage,
         siteIndex,
         siteNumber,
-        queryParams,
-        siteDetails: JSON.stringify(siteDetails),
-        exemptionProjectName: exemption.projectName,
-        exemptionMultipleSiteDetails: JSON.stringify(
-          exemption.multipleSiteDetails
-        ),
-        exemptionSiteDetails: JSON.stringify(exemption.siteDetails)
+        queryParams
       },
       payload: {
         sameActivityDates: exemption.multipleSiteDetails?.sameActivityDates
