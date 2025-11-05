@@ -28,6 +28,7 @@ import { activityDatesSchema } from '#src/server/common/schemas/date.js'
 import { getSiteNumber } from '#src/server/exemption/site-details/utils/site-number.js'
 import { getCancelLink } from '#src/server/exemption/site-details/utils/cancel-link.js'
 import { getBackRoute, getNextRoute } from './utils.js'
+import { copySameActivityDatesToAllSites } from '#src/server/common/helpers/copy-same-activity-data.js'
 
 const getBackLink = (siteIndex, action, siteNumber, queryParams, exemption) => {
   if (action) {
@@ -171,14 +172,24 @@ export const activityDatesSubmitController = {
         end
       })
 
+      const hasSameActivityDatesAcrossSites =
+        exemption.multipleSiteDetails?.sameActivityDates === 'yes'
+
       const action = request.query.action
       const { siteNumber } = request.site
 
+      const anchor = hasSameActivityDatesAcrossSites
+        ? ''
+        : `#site-details-${siteNumber}`
+
       const nextRoute = action
-        ? `${routes.REVIEW_SITE_DETAILS}#site-details-${siteNumber}`
+        ? `${routes.REVIEW_SITE_DETAILS}${anchor}`
         : getNextRoute(exemption, request.site?.queryParams)
 
       if (action) {
+        if (hasSameActivityDatesAcrossSites) {
+          copySameActivityDatesToAllSites(request)
+        }
         await saveSiteDetailsToBackend(request)
       }
 

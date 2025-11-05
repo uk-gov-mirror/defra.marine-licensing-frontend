@@ -1,5 +1,6 @@
 import { vi } from 'vitest'
 import {
+  clearActivityData,
   copySameActivityDatesToAllSites,
   copySameActivityDescriptionToAllSites
 } from './copy-same-activity-data.js'
@@ -211,6 +212,25 @@ describe('copy-same-activity-data', () => {
         3,
         'activityDescription',
         'New description'
+      )
+    })
+  })
+
+  describe('clearActivityData', () => {
+    test('should clear data for all sites', () => {
+      const mockExemption = {
+        siteDetails: [{}]
+      }
+
+      vi.mocked(cacheUtils.getExemptionCache).mockReturnValue(mockExemption)
+
+      clearActivityData(mockRequest, 'activityDates')
+
+      expect(cacheUtils.updateExemptionSiteDetails).toHaveBeenCalledWith(
+        {},
+        0,
+        'activityDates',
+        null
       )
     })
   })

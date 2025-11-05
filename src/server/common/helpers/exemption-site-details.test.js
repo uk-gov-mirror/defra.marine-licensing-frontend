@@ -3,13 +3,13 @@ import {
   processFileUploadSiteDetails,
   processManualSiteDetails,
   processSiteDetails,
-  errorMessages
+  errorMessages,
+  getReviewSummaryText
 } from './exemption-site-details.js'
 
 import {
   getCoordinateSystemText,
   getCoordinateDisplayText,
-  getReviewSummaryText,
   getFileUploadSummaryData,
   getPolygonCoordinatesDisplayData
 } from '#src/server/exemption/site-details/review-site-details/utils.js'
@@ -19,7 +19,6 @@ vi.mock(
   () => ({
     getCoordinateSystemText: vi.fn(),
     getCoordinateDisplayText: vi.fn(),
-    getReviewSummaryText: vi.fn(),
     getFileUploadSummaryData: vi.fn(),
     getPolygonCoordinatesDisplayData: vi.fn()
   })
@@ -265,7 +264,6 @@ describe('exemption-site-details helper', () => {
 
     beforeEach(() => {
       getCoordinateSystemText.mockReturnValue('WGS84 (latitude and longitude)')
-      getReviewSummaryText.mockReturnValue('Single circular site')
       getCoordinateDisplayText.mockReturnValue('51.5074, -0.1278')
     })
 
@@ -273,9 +271,6 @@ describe('exemption-site-details helper', () => {
       const result = processManualSiteDetails(baseManualExemption)
 
       expect(getCoordinateSystemText).toHaveBeenCalledWith('wgs84')
-      expect(getReviewSummaryText).toHaveBeenCalledWith(
-        baseManualExemption.siteDetails[0]
-      )
       expect(getCoordinateDisplayText).toHaveBeenCalledWith(
         baseManualExemption.siteDetails[0],
         'wgs84'
@@ -284,7 +279,8 @@ describe('exemption-site-details helper', () => {
       expect(result).toEqual({
         isFileUpload: false,
         coordinateSystemText: 'WGS84 (latitude and longitude)',
-        reviewSummaryText: 'Single circular site',
+        reviewSummaryText:
+          'Enter one set of coordinates and a width to create a circular site',
         coordinatesType: 'coordinates',
         coordinateSystem: 'wgs84',
         coordinatesEntry: 'single',
@@ -323,7 +319,8 @@ describe('exemption-site-details helper', () => {
       expect(result).toEqual({
         isFileUpload: false,
         coordinateSystemText: 'OSGB36 (eastings and northings)',
-        reviewSummaryText: 'Single circular site',
+        reviewSummaryText:
+          'Enter one set of coordinates and a width to create a circular site',
         coordinatesType: 'coordinates',
         coordinateSystem: 'osgb36',
         coordinatesEntry: 'single',
@@ -361,7 +358,6 @@ describe('exemption-site-details helper', () => {
         { label: 'Point 3', value: '51.5070, -0.1290' }
       ]
 
-      getReviewSummaryText.mockReturnValue('Multiple polygon site')
       getPolygonCoordinatesDisplayData.mockReturnValue(mockPolygonData)
 
       const result = processManualSiteDetails(polygonExemption)
@@ -374,7 +370,8 @@ describe('exemption-site-details helper', () => {
       expect(result).toEqual({
         isFileUpload: false,
         coordinateSystemText: 'WGS84 (latitude and longitude)',
-        reviewSummaryText: 'Multiple polygon site',
+        reviewSummaryText:
+          'Enter multiple sets of coordinates to mark the boundary of the site',
         method: 'Enter the coordinates of the site manually',
         coordinatesType: 'coordinates',
         coordinateSystem: 'wgs84',
@@ -414,7 +411,6 @@ describe('exemption-site-details helper', () => {
       ]
 
       getCoordinateSystemText.mockReturnValue('OSGB36 (eastings and northings)')
-      getReviewSummaryText.mockReturnValue('Multiple polygon site')
       getPolygonCoordinatesDisplayData.mockReturnValue(mockPolygonData)
 
       const result = processManualSiteDetails(osgb36PolygonExemption)
@@ -511,7 +507,6 @@ describe('exemption-site-details helper', () => {
       }
 
       getCoordinateSystemText.mockReturnValue('WGS84 (latitude and longitude)')
-      getReviewSummaryText.mockReturnValue('Single circular site')
       getCoordinateDisplayText.mockReturnValue('51.5074, -0.1278')
 
       const result = processSiteDetails(
@@ -569,7 +564,6 @@ describe('exemption-site-details helper', () => {
       }
 
       getCoordinateSystemText.mockReturnValue('WGS84 (latitude and longitude)')
-      getReviewSummaryText.mockReturnValue('Single circular site')
       getCoordinateDisplayText
         .mockReturnValueOnce('51.5074, -0.1278')
         .mockReturnValueOnce('52.1234, -1.5678')
@@ -623,7 +617,6 @@ describe('exemption-site-details helper', () => {
       }
 
       getCoordinateSystemText.mockReturnValue('WGS84 (latitude and longitude)')
-      getReviewSummaryText.mockReturnValue('Single circular site')
       getCoordinateDisplayText.mockReturnValue('51.5074, -0.1278')
 
       const result = processSiteDetails(
@@ -637,6 +630,23 @@ describe('exemption-site-details helper', () => {
       expect(result[0].showActivityDates).toBe(false)
       expect(result[0].activityDescription).toBe('Test activity description')
       expect(result[0].showActivityDescription).toBe(false)
+    })
+  })
+
+  describe('getReviewSummaryText utils', () => {
+    test('getReviewSummaryText correctly returns text for site details circle width text', () => {
+      expect(
+        getReviewSummaryText({
+          coordinatesEntry: 'single',
+          coordinatesType: 'coordinates'
+        })
+      ).toBe(
+        'Enter one set of coordinates and a width to create a circular site'
+      )
+    })
+
+    test('getReviewSummaryText correctly returns blank otherwise', () => {
+      expect(getReviewSummaryText({})).toBe('')
     })
   })
 })

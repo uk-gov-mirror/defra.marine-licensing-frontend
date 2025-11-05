@@ -204,7 +204,7 @@ export const testScenarios = [
         'Activity dates': '1 January 2025 to 31 January 2025',
         'Activity description': 'Test activity description',
         'Single or multiple sets of coordinates':
-          'Manually enter one set of coordinates and a width to create a circular site',
+          'Enter one set of coordinates and a width to create a circular site',
         'Coordinate system':
           'WGS84 (World Geodetic System 1984) Latitude and longitude',
         'Coordinates at centre of site': '54.726200, -1.599400',
@@ -255,7 +255,7 @@ export const testScenarios = [
         'Activity dates': '1 January 2025 to 31 January 2025',
         'Activity description': 'Test activity description',
         'Single or multiple sets of coordinates':
-          'Manually enter one set of coordinates and a width to create a circular site',
+          'Enter one set of coordinates and a width to create a circular site',
         'Coordinate system':
           'British National Grid (OSGB36) Eastings and Northings',
         'Coordinates at centre of site': '425053, 564180',
@@ -307,7 +307,7 @@ export const testScenarios = [
         'Activity dates': '1 January 2025 to 31 January 2025',
         'Activity description': 'Test activity description',
         'Single or multiple sets of coordinates':
-          'Manually enter multiple sets of coordinates to mark the boundary of the site',
+          'Enter multiple sets of coordinates to mark the boundary of the site',
         'Coordinate system':
           'WGS84 (World Geodetic System 1984) Latitude and longitude',
         'Start and end points': '54.721000, -1.595000',
@@ -360,7 +360,7 @@ export const testScenarios = [
         'Activity dates': '1 January 2025 to 31 January 2025',
         'Activity description': 'Test activity description',
         'Single or multiple sets of coordinates':
-          'Manually enter multiple sets of coordinates to mark the boundary of the site',
+          'Enter multiple sets of coordinates to mark the boundary of the site',
         'Coordinate system':
           'British National Grid (OSGB36) Eastings and Northings',
         'Start and end points': '425053, 564180',
@@ -447,7 +447,7 @@ export const testScenarios = [
           'Site name': 'North Dock',
           'Activity dates': '1 January 2025 to 31 January 2025',
           'Single or multiple sets of coordinates':
-            'Manually enter one set of coordinates and a width to create a circular site',
+            'Enter one set of coordinates and a width to create a circular site',
           'Coordinate system':
             'WGS84 (World Geodetic System 1984) Latitude and longitude',
           'Coordinates at centre of site': '54.726200, -1.599400',
@@ -458,7 +458,7 @@ export const testScenarios = [
           'Site name': 'South Dock',
           'Activity dates': '1 February 2025 to 28 February 2025',
           'Single or multiple sets of coordinates':
-            'Manually enter one set of coordinates and a width to create a circular site',
+            'Enter one set of coordinates and a width to create a circular site',
           'Coordinate system':
             'WGS84 (World Geodetic System 1984) Latitude and longitude',
           'Coordinates at centre of site': '54.730000, -1.610000',

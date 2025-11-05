@@ -1,7 +1,6 @@
 import {
   getCoordinateSystemText,
   getCoordinateDisplayText,
-  getReviewSummaryText,
   getFileUploadSummaryData,
   getPolygonCoordinatesDisplayData
 } from '#src/server/exemption/site-details/review-site-details/utils.js'
@@ -156,3 +155,17 @@ const siteHasUniqueDate = (multipleSiteDetails) =>
 const siteHasUniqueDescription = (multipleSiteDetails) =>
   !multipleSiteDetails.multipleSitesEnabled ||
   multipleSiteDetails.sameActivityDescription === 'no'
+
+export const getReviewSummaryText = (siteDetails) => {
+  const { coordinatesEntry, coordinatesType } = siteDetails
+
+  if (coordinatesEntry === 'single' && coordinatesType === 'coordinates') {
+    return 'Enter one set of coordinates and a width to create a circular site'
+  }
+
+  if (coordinatesEntry === 'multiple' && coordinatesType === 'coordinates') {
+    return 'Enter multiple sets of coordinates to mark the boundary of the site'
+  }
+
+  return ''
+}

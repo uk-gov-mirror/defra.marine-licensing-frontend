@@ -6,6 +6,7 @@ import { createSiteDetailsDataJson } from '#src/server/common/helpers/site-detai
 import { formatDate } from '#src/server/common/helpers/dates/date-utils.js'
 import { getSiteDetailsBySite } from '#src/server/common/helpers/session-cache/site-details-utils.js'
 import { buildSiteLocationData } from '#src/server/common/helpers/site-location-data.js'
+import { getReviewSummaryText } from '#src/server/common/helpers/exemption-site-details.js'
 const isWGS84 = (coordinateSystem) =>
   coordinateSystem === COORDINATE_SYSTEMS.WGS84
 
@@ -70,20 +71,6 @@ export const getSiteDetailsBackLink = (previousPage, coordinatesEntry) => {
 
   // For circular sites (single coordinate), go back to width page
   return routes.WIDTH_OF_SITE
-}
-
-export const getReviewSummaryText = (siteDetails) => {
-  const { coordinatesEntry, coordinatesType } = siteDetails
-
-  if (coordinatesEntry === 'single' && coordinatesType === 'coordinates') {
-    return 'Manually enter one set of coordinates and a width to create a circular site'
-  }
-
-  if (coordinatesEntry === 'multiple' && coordinatesType === 'coordinates') {
-    return 'Manually enter multiple sets of coordinates to mark the boundary of the site'
-  }
-
-  return ''
 }
 
 export const getCoordinateSystemText = (coordinateSystem) => {

@@ -9,7 +9,6 @@ import {
   getFileUploadBackLink,
   getFileUploadSummaryData,
   getPolygonCoordinatesDisplayData,
-  getReviewSummaryText,
   getSiteDetailsBackLink,
   handleSubmissionError,
   hasIncompleteFields,
@@ -251,23 +250,6 @@ describe('siteDetails utils', () => {
         coordinates: [],
         geoJSON: {}
       })
-    })
-  })
-
-  describe('getReviewSummaryText utils', () => {
-    test('getReviewSummaryText correctly returns text for site details circle width text', () => {
-      expect(
-        getReviewSummaryText({
-          coordinatesEntry: 'single',
-          coordinatesType: 'coordinates'
-        })
-      ).toBe(
-        'Manually enter one set of coordinates and a width to create a circular site'
-      )
-    })
-
-    test('getReviewSummaryText correctly returns blank otherwise', () => {
-      expect(getReviewSummaryText({})).toBe('')
     })
   })
 
@@ -513,7 +495,7 @@ describe('siteDetails utils', () => {
           activityDates: '1 January 2025 to 1 January 2025',
           activityDescription: 'Test activity description',
           method:
-            'Manually enter one set of coordinates and a width to create a circular site',
+            'Enter one set of coordinates and a width to create a circular site',
           showActivityDates: true,
           showActivityDescription: true,
           siteName: 'Test Site 1',
@@ -566,7 +548,7 @@ describe('siteDetails utils', () => {
           activityDates: '',
           activityDescription: '',
           method:
-            'Manually enter one set of coordinates and a width to create a circular site',
+            'Enter one set of coordinates and a width to create a circular site',
           showActivityDates: false,
           showActivityDescription: false,
           siteName: 'Test Site 2',
@@ -609,7 +591,7 @@ describe('siteDetails utils', () => {
           activityDates: '1 January 2025 to 1 January 2025',
           activityDescription: 'Test activity description',
           method:
-            'Manually enter one set of coordinates and a width to create a circular site',
+            'Enter one set of coordinates and a width to create a circular site',
           showActivityDates: true,
           showActivityDescription: true,
           siteName: 'Test Site 3',
@@ -787,7 +769,7 @@ describe('siteDetails utils', () => {
               activityDates: '1 January 2025 to 1 January 2025',
               activityDescription: 'Test activity description',
               method:
-                'Manually enter one set of coordinates and a width to create a circular site',
+                'Enter one set of coordinates and a width to create a circular site',
               showActivityDates: true,
               showActivityDescription: true,
               siteName: 'Manual Coordinate Site 1'
