@@ -12,6 +12,9 @@ import {
 import { mockExemption as mockExemptionData } from '#src/server/test-helpers/mocks.js'
 import { makeGetRequest } from '#src/server/test-helpers/server-requests.js'
 import { routes } from '#src/server/common/constants/routes.js'
+import { clearReturnToCheckYourAnswersFlag } from '#src/server/common/helpers/session-cache/utils.js'
+
+vi.mock('#src/server/common/helpers/session-cache/utils.js')
 
 describe('#taskListController', () => {
   const getServer = setupTestServer()
@@ -53,6 +56,7 @@ describe('#taskListController', () => {
     const h = { view: vi.fn() }
     const { authenticatedGetRequest, setExemptionCache } =
       mockExemption(mockExemptionData)
+    vi.mocked(clearReturnToCheckYourAnswersFlag).mockResolvedValue(undefined)
 
     await taskListController.handler({}, h)
 
@@ -66,6 +70,8 @@ describe('#taskListController', () => {
     delete exemptionWithoutTaskList.mcmsContext
 
     expect(setExemptionCache).toHaveBeenCalledWith({}, exemptionWithoutTaskList)
+
+    expect(clearReturnToCheckYourAnswersFlag).toHaveBeenCalledWith({}, h)
 
     expect(h.view).toHaveBeenCalledWith(TASK_LIST_VIEW_ROUTE, {
       pageTitle: 'Task list',

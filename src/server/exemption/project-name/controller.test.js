@@ -152,6 +152,7 @@ describe('#projectName', () => {
       projectNameSubmitController.options.validate.failAction(request, h, err)
 
       expect(h.view).toHaveBeenCalledWith(PROJECT_NAME_VIEW_ROUTE, {
+        backLink: routes.TASK_LIST,
         heading: 'Project Name',
         pageTitle: 'Project name',
         payload: { projectName: '' },
@@ -192,6 +193,7 @@ describe('#projectName', () => {
       projectNameSubmitController.options.validate.failAction(request, h, err)
 
       expect(h.view).toHaveBeenCalledWith(PROJECT_NAME_VIEW_ROUTE, {
+        backLink: routes.TASK_LIST,
         heading: 'Project Name',
         pageTitle: 'Project name',
         payload: { projectName: '' }
@@ -214,6 +216,7 @@ describe('#projectName', () => {
       projectNameSubmitController.options.validate.failAction(request, h, {})
 
       expect(h.view).toHaveBeenCalledWith(PROJECT_NAME_VIEW_ROUTE, {
+        backLink: routes.TASK_LIST,
         heading: 'Project Name',
         pageTitle: 'Project name',
         payload: { projectName: '' }

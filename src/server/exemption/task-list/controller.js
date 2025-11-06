@@ -1,7 +1,8 @@
 import {
+  clearExemptionCache,
+  clearReturnToCheckYourAnswersFlag,
   getExemptionCache,
   resetExemptionSiteDetails,
-  clearExemptionCache,
   setExemptionCache
 } from '#src/server/common/helpers/session-cache/utils.js'
 import { transformTaskList } from '#src/server/exemption/task-list/utils.js'
@@ -63,6 +64,8 @@ export const taskListController = {
       multipleSiteDetails,
       siteDetails
     })
+
+    await clearReturnToCheckYourAnswersFlag(request, h)
 
     return h.view(TASK_LIST_VIEW_ROUTE, {
       ...taskListViewSettings,
