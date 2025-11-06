@@ -547,7 +547,6 @@ export const testScenarios = [
         'Project name': 'Hammersmith pontoon construction'
       },
       siteLocation: {
-        'Adding multiple sites': 'Yes',
         'Method of providing site location':
           'Upload a file with the coordinates of the site',
         'File type': 'KML',
