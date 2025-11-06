@@ -56,6 +56,7 @@ describe('#publicRegister', () => {
       publicRegisterController.handler({}, h)
 
       expect(h.view).toHaveBeenCalledWith(PUBLIC_REGISTER_VIEW_ROUTE, {
+        backLink: routes.TASK_LIST,
         pageTitle: 'Sharing your project information publicly',
         heading: 'Sharing your project information publicly',
         projectName: mockExemption.projectName,
@@ -69,10 +70,30 @@ describe('#publicRegister', () => {
       publicRegisterController.handler({}, h)
 
       expect(h.view).toHaveBeenNthCalledWith(2, PUBLIC_REGISTER_VIEW_ROUTE, {
+        backLink: routes.TASK_LIST,
         pageTitle: 'Sharing your project information publicly',
         heading: 'Sharing your project information publicly',
         projectName: undefined,
         payload: undefined
+      })
+    })
+
+    test('publicRegisterController handler should render with correct context when coming from Check Your Answers', () => {
+      const h = { view: vi.fn() }
+
+      publicRegisterController.handler(
+        { query: { from: 'check-your-answers' } },
+        h
+      )
+
+      expect(h.view).toHaveBeenCalledWith(PUBLIC_REGISTER_VIEW_ROUTE, {
+        backLink: routes.CHECK_YOUR_ANSWERS,
+        pageTitle: 'Sharing your project information publicly',
+        heading: 'Sharing your project information publicly',
+        projectName: mockExemption.projectName,
+        payload: {
+          ...mockExemption.publicRegister
+        }
       })
     })
   })
@@ -150,6 +171,7 @@ describe('#publicRegister', () => {
       )
 
       expect(h.view).toHaveBeenCalledWith(PUBLIC_REGISTER_VIEW_ROUTE, {
+        backLink: routes.TASK_LIST,
         pageTitle: 'Sharing your project information publicly',
         heading: 'Sharing your project information publicly',
         projectName: mockExemption.projectName,
@@ -195,6 +217,7 @@ describe('#publicRegister', () => {
       )
 
       expect(h.view).toHaveBeenCalledWith(PUBLIC_REGISTER_VIEW_ROUTE, {
+        backLink: routes.TASK_LIST,
         heading: 'Sharing your project information publicly',
         pageTitle: 'Sharing your project information publicly',
         projectName: 'Test Project',
@@ -218,6 +241,7 @@ describe('#publicRegister', () => {
       publicRegisterSubmitController.options.validate.failAction(request, h, {})
 
       expect(h.view).toHaveBeenCalledWith(PUBLIC_REGISTER_VIEW_ROUTE, {
+        backLink: routes.TASK_LIST,
         heading: 'Sharing your project information publicly',
         pageTitle: 'Sharing your project information publicly',
         projectName: 'Test Project',
@@ -241,6 +265,7 @@ describe('#publicRegister', () => {
       publicRegisterSubmitController.options.validate.failAction(request, h, {})
 
       expect(h.view).toHaveBeenCalledWith(PUBLIC_REGISTER_VIEW_ROUTE, {
+        backLink: routes.TASK_LIST,
         heading: 'Sharing your project information publicly',
         pageTitle: 'Sharing your project information publicly',
         projectName: 'Test Project',
