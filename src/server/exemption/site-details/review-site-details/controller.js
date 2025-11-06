@@ -1,7 +1,10 @@
 import {
+  clearReturnToCheckYourAnswersFlag,
   getExemptionCache,
+  getReturnToCheckYourAnswersFlag,
   resetExemptionSiteDetails,
-  setExemptionCache
+  setExemptionCache,
+  setReturnToCheckYourAnswersFlag
 } from '#src/server/common/helpers/session-cache/utils.js'
 import { routes } from '#src/server/common/constants/routes.js'
 import {
@@ -25,8 +28,15 @@ export const reviewSiteDetailsController = {
   async handler(request, h) {
     const previousPage = request.headers?.referer
     const exemption = getExemptionCache(request)
+    const fromCheckYourAnswers = request.query?.from === 'check-your-answers'
 
     request.yar.clear('savedSiteDetails')
+
+    if (fromCheckYourAnswers) {
+      await setReturnToCheckYourAnswersFlag(request, h)
+    } else {
+      await clearReturnToCheckYourAnswersFlag(request, h)
+    }
 
     if (!exemption.id) {
       return h.redirect(routes.TASK_LIST)
@@ -54,18 +64,22 @@ export const reviewSiteDetailsController = {
     })
     const { coordinatesType } = firstSite
 
+    const returnToCheckYourAnswers = getReturnToCheckYourAnswersFlag(request)
+
     return coordinatesType === 'file'
       ? renderFileUploadReview(h, {
           exemption: completeExemption,
           siteDetails,
           previousPage,
-          reviewSiteDetailsPageData
+          reviewSiteDetailsPageData,
+          returnToCheckYourAnswers
         })
       : renderManualCoordinateReview(h, {
           exemption: completeExemption,
           siteDetails,
           previousPage,
-          reviewSiteDetailsPageData
+          reviewSiteDetailsPageData,
+          returnToCheckYourAnswers
         })
   }
 }
@@ -96,6 +110,12 @@ export const reviewSiteDetailsSubmitController = {
       })
 
       return h.redirect(`${routes.SITE_NAME}?site=${updatedSiteDetails.length}`)
+    }
+
+    const returnToCheckYourAnswers = getReturnToCheckYourAnswersFlag(request)
+    if (returnToCheckYourAnswers) {
+      await clearReturnToCheckYourAnswersFlag(request, h)
+      return h.redirect(routes.CHECK_YOUR_ANSWERS)
     }
 
     resetExemptionSiteDetails(request)

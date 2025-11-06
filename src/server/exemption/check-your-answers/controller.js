@@ -1,6 +1,7 @@
 import Boom from '@hapi/boom'
 import {
   clearExemptionCache,
+  clearReturnToCheckYourAnswersFlag,
   getExemptionCache
 } from '#src/server/common/helpers/session-cache/utils.js'
 import { authenticatedPostRequest } from '#src/server/common/helpers/authenticated-requests.js'
@@ -35,13 +36,22 @@ export const checkYourAnswersController = {
       cachedExemption.multipleSiteDetails,
       cachedExemption.siteDetails
     )
+    await clearReturnToCheckYourAnswersFlag(request, h)
+
+    const siteLocationChangeLink = `${routes.REVIEW_SITE_DETAILS}?from=check-your-answers#site-location-card`
+    const activityDetailsChangeLink = `${routes.REVIEW_SITE_DETAILS}?from=check-your-answers#activity-details-card`
 
     return h.view(CHECK_YOUR_ANSWERS_VIEW_ROUTE, {
       ...checkYourAnswersViewContent,
       ...cachedExemption,
       mcmsContext: savedExemption.mcmsContext,
       siteDetails,
-      siteLocationData,
+      siteLocationData: {
+        ...siteLocationData,
+        changeLink: siteLocationChangeLink
+      },
+      activityDetailsChangeLink,
+      reviewSiteDetailsRoute: routes.REVIEW_SITE_DETAILS,
       multipleSiteDetails,
       isReadOnly: false
     })

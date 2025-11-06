@@ -37,14 +37,14 @@
     actions: {
       items: [
         {
-          href: "/exemption/review-site-details?from=check-your-answers#providing-site-location-card",
+          href: params.changeLink,
           text: "Change",
           classes: 'govuk-link--no-visited-state'
         }
       ]
     } if not params.isReadOnly,
     attributes: {
-      id: "providing-site-location-card"
+      id: "site-location-card"
     }
   },
   rows: rows
