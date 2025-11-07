@@ -69,7 +69,11 @@ describe('#taskListController', () => {
     delete exemptionWithoutTaskList.taskList
     delete exemptionWithoutTaskList.mcmsContext
 
-    expect(setExemptionCache).toHaveBeenCalledWith({}, exemptionWithoutTaskList)
+    expect(setExemptionCache).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.any(Object),
+      exemptionWithoutTaskList
+    )
 
     expect(clearReturnToCheckYourAnswersFlag).toHaveBeenCalledWith({}, h)
 
@@ -162,9 +166,13 @@ describe('#taskListController', () => {
 
     expect(clearExemptionCache).toHaveBeenCalled()
 
-    expect(setExemptionCache).toHaveBeenCalledWith(expect.any(Object), {
-      id: 'abc123'
-    })
+    expect(setExemptionCache).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.any(Object),
+      {
+        id: 'abc123'
+      }
+    )
 
     expect(statusCode).toBe(302)
     expect(headers.location).toBe('/exemption/task-list')

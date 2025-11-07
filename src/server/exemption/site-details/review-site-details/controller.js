@@ -1,5 +1,6 @@
 import {
   clearReturnToCheckYourAnswersFlag,
+  clearSavedSiteDetails,
   getExemptionCache,
   getReturnToCheckYourAnswersFlag,
   resetExemptionSiteDetails,
@@ -30,7 +31,7 @@ export const reviewSiteDetailsController = {
     const exemption = getExemptionCache(request)
     const fromCheckYourAnswers = request.query?.from === 'check-your-answers'
 
-    request.yar.clear('savedSiteDetails')
+    await clearSavedSiteDetails(request, h)
 
     if (fromCheckYourAnswers) {
       await setReturnToCheckYourAnswersFlag(request, h)
@@ -50,7 +51,7 @@ export const reviewSiteDetailsController = {
     const { projectName, publicRegister, multipleSiteDetails, siteDetails } =
       completeExemption
 
-    setExemptionCache(request, {
+    await setExemptionCache(request, h, {
       id: exemption.id,
       projectName,
       publicRegister,
@@ -100,16 +101,7 @@ export const reviewSiteDetailsSubmitController = {
     const siteDetails = completeExemption.siteDetails
 
     if (payload?.add) {
-      const updatedSiteDetails = [
-        ...siteDetails,
-        { coordinatesType: siteDetails[0].coordinatesType }
-      ]
-      setExemptionCache(request, {
-        ...completeExemption,
-        siteDetails: updatedSiteDetails
-      })
-
-      return h.redirect(`${routes.SITE_NAME}?site=${updatedSiteDetails.length}`)
+      return h.redirect(`${routes.SITE_NAME}?site=${siteDetails.length + 1}`)
     }
 
     const returnToCheckYourAnswers = getReturnToCheckYourAnswersFlag(request)
