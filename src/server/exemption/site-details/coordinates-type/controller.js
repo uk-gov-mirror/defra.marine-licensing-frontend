@@ -100,7 +100,7 @@ export const coordinatesTypeSubmitController = {
 
     const hasChangedCoordinatesType =
       payload.coordinatesType !==
-      exemption.siteDetails[siteIndex].coordinatesType
+      exemption.siteDetails?.[siteIndex].coordinatesType
 
     if (hasChangedCoordinatesType) {
       await clearSiteDetails(request, exemption)
