@@ -658,7 +658,6 @@ describe('#utils', () => {
     })
   })
 
-<<<<<<< HEAD
   describe('setReturnToCheckYourAnswersFlag', () => {
     test('should set the flag to true in cache', async () => {
       const mockH = {}
@@ -724,16 +723,11 @@ describe('#utils', () => {
   })
 
   describe('clearReturnToCheckYourAnswersFlag', () => {
-    test('should clear the flag from cache', async () => {
-=======
-  describe('clearSavedSiteDetails', () => {
     test('should clear the value in cache', async () => {
->>>>>>> main
       const mockH = {}
       const mockRequest = {
         yar: {
           clear: vi.fn(),
-<<<<<<< HEAD
           commit: vi.fn().mockResolvedValue(undefined)
         }
       }
@@ -741,7 +735,16 @@ describe('#utils', () => {
 
       expect(mockRequest.yar.clear).toHaveBeenCalledWith(
         RETURN_TO_CHECK_YOUR_ANSWERS_FLAG_KEY
-=======
+      )
+    })
+  })
+
+  describe('clearSavedSiteDetails', () => {
+    test('should clear the value in cache', async () => {
+      const mockH = {}
+      const mockRequest = {
+        yar: {
+          clear: vi.fn(),
           commit: vi.fn().mockResolvedValue()
         }
       }
@@ -750,13 +753,10 @@ describe('#utils', () => {
 
       expect(mockRequest.yar.clear).toHaveBeenCalledWith(
         SAVED_SITE_DETAILS_CACHE_KEY
->>>>>>> main
       )
       expect(mockRequest.yar.commit).toHaveBeenCalledWith(mockH)
     })
   })
-<<<<<<< HEAD
-=======
 
   describe('setSavedSiteDetails', () => {
     test('should update the value in cache', async () => {
@@ -801,5 +801,4 @@ describe('#utils', () => {
       expect(result).toEqual({})
     })
   })
->>>>>>> main
 })
