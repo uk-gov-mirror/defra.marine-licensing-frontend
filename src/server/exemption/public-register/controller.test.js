@@ -102,28 +102,6 @@ describe('#publicRegister', () => {
       expect(headers.location).toBe('/exemption/task-list')
     })
 
-    test('Should correctly redirect to check your answers when parameter is present', async () => {
-      const { statusCode, headers } = await makePostRequest({
-        url: routes.PUBLIC_REGISTER,
-        server: getServer(),
-        formData: { consent: 'no', reason: 'Test reason' }
-      })
-
-      expect(authRequests.authenticatedPatchRequest).toHaveBeenCalledWith(
-        expect.any(Object),
-        '/exemption/public-register?from=check-your-answers',
-        {
-          id: mockExemption.id,
-          consent: 'no',
-          reason: 'Test reason'
-        }
-      )
-
-      expect(statusCode).toBe(302)
-
-      expect(headers.location).toBe(routes.CHECK_YOUR_ANSWERS)
-    })
-
     test('Should pass error to global catchAll behaviour if it contains no validation data', async () => {
       const apiPostMock = vi.spyOn(authRequests, 'authenticatedPatchRequest')
       apiPostMock.mockRejectedValueOnce({
@@ -292,6 +270,28 @@ describe('#publicRegister', () => {
       const { document } = new JSDOM(result).window
 
       expect(document.querySelector('.govuk-error-summary')).toBeTruthy()
+    })
+
+    test('Should correctly redirect to check your answers when parameter is present', async () => {
+      const { statusCode, headers } = await makePostRequest({
+        url: routes.PUBLIC_REGISTER + '?from=check-your-answers',
+        server: getServer(),
+        formData: { consent: 'no', reason: 'Test reason' }
+      })
+
+      expect(authRequests.authenticatedPatchRequest).toHaveBeenCalledWith(
+        expect.any(Object),
+        '/exemption/public-register',
+        {
+          id: mockExemption.id,
+          consent: 'no',
+          reason: 'Test reason'
+        }
+      )
+
+      expect(statusCode).toBe(302)
+
+      expect(headers.location).toBe(routes.CHECK_YOUR_ANSWERS)
     })
 
     test('Should show error for reason being empty when consent is set to no', async () => {
