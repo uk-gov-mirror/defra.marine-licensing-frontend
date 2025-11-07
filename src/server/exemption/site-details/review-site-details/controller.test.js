@@ -189,6 +189,22 @@ describe('#reviewSiteDetails', () => {
 
         await reviewSiteDetailsController.handler(mockRequest, h)
 
+        expect(cacheUtils.clearReturnToCheckYourAnswersFlag).toHaveBeenCalled()
+
+        expect(h.redirect).toHaveBeenCalledWith(routes.TASK_LIST)
+      })
+
+      test('should set flag if coming from check your answers page', async () => {
+        getExemptionCacheSpy.mockReturnValueOnce({})
+
+        const h = createMockHandler('redirect')
+        const mockRequest = createMockRequest()
+        mockRequest.query = { from: 'check-your-answers' }
+
+        await reviewSiteDetailsController.handler(mockRequest, h)
+
+        expect(cacheUtils.setReturnToCheckYourAnswersFlag).toHaveBeenCalled()
+
         expect(h.redirect).toHaveBeenCalledWith(routes.TASK_LIST)
       })
 
@@ -375,6 +391,21 @@ describe('#reviewSiteDetails', () => {
 
         expect(statusCode).toBe(statusCodes.redirect)
         expect(headers.location).toBe(`${routes.SITE_NAME}?site=3`)
+      })
+
+      test('should handle redirect to check your answers correctly', async () => {
+        vi.mocked(cacheUtils.getReturnToCheckYourAnswersFlag).mockReturnValue(
+          true
+        )
+
+        const { headers, statusCode } = await makePostRequest({
+          url: routes.REVIEW_SITE_DETAILS,
+          server: getServer(),
+          formData: {}
+        })
+
+        expect(statusCode).toBe(statusCodes.redirect)
+        expect(headers.location).toBe(`${routes.CHECK_YOUR_ANSWERS}`)
       })
     })
   })

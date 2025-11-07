@@ -460,6 +460,12 @@ describe('siteDetails utils', () => {
     test('getFileUploadBackLink correctly handles invalid URLs', () => {
       expect(getFileUploadBackLink('invalid-url')).toBe(routes.FILE_UPLOAD)
     })
+
+    test('getFileUploadBackLink correctly handles check your answers redirect', () => {
+      expect(getFileUploadBackLink('any page', true)).toBe(
+        routes.CHECK_YOUR_ANSWERS
+      )
+    })
   })
 
   describe('buildManualCoordinateSummaryData util', () => {

@@ -106,6 +106,31 @@ describe('#projectName', () => {
       expect(headers.location).toBe(routes.TASK_LIST)
     })
 
+    test('Should correctly update existing project and redirect to check your answers when parameter is present', async () => {
+      getExemptionCacheSpy.mockReturnValueOnce(mockExemption)
+
+      const apiPatchMock = vi.spyOn(authRequests, 'authenticatedPatchRequest')
+      apiPatchMock.mockResolvedValue({
+        payload: { projectName: 'Project name' }
+      })
+
+      const { statusCode, headers } = await makePostRequest({
+        url: routes.PROJECT_NAME + '?from=check-your-answers',
+        server: getServer(),
+        formData: { projectName: 'Project name' }
+      })
+
+      expect(authRequests.authenticatedPatchRequest).toHaveBeenCalledWith(
+        expect.any(Object),
+        `/exemption/project-name`,
+        { projectName: 'Project name', id: mockExemption.id }
+      )
+
+      expect(statusCode).toBe(302)
+
+      expect(headers.location).toBe(routes.CHECK_YOUR_ANSWERS)
+    })
+
     test('Should pass error to global catchAll behaviour if it is not a validation error', async () => {
       const apiPostMock = vi.spyOn(authRequests, 'authenticatedPostRequest')
       apiPostMock.mockRejectedValueOnce({
