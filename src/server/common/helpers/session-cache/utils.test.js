@@ -8,7 +8,8 @@ import {
   setExemptionCache,
   updateExemptionSiteDetails,
   updateExemptionSiteDetailsBatch,
-  updateExemptionMultipleSiteDetails
+  updateExemptionMultipleSiteDetails,
+  clearSiteDetails
 } from '#src/server/common/helpers/session-cache/utils.js'
 
 vi.mock('@hapi/hoek', () => ({
@@ -121,6 +122,34 @@ describe('#utils', () => {
       expect(mockRequest.yar.set).toHaveBeenCalledWith(EXEMPTION_CACHE_KEY, {})
 
       expect(cache).toEqual({})
+    })
+  })
+
+  describe('clearSiteDetails', () => {
+    test('should reset value', async () => {
+      const expected = { projectName: 'Test project' }
+
+      const mockRequest = {
+        yar: {
+          get: vi.fn().mockReturnValue(expected),
+          set: vi.fn()
+        }
+      }
+
+      const value = {
+        projectName: 'Test project',
+        siteDetails: [{ siteName: 'test' }],
+        multipleSiteDetails: { multipleSitesEnabled: true }
+      }
+
+      const result = await clearSiteDetails(mockRequest, value)
+
+      expect(mockRequest.yar.set).toHaveBeenCalledWith(
+        EXEMPTION_CACHE_KEY,
+        expected
+      )
+
+      expect(result).toBe(expected)
     })
   })
 

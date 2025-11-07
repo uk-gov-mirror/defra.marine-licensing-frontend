@@ -1,4 +1,5 @@
 import {
+  clearSiteDetails,
   getExemptionCache,
   updateExemptionSiteDetails
 } from '#src/server/common/helpers/session-cache/utils.js'
@@ -91,10 +92,19 @@ export const coordinatesTypeSubmitController = {
       }
     }
   },
-  handler(request, h) {
+  async handler(request, h) {
     const { payload } = request
+    const exemption = getExemptionCache(request)
 
     const { siteIndex, queryParams } = request.site
+
+    const hasChangedCoordinatesType =
+      payload.coordinatesType !==
+      exemption.siteDetails[siteIndex].coordinatesType
+
+    if (hasChangedCoordinatesType) {
+      await clearSiteDetails(request, exemption)
+    }
 
     updateExemptionSiteDetails(
       request,
