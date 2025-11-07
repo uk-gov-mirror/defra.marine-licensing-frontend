@@ -153,6 +153,69 @@ describe('#projectName', () => {
       )
     })
 
+    test('Should handle API validation errors in catch block', async () => {
+      const apiPostMock = vi.spyOn(authRequests, 'authenticatedPostRequest')
+      apiPostMock.mockRejectedValueOnce({
+        data: {
+          payload: {
+            validation: {
+              details: [
+                {
+                  path: ['projectName'],
+                  message: 'PROJECT_NAME_REQUIRED',
+                  type: 'string.empty'
+                }
+              ]
+            }
+          }
+        }
+      })
+
+      const { result, statusCode } = await makePostRequest({
+        url: routes.PROJECT_NAME,
+        server: getServer(),
+        formData: { projectName: 'test' }
+      })
+
+      expect(statusCode).toBe(statusCodes.ok)
+      expect(result).toContain('Project name')
+
+      const { document } = new JSDOM(result).window
+      expect(document.querySelector('.govuk-error-summary')).toBeTruthy()
+    })
+
+    test('Should handle API validation errors in catch block with from=check-your-answers parameter', async () => {
+      const apiPostMock = vi.spyOn(authRequests, 'authenticatedPostRequest')
+      apiPostMock.mockRejectedValueOnce({
+        data: {
+          payload: {
+            validation: {
+              details: [
+                {
+                  path: ['projectName'],
+                  message: 'PROJECT_NAME_REQUIRED',
+                  type: 'string.empty'
+                }
+              ]
+            }
+          }
+        }
+      })
+
+      const { result, statusCode } = await makePostRequest({
+        url: routes.PROJECT_NAME + '?from=check-your-answers',
+        server: getServer(),
+        formData: { projectName: 'test' }
+      })
+
+      expect(statusCode).toBe(statusCodes.ok)
+      expect(result).toContain('Project name')
+      expect(result).toContain(routes.CHECK_YOUR_ANSWERS)
+
+      const { document } = new JSDOM(result).window
+      expect(document.querySelector('.govuk-error-summary')).toBeTruthy()
+    })
+
     test('Should correctly validate on empty data', () => {
       const request = {
         payload: { projectName: '' }

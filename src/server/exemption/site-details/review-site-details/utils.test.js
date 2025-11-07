@@ -49,6 +49,12 @@ describe('siteDetails utils', () => {
     test('getSiteDetailsBackLink correctly returns fallback option', () => {
       expect(getSiteDetailsBackLink(undefined)).toBe(routes.TASK_LIST)
     })
+
+    test('getSiteDetailsBackLink correctly returns to check your answers', () => {
+      expect(getSiteDetailsBackLink('any page', 'multiple', true)).toBe(
+        routes.CHECK_YOUR_ANSWERS
+      )
+    })
   })
 
   describe('getFileUploadSummaryData util', () => {
