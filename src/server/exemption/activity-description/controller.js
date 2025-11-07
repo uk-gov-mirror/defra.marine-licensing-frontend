@@ -137,8 +137,9 @@ export const activityDescriptionSubmitController = {
       const exemption = getExemptionCache(request)
       const { siteIndex } = request.site
 
-      updateExemptionSiteDetails(
+      await updateExemptionSiteDetails(
         request,
+        h,
         siteIndex,
         'activityDescription',
         payload.activityDescription
@@ -160,9 +161,10 @@ export const activityDescriptionSubmitController = {
 
       if (nextRoute === routes.REVIEW_SITE_DETAILS || action) {
         if (hasSameActivityDescriptionAcrossSites) {
-          copySameActivityDescriptionToAllSites(request)
+          await copySameActivityDescriptionToAllSites(request, h)
         }
-        await saveSiteDetailsToBackend(request)
+
+        await saveSiteDetailsToBackend(request, h)
       }
 
       return h.redirect(nextRoute)

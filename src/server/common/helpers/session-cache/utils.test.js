@@ -9,7 +9,10 @@ import {
   updateExemptionSiteDetails,
   updateExemptionSiteDetailsBatch,
   updateExemptionMultipleSiteDetails,
-  clearSiteDetails
+  clearSiteDetails,
+  clearSavedSiteDetails,
+  SAVED_SITE_DETAILS_CACHE_KEY,
+  setSavedSiteDetails
 } from '#src/server/common/helpers/session-cache/utils.js'
 
 vi.mock('@hapi/hoek', () => ({
@@ -19,18 +22,22 @@ vi.mock('@hapi/hoek', () => ({
 describe('#utils', () => {
   describe('clearExemptionCache', () => {
     let mockRequest
+    let mockH
 
     beforeEach(() => {
+      mockH = {}
       mockRequest = {
         yar: {
-          clear: vi.fn()
+          clear: vi.fn(),
+          commit: vi.fn().mockResolvedValue()
         }
       }
     })
 
-    test('should clear exemption cache', () => {
-      clearExemptionCache(mockRequest)
+    test('should clear exemption cache', async () => {
+      await clearExemptionCache(mockRequest, mockH)
       expect(mockRequest.yar.clear).toHaveBeenCalledWith(EXEMPTION_CACHE_KEY)
+      expect(mockRequest.yar.commit).toHaveBeenCalledWith(mockH)
     })
   })
 
@@ -40,7 +47,8 @@ describe('#utils', () => {
     beforeEach(() => {
       mockRequest = {
         yar: {
-          get: vi.fn()
+          get: vi.fn(),
+          commit: vi.fn()
         }
       }
     })
@@ -80,46 +88,52 @@ describe('#utils', () => {
 
   describe('setExemptionCache', () => {
     let mockRequest
+    let mockH
 
     beforeEach(() => {
+      mockH = {}
       mockRequest = {
         yar: {
           get: vi.fn(),
-          set: vi.fn()
+          set: vi.fn(),
+          commit: vi.fn().mockResolvedValue()
         }
       }
     })
 
-    test('should store the value in cache', () => {
+    test('should store the value in cache', async () => {
       const value = { projectName: 'Test project' }
 
-      const result = setExemptionCache(mockRequest, value)
+      const result = await setExemptionCache(mockRequest, mockH, value)
 
       expect(mockRequest.yar.set).toHaveBeenCalledWith(
         EXEMPTION_CACHE_KEY,
         value
       )
+      expect(mockRequest.yar.commit).toHaveBeenCalledWith(mockH)
       expect(result).toBe(value)
     })
 
-    test('should handle empty objects', () => {
+    test('should handle empty objects', async () => {
       const value = {}
 
-      const cache = setExemptionCache(mockRequest, value)
+      const cache = await setExemptionCache(mockRequest, mockH, value)
 
       expect(mockRequest.yar.set).toHaveBeenCalledWith(
         EXEMPTION_CACHE_KEY,
         value
       )
+      expect(mockRequest.yar.commit).toHaveBeenCalledWith(mockH)
       expect(cache).toBe(value)
     })
 
-    test('should handle undefined values and default to an empty object', () => {
+    test('should handle undefined values and default to an empty object', async () => {
       const value = undefined
 
-      const cache = setExemptionCache(mockRequest, value)
+      const cache = await setExemptionCache(mockRequest, mockH, value)
 
       expect(mockRequest.yar.set).toHaveBeenCalledWith(EXEMPTION_CACHE_KEY, {})
+      expect(mockRequest.yar.commit).toHaveBeenCalledWith(mockH)
 
       expect(cache).toEqual({})
     })
@@ -155,21 +169,25 @@ describe('#utils', () => {
 
   describe('updateExemptionSiteDetails', () => {
     let mockRequest
+    let mockH
 
     beforeEach(() => {
+      mockH = {}
       mockRequest = {
         yar: {
           get: vi.fn(),
-          set: vi.fn()
+          set: vi.fn(),
+          commit: vi.fn().mockResolvedValue()
         }
       }
     })
 
-    test('should store the value in cache', () => {
+    test('should store the value in cache', async () => {
       const value = { coordinatesType: 'file' }
 
-      const result = updateExemptionSiteDetails(
+      const result = await updateExemptionSiteDetails(
         mockRequest,
+        mockH,
         0,
         'coordinatesType',
         value.coordinatesType
@@ -178,14 +196,16 @@ describe('#utils', () => {
       expect(mockRequest.yar.set).toHaveBeenCalledWith(EXEMPTION_CACHE_KEY, {
         siteDetails: [value]
       })
-      expect(result).toEqual(value)
+      expect(mockRequest.yar.commit).toHaveBeenCalledWith(mockH)
+      expect(result).toEqual({ coordinatesType: 'file' })
     })
 
-    test('should handle empty objects', () => {
+    test('should handle empty objects', async () => {
       const value = {}
 
-      const result = updateExemptionSiteDetails(
+      const result = await updateExemptionSiteDetails(
         mockRequest,
+        mockH,
         0,
         'coordinatesType',
         value.coordinatesType
@@ -194,14 +214,16 @@ describe('#utils', () => {
       expect(mockRequest.yar.set).toHaveBeenCalledWith(EXEMPTION_CACHE_KEY, {
         siteDetails: [{}]
       })
+      expect(mockRequest.yar.commit).toHaveBeenCalledWith(mockH)
       expect(result).toEqual({ coordinatesType: null })
     })
 
-    test('should handle undefined values and convert to null', () => {
+    test('should handle undefined values and convert to null', async () => {
       const value = undefined
 
-      const result = updateExemptionSiteDetails(
+      const result = await updateExemptionSiteDetails(
         mockRequest,
+        mockH,
         0,
         'coordinatesType',
         value
@@ -210,15 +232,17 @@ describe('#utils', () => {
       expect(mockRequest.yar.set).toHaveBeenCalledWith(EXEMPTION_CACHE_KEY, {
         siteDetails: [{}]
       })
+      expect(mockRequest.yar.commit).toHaveBeenCalledWith(mockH)
 
       expect(result).toEqual({ coordinatesType: null })
     })
 
-    test('should handle null values correctly', () => {
+    test('should handle null values correctly', async () => {
       const value = null
 
-      const result = updateExemptionSiteDetails(
+      const result = await updateExemptionSiteDetails(
         mockRequest,
+        mockH,
         0,
         'coordinatesType',
         value
@@ -227,6 +251,7 @@ describe('#utils', () => {
       expect(mockRequest.yar.set).toHaveBeenCalledWith(EXEMPTION_CACHE_KEY, {
         siteDetails: [{}]
       })
+      expect(mockRequest.yar.commit).toHaveBeenCalledWith(mockH)
 
       expect(result).toEqual({ coordinatesType: null })
     })
@@ -234,17 +259,20 @@ describe('#utils', () => {
 
   describe('updateExemptionMultipleSiteDetails', () => {
     let mockRequest
+    let mockH
 
     beforeEach(() => {
+      mockH = {}
       mockRequest = {
         yar: {
           get: vi.fn(),
-          set: vi.fn()
+          set: vi.fn(),
+          commit: vi.fn().mockResolvedValue()
         }
       }
     })
 
-    test('should store the value in multipleSiteDetails cache', () => {
+    test('should store the value in multipleSiteDetails cache', async () => {
       const existingCache = {
         projectName: 'Test Project',
         multipleSiteDetails: {
@@ -254,8 +282,9 @@ describe('#utils', () => {
 
       mockRequest.yar.get.mockReturnValue(existingCache)
 
-      const result = updateExemptionMultipleSiteDetails(
+      const result = await updateExemptionMultipleSiteDetails(
         mockRequest,
+        mockH,
         'sameActivityDates',
         'yes'
       )
@@ -267,18 +296,20 @@ describe('#utils', () => {
           sameActivityDates: 'yes'
         }
       })
+      expect(mockRequest.yar.commit).toHaveBeenCalledWith(mockH)
       expect(result).toEqual({ sameActivityDates: 'yes' })
     })
 
-    test('should handle empty multipleSiteDetails', () => {
+    test('should handle empty multipleSiteDetails', async () => {
       const existingCache = {
         projectName: 'Test Project'
       }
 
       mockRequest.yar.get.mockReturnValue(existingCache)
 
-      const result = updateExemptionMultipleSiteDetails(
+      const result = await updateExemptionMultipleSiteDetails(
         mockRequest,
+        mockH,
         'sameActivityDates',
         'no'
       )
@@ -289,10 +320,11 @@ describe('#utils', () => {
           sameActivityDates: 'no'
         }
       })
+      expect(mockRequest.yar.commit).toHaveBeenCalledWith(mockH)
       expect(result).toEqual({ sameActivityDates: 'no' })
     })
 
-    test('should handle undefined values and convert to null', () => {
+    test('should handle undefined values and convert to null', async () => {
       const existingCache = {
         projectName: 'Test Project',
         multipleSiteDetails: {
@@ -302,8 +334,9 @@ describe('#utils', () => {
 
       mockRequest.yar.get.mockReturnValue(existingCache)
 
-      const result = updateExemptionMultipleSiteDetails(
+      const result = await updateExemptionMultipleSiteDetails(
         mockRequest,
+        mockH,
         'sameActivityDates',
         undefined
       )
@@ -315,11 +348,12 @@ describe('#utils', () => {
           sameActivityDates: null
         }
       })
+      expect(mockRequest.yar.commit).toHaveBeenCalledWith(mockH)
 
       expect(result).toEqual({ sameActivityDates: null })
     })
 
-    test('should handle null values correctly', () => {
+    test('should handle null values correctly', async () => {
       const existingCache = {
         projectName: 'Test Project',
         multipleSiteDetails: {
@@ -329,8 +363,9 @@ describe('#utils', () => {
 
       mockRequest.yar.get.mockReturnValue(existingCache)
 
-      const result = updateExemptionMultipleSiteDetails(
+      const result = await updateExemptionMultipleSiteDetails(
         mockRequest,
+        mockH,
         'sameActivityDates',
         null
       )
@@ -342,6 +377,7 @@ describe('#utils', () => {
           sameActivityDates: null
         }
       })
+      expect(mockRequest.yar.commit).toHaveBeenCalledWith(mockH)
 
       expect(result).toEqual({ sameActivityDates: null })
     })
@@ -644,6 +680,69 @@ describe('#utils', () => {
         siteDetails: []
       })
       expect(result).toEqual({ siteDetails: null })
+    })
+  })
+
+  describe('clearSavedSiteDetails', () => {
+    test('should clear the value in cache', async () => {
+      const mockH = {}
+      const mockRequest = {
+        yar: {
+          clear: vi.fn(),
+          commit: vi.fn().mockResolvedValue()
+        }
+      }
+
+      await clearSavedSiteDetails(mockRequest, mockH)
+
+      expect(mockRequest.yar.clear).toHaveBeenCalledWith(
+        SAVED_SITE_DETAILS_CACHE_KEY
+      )
+      expect(mockRequest.yar.commit).toHaveBeenCalledWith(mockH)
+    })
+  })
+
+  describe('setSavedSiteDetails', () => {
+    test('should update the value in cache', async () => {
+      const value = { originalCoordinatesEntry: 'single' }
+
+      const mockH = {}
+      const mockRequest = {
+        yar: {
+          set: vi.fn(),
+          get: vi.fn().mockReturnValue(value),
+          commit: vi.fn().mockResolvedValue()
+        }
+      }
+
+      const result = await setSavedSiteDetails(mockRequest, mockH, value)
+
+      expect(mockRequest.yar.set).toHaveBeenCalledWith(
+        SAVED_SITE_DETAILS_CACHE_KEY,
+        value
+      )
+      expect(mockRequest.yar.commit).toHaveBeenCalledWith(mockH)
+      expect(result).toEqual(value)
+    })
+
+    test('should handle undefined values and default to an empty object', async () => {
+      const mockH = {}
+      const mockRequest = {
+        yar: {
+          get: vi.fn().mockResolvedValue({}),
+          set: vi.fn(),
+          commit: vi.fn().mockResolvedValue()
+        }
+      }
+
+      const result = await setSavedSiteDetails(mockRequest, mockH, undefined)
+
+      expect(mockRequest.yar.set).toHaveBeenCalledWith(
+        SAVED_SITE_DETAILS_CACHE_KEY,
+        {}
+      )
+      expect(mockRequest.yar.commit).toHaveBeenCalledWith(mockH)
+      expect(result).toEqual({})
     })
   })
 })

@@ -324,6 +324,7 @@ describe('#coordinatesType', () => {
 
       expect(cacheUtils.updateExemptionSiteDetails).toHaveBeenCalledWith(
         mockRequest,
+        h,
         0,
         'coordinatesType',
         'file'

@@ -167,7 +167,7 @@ export const activityDatesSubmitController = {
       )
 
       const { siteIndex } = request.site
-      updateExemptionSiteDetails(request, siteIndex, 'activityDates', {
+      await updateExemptionSiteDetails(request, h, siteIndex, 'activityDates', {
         start,
         end
       })
@@ -188,9 +188,9 @@ export const activityDatesSubmitController = {
 
       if (action) {
         if (hasSameActivityDatesAcrossSites) {
-          copySameActivityDatesToAllSites(request)
+          await copySameActivityDatesToAllSites(request, h)
         }
-        await saveSiteDetailsToBackend(request)
+        await saveSiteDetailsToBackend(request, h)
       }
 
       return h.redirect(nextRoute)

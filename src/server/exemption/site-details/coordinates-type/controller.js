@@ -106,8 +106,9 @@ export const coordinatesTypeSubmitController = {
       await clearSiteDetails(request, exemption)
     }
 
-    updateExemptionSiteDetails(
+    await updateExemptionSiteDetails(
       request,
+      h,
       siteIndex,
       'coordinatesType',
       payload.coordinatesType

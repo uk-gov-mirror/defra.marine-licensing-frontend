@@ -70,7 +70,7 @@ export const checkYourAnswersSubmitController = {
       )
 
       if (response?.message === 'success' && response?.value) {
-        clearExemptionCache(request)
+        await clearExemptionCache(request, h)
         const { applicationReference } = response.value
         return h.redirect(
           `/exemption/confirmation?applicationReference=${applicationReference}`
