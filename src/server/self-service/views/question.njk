@@ -1,0 +1,86 @@
+{% extends "layouts/page.njk" %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/checkboxes/macro.njk" import govukCheckboxes %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
+{% block beforeContent %}
+  {{ super() }}
+  {{ appBackLink({ backLink: backLink }) }}
+{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+
+      {% if errorSummary %}
+        {{ govukErrorSummary({
+          titleText: "There is a problem",
+          errorList: errorSummary
+        }) }}
+      {% endif %}
+
+      <form method="POST">
+        <input type="hidden" name="csrfToken" value="{{ csrfToken }}"/>
+
+        {% set legendHtml %}
+          {% if section %}
+            <span class="govuk-caption-l">{{ section.text }}</span>
+          {% endif %}
+          {{ question.text }}
+        {% endset %}
+
+        {% set items = [] %}
+        {% for answer in question.answers %}
+          {% if answer.hint %}
+            {% set item = {
+              value: answer.id,
+              text: answer.text,
+              checked: answer.id in selectedAnswerIds,
+              hint: { html: answer.hint }
+            } %}
+          {% else %}
+            {% set item = {
+              value: answer.id,
+              text: answer.text,
+              checked: answer.id in selectedAnswerIds
+            } %}
+          {% endif %}
+          {% set items = (items.push(item), items) %}
+        {% endfor %}
+
+        {% if question.multiSelect %}
+          {{ govukCheckboxes({
+            name: "answers",
+            fieldset: {
+              legend: {
+                html: legendHtml,
+                isPageHeading: true,
+                classes: "govuk-fieldset__legend--xl"
+              }
+            },
+            hint: { html: question.hint } if question.hint,
+            errorMessage: errors.answers if errors,
+            items: items
+          }) }}
+        {% else %}
+          {{ govukRadios({
+            name: "answers",
+            fieldset: {
+              legend: {
+                html: legendHtml,
+                isPageHeading: true,
+                classes: "govuk-fieldset__legend--xl"
+              }
+            },
+            hint: { html: question.hint } if question.hint,
+            errorMessage: errors.answers if errors,
+            items: items
+          }) }}
+        {% endif %}
+
+        {{ govukButton({ text: "Continue" }) }}
+      </form>
+
+    </div>
+  </div>
+{% endblock %}

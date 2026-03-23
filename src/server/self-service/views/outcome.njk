@@ -1,0 +1,98 @@
+{% extends "layouts/page.njk" %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% block beforeContent %}
+  {{ super() }}
+  {{ appBackLink({ backLink: backLink }) }}
+{% endblock %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+
+      {% if section %}
+        <span class="govuk-caption-l">{{ section.text }}</span>
+      {% endif %}
+      <h1 class="govuk-heading-xl">{{ outcome.heading }}</h1>
+
+      {% if outcome.text %}
+        {{ govukInsetText({ html: outcome.text }) }}
+      {% endif %}
+
+      {% if terminalMessage %}
+        <div class="govuk-inset-text">
+          {{ terminalMessage }}
+        </div>
+      {% endif %}
+
+      {% if outcomeTypes | length > 1 %}
+
+        {% for ot in outcomeTypes %}
+          <div class="app-self-service-card govuk-!-margin-bottom-6">
+            <h2 class="govuk-heading-m">
+              Option {{ loop.index }}{% if ot.heading %} - {{ ot.heading }}{% endif %}
+            </h2>
+
+            {% if ot.text %}
+              <div class="govuk-body">{{ ot.text | safe }}</div>
+            {% endif %}
+
+            {% if ot.link %}
+              <p class="govuk-body">
+                <a href="{{ ot.link }}" target="_blank" class="govuk-link" rel="noopener noreferrer">{{ ot.heading or ot.link }}</a>
+              </p>
+            {% endif %}
+
+            <div class="govuk-button-group">
+              {% if ot.module or ot.nextQuestionRoute or ot.overrideCtaButtonUrl %}
+                <form method="POST">
+                  <input type="hidden" name="csrfToken" value="{{ csrfToken }}"/>
+                  <input type="hidden" name="selectedOutcomeTypeId" value="{{ ot.id }}"/>
+                  <input type="hidden" name="mode" value="SUBMIT"/>
+                  {{ govukButton({ text: "Continue" }) }}
+                </form>
+              {% endif %}
+
+              <a href="/journey/self-service/answers" target="_blank" class="govuk-link" rel="noopener noreferrer">
+                View a record of my answers
+              </a>
+            </div>
+          </div>
+        {% endfor %}
+
+      {% else %}
+
+        {% set ot = outcomeTypes[0] %}
+
+        {% if ot.text %}
+          <div class="govuk-body">{{ ot.text | safe }}</div>
+        {% endif %}
+
+        {% if ot.link %}
+          <p class="govuk-body">
+            <a href="{{ ot.link }}" target="_blank" class="govuk-link" rel="noopener noreferrer">{{ ot.heading or ot.link }}</a>
+          </p>
+        {% endif %}
+
+        <div class="govuk-button-group">
+          {% if ot.module or ot.nextQuestionRoute or ot.overrideCtaButtonUrl %}
+            <form method="POST">
+              <input type="hidden" name="csrfToken" value="{{ csrfToken }}"/>
+              <input type="hidden" name="selectedOutcomeTypeId" value="{{ ot.id }}"/>
+              <input type="hidden" name="mode" value="SUBMIT"/>
+              {{ govukButton({
+                text: ot.overrideCtaButtonText or ot.heading or "Continue"
+              }) }}
+            </form>
+          {% endif %}
+
+          <a href="/journey/self-service/answers" target="_blank" class="govuk-link" rel="noopener noreferrer">
+            View a record of my answers
+          </a>
+        </div>
+
+      {% endif %}
+
+    </div>
+  </div>
+{% endblock %}

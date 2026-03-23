@@ -1,0 +1,33 @@
+{% extends "layouts/page.njk" %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+
+      <p class="govuk-body app-no-print">
+        <a href="javascript:window.print()" class="govuk-link">Print this page</a>
+      </p>
+
+      <h1 class="govuk-heading-xl">
+        Marine Management Organisation &mdash; Marine Licence requirement check
+      </h1>
+
+      <h2 class="govuk-heading-l">Introduction</h2>
+      <p class="govuk-body">{{ preambleText }}</p>
+
+      <h2 class="govuk-heading-l">Date of check</h2>
+      <p class="govuk-body">{{ dateOfCheck }}</p>
+
+      <h2 class="govuk-heading-l">Answers</h2>
+      {% for qa in groupedAnswers %}
+        <p class="govuk-body">
+          <strong>{{ qa.questionText | safe }}</strong><br/>
+          {% for answerText in qa.answers %}
+            {{ answerText | safe }}<br/>
+          {% endfor %}
+        </p>
+      {% endfor %}
+
+    </div>
+  </div>
+{% endblock %}

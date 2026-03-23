@@ -1,0 +1,12 @@
+@use 'govuk-frontend' as *;
+
+.app-self-service-card {
+  border: 1px solid $govuk-border-colour;
+  padding: govuk-spacing(4);
+}
+
+@media print {
+  .app-no-print {
+    display: none !important; // stylelint-disable-line declaration-no-important
+  }
+}
