@@ -19,7 +19,7 @@ const VIEW_PATH = 'self-service/views/question'
 
 export const questionController = {
   options: {
-    auth: false
+    auth: false // Self-service journey is entirely public, no authentication required
   },
   handler(request, h) {
     if (!getJourneyState(request)) {
@@ -43,7 +43,7 @@ export const questionController = {
 
 export const questionSubmitController = {
   options: {
-    auth: false
+    auth: false // Self-service journey is entirely public, no authentication required
   },
   async handler(request, h) {
     if (!getJourneyState(request)) {

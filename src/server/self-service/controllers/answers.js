@@ -12,7 +12,7 @@ const VIEW_PATH = 'self-service/views/answers'
 
 export const answersController = {
   options: {
-    auth: false
+    auth: false // Self-service journey is entirely public, no authentication required
   },
   handler(request, h) {
     const state = getJourneyState(request)

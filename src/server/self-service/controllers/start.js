@@ -9,7 +9,7 @@ const VIEW_PATH = 'self-service/views/start'
 
 export const startController = {
   options: {
-    auth: false
+    auth: false // Self-service journey is entirely public, no authentication required
   },
   handler(_request, h) {
     return h.view(VIEW_PATH, {
@@ -20,7 +20,7 @@ export const startController = {
 
 export const startSubmitController = {
   options: {
-    auth: false
+    auth: false // Self-service journey is entirely public, no authentication required
   },
   async handler(request, h) {
     await clearJourney(request, h)

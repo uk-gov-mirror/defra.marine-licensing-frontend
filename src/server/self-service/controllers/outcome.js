@@ -16,7 +16,7 @@ const VIEW_PATH = 'self-service/views/outcome'
 
 export const outcomeController = {
   options: {
-    auth: false
+    auth: false // Self-service journey is entirely public, no authentication required
   },
   handler(request, h) {
     if (!getJourneyState(request)) {
@@ -42,7 +42,7 @@ export const outcomeController = {
 
 export const outcomeSubmitController = {
   options: {
-    auth: false
+    auth: false // Self-service journey is entirely public, no authentication required
   },
   async handler(request, h) {
     if (!getJourneyState(request)) {
