@@ -40,11 +40,6 @@ export async function pushAnswers(request, h, newAnswers) {
 
 /**
  * @param {import('@hapi/hapi').Request} request
- * @param {string} questionRoute
- * @returns {object[]}
- */
-/**
- * @param {import('@hapi/hapi').Request} request
  * @param {string} currentRoute - the route of the page being rendered (e.g. '/sea')
  * @returns {string}
  */
