@@ -57,10 +57,8 @@ export const outcomeSubmitController = {
     if (outcomeType.nextQuestionRoute) {
       const answer = {
         questionRoute: outcomeRoute,
-        questionText: outcomeType.text ?? outcome.heading,
         mcmsAppFormMapping: null,
         answerId: outcomeType.id,
-        answerText: outcomeType.heading,
         answeredAt: new Date().toISOString()
       }
       await pushAnswers(request, h, [answer])

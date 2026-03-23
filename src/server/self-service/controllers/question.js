@@ -79,10 +79,8 @@ export const questionSubmitController = {
       }
       return {
         questionRoute: question.route,
-        questionText: question.text,
         mcmsAppFormMapping: question.mcmsAppFormMapping ?? null,
         answerId: answer.id,
-        answerText: answer.text,
         answeredAt: now
       }
     })

@@ -67,9 +67,9 @@ describe('session-answers', () => {
       const newAnswers = [
         {
           questionRoute: '/sea',
-          questionText: 'Where?',
+
           answerId: 'inSea',
-          answerText: 'In the sea',
+
           answeredAt: '2026-01-01T00:01:00Z'
         }
       ]
@@ -87,23 +87,23 @@ describe('session-answers', () => {
         answers: [
           {
             questionRoute: '/sea',
-            questionText: 'Where?',
+
             answerId: 'inSea',
-            answerText: 'In the sea',
+
             answeredAt: '2026-01-01T00:01:00Z'
           },
           {
             questionRoute: '/jurisdiction',
-            questionText: 'Which waters?',
+
             answerId: 'english',
-            answerText: 'English',
+
             answeredAt: '2026-01-01T00:02:00Z'
           },
           {
             questionRoute: '/activity-type',
-            questionText: 'Activity?',
+
             answerId: 'construction',
-            answerText: 'Construction',
+
             answeredAt: '2026-01-01T00:03:00Z'
           }
         ]
@@ -113,9 +113,9 @@ describe('session-answers', () => {
       const newAnswers = [
         {
           questionRoute: '/sea',
-          questionText: 'Where?',
+
           answerId: 'onLand',
-          answerText: 'On land',
+
           answeredAt: '2026-01-01T00:04:00Z'
         }
       ]
@@ -242,9 +242,7 @@ describe('session-answers', () => {
         ]
       }
       const request = createMockRequest(state)
-      expect(getBackLink(request, '/sea')).toBe(
-        '/journey/self-service/start'
-      )
+      expect(getBackLink(request, '/sea')).toBe('/journey/self-service/start')
     })
 
     test('returns previous answered question when on a later question', () => {

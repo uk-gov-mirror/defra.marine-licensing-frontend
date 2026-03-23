@@ -40,6 +40,19 @@ export async function pushAnswers(request, h, newAnswers) {
 
 /**
  * @param {import('@hapi/hapi').Request} request
+ * @param {string} questionRoute
+ * @returns {object[]}
+ */
+export function getAnswersForRoute(request, questionRoute) {
+  const state = getJourneyState(request)
+  if (!state) {
+    return []
+  }
+  return state.answers.filter((a) => a.questionRoute === questionRoute)
+}
+
+/**
+ * @param {import('@hapi/hapi').Request} request
  * @param {string} currentRoute - the route of the page being rendered (e.g. '/sea')
  * @returns {string}
  */
@@ -49,9 +62,7 @@ export function getBackLink(request, currentRoute) {
     return START_PATH
   }
 
-  const index = state.answers.findIndex(
-    (a) => a.questionRoute === currentRoute
-  )
+  const index = state.answers.findIndex((a) => a.questionRoute === currentRoute)
 
   if (index > 0) {
     return `${ROUTE_PREFIX}${state.answers[index - 1].questionRoute}`
@@ -64,19 +75,6 @@ export function getBackLink(request, currentRoute) {
   // Current route not yet answered — back to the last answered question
   const lastAnswer = state.answers[state.answers.length - 1]
   return `${ROUTE_PREFIX}${lastAnswer.questionRoute}`
-}
-
-/**
- * @param {import('@hapi/hapi').Request} request
- * @param {string} questionRoute
- * @returns {object[]}
- */
-export function getAnswersForRoute(request, questionRoute) {
-  const state = getJourneyState(request)
-  if (!state) {
-    return []
-  }
-  return state.answers.filter((a) => a.questionRoute === questionRoute)
 }
 
 /**

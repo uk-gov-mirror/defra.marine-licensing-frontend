@@ -21,9 +21,9 @@
       <h2 class="govuk-heading-l">Answers</h2>
       {% for qa in groupedAnswers %}
         <p class="govuk-body">
-          <strong>{{ qa.questionText | safe }}</strong><br/>
+          <strong>{{ qa.questionText }}</strong><br/>
           {% for answerText in qa.answers %}
-            {{ answerText | safe }}<br/>
+            {{ answerText }}<br/>
           {% endfor %}
         </p>
       {% endfor %}
