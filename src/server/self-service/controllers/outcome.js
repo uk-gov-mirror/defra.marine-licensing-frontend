@@ -108,6 +108,12 @@ export const outcomeSubmitController = {
 function buildExternalRedirectUrl(request, outcomeType) {
   const url = new URL(outcomeType.overrideCtaButtonUrl)
 
+  if (url.protocol !== 'https:' || !url.hostname.endsWith('.gov.uk')) {
+    throw new Error(
+      `Redirect URL must be HTTPS on a .gov.uk domain, got '${url.origin}'`
+    )
+  }
+
   url.searchParams.set('outcomeType', outcomeType.id)
 
   if (outcomeType.params) {
