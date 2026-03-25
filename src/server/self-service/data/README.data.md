@@ -31,7 +31,7 @@ A decision-tree engine that helps applicants determine whether they need a marin
 
 The entry point is defined by `firstQuestionRoute: "/sea"`.
 
-This first question asks: *"Where will the proposed activities take place?"* with two answers:
+This first question asks: _"Where will the proposed activities take place?"_ with two answers:
 
 - **"In or over the sea"** → continues to `/jurisdiction`
 - **"On land above mean high water springs"** → exits immediately (not licensable)
@@ -91,25 +91,25 @@ A question page presents radio buttons (or occasionally checkboxes). Each answer
 
 **Fields:**
 
-| Field | Required | Purpose |
-|-------|----------|---------|
-| `route` | Yes | URL path for this page |
-| `text` | Yes | The question shown to the user |
-| `hint` | No | Help text (may contain HTML) |
-| `section` | No | Which progress bar section this belongs to (absent on 4 burial-at-sea pages) |
-| `answers` | Yes | Array of radio button options |
-| `multiSelect` | No | If present, page uses checkboxes instead (see below) |
-| `mcmsAppFormMapping` | No | Maps this question to a field in the MCMS application form |
+| Field                | Required | Purpose                                                                      |
+| -------------------- | -------- | ---------------------------------------------------------------------------- |
+| `route`              | Yes      | URL path for this page                                                       |
+| `text`               | Yes      | The question shown to the user                                               |
+| `hint`               | No       | Help text (may contain HTML)                                                 |
+| `section`            | No       | Which progress bar section this belongs to (absent on 4 burial-at-sea pages) |
+| `answers`            | Yes      | Array of radio button options                                                |
+| `multiSelect`        | No       | If present, page uses checkboxes instead (see below)                         |
+| `mcmsAppFormMapping` | No       | Maps this question to a field in the MCMS application form                   |
 
 **Answer fields:**
 
-| Field | Required | Purpose |
-|-------|----------|---------|
-| `id` | Yes | Machine identifier for this answer |
-| `text` | Yes | Label shown to the user |
-| `hint` | No | Expandable help text for this option |
-| `nextQuestionRoute` | No* | Go to another question |
-| `outcomeRoute` | No* | Go to an outcome page |
+| Field               | Required | Purpose                              |
+| ------------------- | -------- | ------------------------------------ |
+| `id`                | Yes      | Machine identifier for this answer   |
+| `text`              | Yes      | Label shown to the user              |
+| `hint`              | No       | Expandable help text for this option |
+| `nextQuestionRoute` | No\*     | Go to another question               |
+| `outcomeRoute`      | No\*     | Go to an outcome page                |
 
 \* Every answer on a radio-button page must have exactly one of `nextQuestionRoute` or `outcomeRoute`.
 
@@ -123,10 +123,7 @@ An outcome page displays a result and presents one or more actions (defined by `
   "heading": "Exemption not available",
   "section": "doINeedAMarineLicenceConstruction",
   "text": "<b>Please select the service you require.</b>...",
-  "outcomeTypes": [
-    "WO_CON_NO_EXE_SELF_SERVICE",
-    "WO_NO_EXE_STANDARD_MLA"
-  ]
+  "outcomeTypes": ["WO_CON_NO_EXE_SELF_SERVICE", "WO_NO_EXE_STANDARD_MLA"]
 }
 ```
 
@@ -135,7 +132,7 @@ An outcome page displays a result and presents one or more actions (defined by `
 
 ### 3. OutcomeTypes (99 definitions)
 
-These define what the user can *do* at an outcome page. They are the leaf actions of the system.
+These define what the user can _do_ at an outcome page. They are the leaf actions of the system.
 
 ```json
 {
@@ -150,15 +147,15 @@ These define what the user can *do* at an outcome page. They are the leaf action
 
 **Types of outcomeType:**
 
-| Category | What it does | Key fields | Count |
-|----------|-------------|------------|-------|
-| **Application launch** | Opens the licence application | `module: "MMO_APP2_CONTROL"` | ~10 |
-| **Advice/notification** | Opens an enquiry or exemption form | `module: "MMO_ADVICE_CONTROL"` + `params` | ~33 |
-| **External redirect** | Redirects to Defra marine licensing frontend | `overrideCtaButtonUrl` + `overrideCtaButtonText` | 12 |
-| **Download** | Provides a .docx template | `link: "https://...docx"` | ~8 |
-| **External link** | Opens an external tool (e.g. ArcGIS map) | `link: "https://..."` | ~2 |
-| **Info only** | Displays text, no action | (no module/link) | ~22 |
-| **Routing** | Sends user back into the question tree | `nextQuestionRoute` | 12 |
+| Category                | What it does                                 | Key fields                                       | Count |
+| ----------------------- | -------------------------------------------- | ------------------------------------------------ | ----- |
+| **Application launch**  | Opens the licence application                | `module: "MMO_APP2_CONTROL"`                     | ~10   |
+| **Advice/notification** | Opens an enquiry or exemption form           | `module: "MMO_ADVICE_CONTROL"` + `params`        | ~33   |
+| **External redirect**   | Redirects to Defra marine licensing frontend | `overrideCtaButtonUrl` + `overrideCtaButtonText` | 12    |
+| **Download**            | Provides a .docx template                    | `link: "https://...docx"`                        | ~8    |
+| **External link**       | Opens an external tool (e.g. ArcGIS map)     | `link: "https://..."`                            | ~2    |
+| **Info only**           | Displays text, no action                     | (no module/link)                                 | ~22   |
+| **Routing**             | Sends user back into the question tree       | `nextQuestionRoute`                              | 12    |
 
 ---
 
@@ -226,13 +223,13 @@ flowchart TD
 
 ### The Five Phases
 
-| Phase | What happens | Section IDs |
-|-------|-------------|-------------|
-| **1. Jurisdiction** | Is it in the sea? Which waters? | `doINeedAMarineLicence` |
-| **2. Activity type** | Construction, deposit, removal, dredging, or other? | `doINeedAMarineLicence{Type}` |
-| **3. Activity details** | Specific questions about the proposed activity | `doINeedAMarineLicence{Type}` |
-| **4. Exemption check** | Does an exemption article apply? | `construction`, `deposit`, `removal`, `dredging` |
-| **5. Self-service check** | Is the activity suitable for fast-track licensing? | `activityType`, `subactivityType`, `navigationalRisk`, `durationOfWorks`, `activityLocation`, `siteSensitivities`, `defence`, `protectionOfHeritage`, `marineProtectedArea200`, etc. |
+| Phase                     | What happens                                        | Section IDs                                                                                                                                                                          |
+| ------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **1. Jurisdiction**       | Is it in the sea? Which waters?                     | `doINeedAMarineLicence`                                                                                                                                                              |
+| **2. Activity type**      | Construction, deposit, removal, dredging, or other? | `doINeedAMarineLicence{Type}`                                                                                                                                                        |
+| **3. Activity details**   | Specific questions about the proposed activity      | `doINeedAMarineLicence{Type}`                                                                                                                                                        |
+| **4. Exemption check**    | Does an exemption article apply?                    | `construction`, `deposit`, `removal`, `dredging`                                                                                                                                     |
+| **5. Self-service check** | Is the activity suitable for fast-track licensing?  | `activityType`, `subactivityType`, `navigationalRisk`, `durationOfWorks`, `activityLocation`, `siteSensitivities`, `defence`, `protectionOfHeritage`, `marineProtectedArea200`, etc. |
 
 ---
 
@@ -275,13 +272,13 @@ flowchart TD
 
 **The five multiSelect pages:**
 
-| Page | Continues to | "Other" goes to |
-|------|-------------|-----------------|
+| Page                                       | Continues to                    | "Other" goes to            |
+| ------------------------------------------ | ------------------------------- | -------------------------- |
 | `/construction/maintenance-existing-works` | `/construction/.../scaffolding` | Standard MLA (maintenance) |
-| `/removal/activities` | `/activity/completion` | Standard MLA (removals) |
-| `/dredging/activities` | `/activity/completion` | Standard MLA (dredging) |
-| `/dredging/beach-maintenance/activities` | `/activity/completion` | Standard MLA (beach) |
-| `/deposit/markers/activities` | `/activity/completion` | Standard MLA (deposits) |
+| `/removal/activities`                      | `/activity/completion`          | Standard MLA (removals)    |
+| `/dredging/activities`                     | `/activity/completion`          | Standard MLA (dredging)    |
+| `/dredging/beach-maintenance/activities`   | `/activity/completion`          | Standard MLA (beach)       |
+| `/deposit/markers/activities`              | `/activity/completion`          | Standard MLA (deposits)    |
 
 ### 2. Outcome Fork Pages (Re-entry into the Question Tree)
 
@@ -305,20 +302,20 @@ flowchart TD
 
 **The 12 routing outcomeTypes:**
 
-| OutcomeType ID | Routes to |
-|---------------|-----------|
-| `WO_CON_EXEMPTION_JOURNEY` | `/exemption/construction` |
-| `WO_CON_SELF_SERVICE_JOURNEY` | `/construction/activity` |
-| `WO_CON_NO_EXE_SELF_SERVICE` | `/construction/activity` |
-| `WO_DEPOSIT_EXEMPTION_JOURNEY` | `/exemption/deposit/activity-type` |
-| `WO_DEPOSIT_SELF_SERVICE_JOURNEY` | `/deposit/activity` |
-| `WO_DEPOSIT_NO_EXE_SELF_SERVICE` | `/deposit/activity` |
-| `WO_REMOVAL_EXEMPTION_JOURNEY` | `/exemption/removal/activity-type` |
-| `WO_REMOVAL_SELF_SERVICE_JOURNEY` | `/removal/activity` |
-| `WO_REMOVAL_NO_EXE_SELF_SERVICE` | `/removal/activity` |
-| `WO_DREDGING_EXEMPTION_JOURNEY` | `/exemption/dredging` |
-| `WO_DREDGING_SELF_SERVICE_JOURNEY` | `/dredging/activity` |
-| `WO_DREDGING_NO_EXE_SELF_SERVICE` | `/dredging/activity` |
+| OutcomeType ID                     | Routes to                          |
+| ---------------------------------- | ---------------------------------- |
+| `WO_CON_EXEMPTION_JOURNEY`         | `/exemption/construction`          |
+| `WO_CON_SELF_SERVICE_JOURNEY`      | `/construction/activity`           |
+| `WO_CON_NO_EXE_SELF_SERVICE`       | `/construction/activity`           |
+| `WO_DEPOSIT_EXEMPTION_JOURNEY`     | `/exemption/deposit/activity-type` |
+| `WO_DEPOSIT_SELF_SERVICE_JOURNEY`  | `/deposit/activity`                |
+| `WO_DEPOSIT_NO_EXE_SELF_SERVICE`   | `/deposit/activity`                |
+| `WO_REMOVAL_EXEMPTION_JOURNEY`     | `/exemption/removal/activity-type` |
+| `WO_REMOVAL_SELF_SERVICE_JOURNEY`  | `/removal/activity`                |
+| `WO_REMOVAL_NO_EXE_SELF_SERVICE`   | `/removal/activity`                |
+| `WO_DREDGING_EXEMPTION_JOURNEY`    | `/exemption/dredging`              |
+| `WO_DREDGING_SELF_SERVICE_JOURNEY` | `/dredging/activity`               |
+| `WO_DREDGING_NO_EXE_SELF_SERVICE`  | `/dredging/activity`               |
 
 ### 3. The Self-Service Gauntlet
 
@@ -350,18 +347,23 @@ Any "No" at the wrong point typically diverts to a standard licence application 
 Every journey ends at a **terminal outcomeType**. There are 87 terminal outcomeTypes, falling into these categories:
 
 ### Exemption Available (~40 outcomes)
+
 Named `WO_EXE_AVAILABLE_ARTICLE_{N}` — the activity is exempt under a specific article of the Marine and Coastal Access Act 2009. Some require notification to the MMO, some don't.
 
 ### Not Licensable (~10 outcomes)
+
 Named `WO_EXE_NOT_LICENSABLE_*` — the activity doesn't require a marine licence at all (e.g. it's on land, in devolved waters, or involves cables outside 12NM).
 
 ### Licence Required (~10 outcomes)
+
 Named `WO_STANDARD_TRACK_MLA*` or `WO_FAST_TRACK_MLA*` — launches the licence application module (`MMO_APP2_CONTROL`).
 
 ### Download Template (~8 outcomes)
+
 Named `WO_DOWNLOAD_*_AGREED_METHOD_TEMPLATE` — provides a .docx template that must be agreed with a harbour authority, Trinity House, Natural England, or Historic England.
 
 ### Enquiry / EIA (~4 outcomes)
+
 Named `WO_ENQUIRY` or `WO_EIA` — launches the advice module (`MMO_ADVICE_CONTROL`) for complex cases.
 
 ---
@@ -383,6 +385,7 @@ Four of the five multiSelect pages route to `/activity/completion` ("Will activi
 ### 4. Orphaned Pages
 
 **4 unreachable questions** — defined in the JSON but no route points to them:
+
 - `/exemption/construction/maintenance/pontoons`
 - `/exemption/deposit/pollution/pollution-prevention`
 - `/exemption/removal/waste/litter-seaweed/lse`
@@ -391,6 +394,7 @@ Four of the five multiSelect pages route to `/activity/completion` ("Will activi
 These may be legacy pages from earlier versions, or they may be reached by application logic outside this JSON.
 
 **13 unreachable outcomes** — defined but never referenced by any `outcomeRoute`:
+
 - The 4 `/journey-select` pages (construction, deposit, removal, dredging)
 - The 8 `/standard-marine-licence-application/*` pages
 - `/not-licensable`
@@ -399,6 +403,7 @@ These may be legacy pages from earlier versions, or they may be reached by appli
 These are likely reached by hardcoded routes in the application rather than through the JSON decision tree.
 
 **3 unreferenced outcomeTypes** — defined but not used by any outcome page:
+
 - `WO_INTERACTIVE_MAP_STAGE1`
 - `WO_INTERACTIVE_MAP`
 - `WO_EXE_AVAILABLE_SECTION_81`
@@ -406,6 +411,7 @@ These are likely reached by hardcoded routes in the application rather than thro
 ### 5. HTML in Content Fields
 
 The `text` and `hint` fields contain raw HTML — not Markdown, not plain text. Common patterns:
+
 - `<p><p>` for paragraph breaks (note: doubled, not `<p>...</p>`)
 - `<a target="_blank" href="...">` for external links
 - `<b>` for bold text
@@ -422,16 +428,16 @@ This HTML will need careful handling in any code generation — it should be ren
 
 These question pages are **not reachable** by following `nextQuestionRoute` from other questions. They can only be entered when a user selects an outcomeType on a fork page:
 
-| Page | Reached via |
-|------|------------|
-| `/construction/activity` | `WO_CON_SELF_SERVICE_JOURNEY` or `WO_CON_NO_EXE_SELF_SERVICE` |
-| `/deposit/activity` | `WO_DEPOSIT_SELF_SERVICE_JOURNEY` or `WO_DEPOSIT_NO_EXE_SELF_SERVICE` |
-| `/removal/activity` | `WO_REMOVAL_SELF_SERVICE_JOURNEY` or `WO_REMOVAL_NO_EXE_SELF_SERVICE` |
-| `/dredging/activity` | `WO_DREDGING_SELF_SERVICE_JOURNEY` or `WO_DREDGING_NO_EXE_SELF_SERVICE` |
-| `/exemption/construction` | `WO_CON_EXEMPTION_JOURNEY` |
-| `/exemption/deposit/activity-type` | `WO_DEPOSIT_EXEMPTION_JOURNEY` |
-| `/exemption/removal/activity-type` | `WO_REMOVAL_EXEMPTION_JOURNEY` |
-| `/exemption/dredging` | `WO_DREDGING_EXEMPTION_JOURNEY` |
+| Page                               | Reached via                                                             |
+| ---------------------------------- | ----------------------------------------------------------------------- |
+| `/construction/activity`           | `WO_CON_SELF_SERVICE_JOURNEY` or `WO_CON_NO_EXE_SELF_SERVICE`           |
+| `/deposit/activity`                | `WO_DEPOSIT_SELF_SERVICE_JOURNEY` or `WO_DEPOSIT_NO_EXE_SELF_SERVICE`   |
+| `/removal/activity`                | `WO_REMOVAL_SELF_SERVICE_JOURNEY` or `WO_REMOVAL_NO_EXE_SELF_SERVICE`   |
+| `/dredging/activity`               | `WO_DREDGING_SELF_SERVICE_JOURNEY` or `WO_DREDGING_NO_EXE_SELF_SERVICE` |
+| `/exemption/construction`          | `WO_CON_EXEMPTION_JOURNEY`                                              |
+| `/exemption/deposit/activity-type` | `WO_DEPOSIT_EXEMPTION_JOURNEY`                                          |
+| `/exemption/removal/activity-type` | `WO_REMOVAL_EXEMPTION_JOURNEY`                                          |
+| `/exemption/dredging`              | `WO_DREDGING_EXEMPTION_JOURNEY`                                         |
 
 In the generated site, these pages must be valid entry points even though no question's answer directly links to them.
 
@@ -443,15 +449,15 @@ In the generated site, these pages must be valid entry points even though no que
 
 Key mappings:
 
-| Mapping | Question |
-|---------|----------|
-| `ACTIVITY_TYPE` | `/activity-type` |
-| `ACTIVITY_SUBTYPE_CONSTRUCTION` | Construction sub-type |
+| Mapping                                 | Question                                 |
+| --------------------------------------- | ---------------------------------------- |
+| `ACTIVITY_TYPE`                         | `/activity-type`                         |
+| `ACTIVITY_SUBTYPE_CONSTRUCTION`         | Construction sub-type                    |
 | `MAINTENANCE_EXISTING_WORKS_ACTIVITIES` | Maintenance sub-activities (multiSelect) |
-| `SINGLE_LOCATION` | Single or multiple locations |
-| `HISTORIC_ENGLAND` | Historic England method agreed |
-| `NATURAL_ENGLAND` | Natural England method agreed |
-| `SCAFFOLDING_HA_METHOD` | Harbour authority method agreed |
+| `SINGLE_LOCATION`                       | Single or multiple locations             |
+| `HISTORIC_ENGLAND`                      | Historic England method agreed           |
+| `NATURAL_ENGLAND`                       | Natural England method agreed            |
+| `SCAFFOLDING_HA_METHOD`                 | Harbour authority method agreed          |
 
 This data must be preserved through the journey and passed to the application module at the end.
 
@@ -486,15 +492,15 @@ These parameters configure what the destination module does — which form to sh
 
 ## Summary: What the Generated Site Must Handle
 
-| Concern | Count | Notes |
-|---------|-------|-------|
-| Radio button question pages | 354 | Standard GOV.UK radios |
-| Checkbox question pages | 5 | MultiSelect with special routing |
-| Outcome pages (terminal) | 98 | Display result + action buttons |
-| Outcome pages (fork) | 8 | Display choices that re-enter question tree |
-| Transitions to test | 1,078 | Each is a single verifiable assertion |
-| Terminal outcomes | 87 | Distinct end-states |
-| Sections (progress bar) | 48 | Grouped into 5 phases |
-| MCMS form mappings | 22 | Answers to carry forward |
-| HTML content fields | ~465 | Raw HTML, not escaped |
-| External links in content | ~50+ | GOV.UK guidance, ArcGIS maps, .docx downloads |
+| Concern                     | Count | Notes                                         |
+| --------------------------- | ----- | --------------------------------------------- |
+| Radio button question pages | 354   | Standard GOV.UK radios                        |
+| Checkbox question pages     | 5     | MultiSelect with special routing              |
+| Outcome pages (terminal)    | 98    | Display result + action buttons               |
+| Outcome pages (fork)        | 8     | Display choices that re-enter question tree   |
+| Transitions to test         | 1,078 | Each is a single verifiable assertion         |
+| Terminal outcomes           | 87    | Distinct end-states                           |
+| Sections (progress bar)     | 48    | Grouped into 5 phases                         |
+| MCMS form mappings          | 22    | Answers to carry forward                      |
+| HTML content fields         | ~465  | Raw HTML, not escaped                         |
+| External links in content   | ~50+  | GOV.UK guidance, ArcGIS maps, .docx downloads |
