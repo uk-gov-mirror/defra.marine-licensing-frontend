@@ -1,85 +1,168 @@
-import { transformTaskList } from '#src/server/marine-licence/task-list/utils.js'
+import {
+  transformProjectDetailsTaskList,
+  transformSiteDetailsTaskList,
+  transformOtherPermissionsTaskList
+} from '#src/server/marine-licence/task-list/utils.js'
 import { marineLicenceRoutes } from '#src/server/common/constants/routes.js'
 
 describe('taskList utils', () => {
-  test('transformTaskList correctly returns task list with Completed status', () => {
-    expect(
-      transformTaskList({
-        projectName: 'COMPLETED'
-      })
-    ).toEqual([
-      {
-        href: marineLicenceRoutes.MARINE_LICENCE_PROJECT_NAME,
-        status: { text: 'Completed' },
-        title: {
-          classes: 'govuk-link--no-visited-state',
-          text: 'Project name'
+  describe('transformProjectDetailsTaskList', () => {
+    test('correctly returns Completed status', () => {
+      expect(
+        transformProjectDetailsTaskList({ projectName: 'COMPLETED' })
+      ).toEqual([
+        {
+          href: marineLicenceRoutes.MARINE_LICENCE_PROJECT_NAME,
+          status: { text: 'Completed' },
+          title: {
+            classes: 'govuk-link--no-visited-state',
+            text: 'Project name'
+          }
         }
+      ])
+    })
+
+    test('correctly returns In Progress', () => {
+      expect(
+        transformProjectDetailsTaskList({ projectName: 'IN_PROGRESS' })
+      ).toEqual([
+        {
+          href: marineLicenceRoutes.MARINE_LICENCE_PROJECT_NAME,
+          status: {
+            tag: { text: 'In Progress', classes: 'govuk-tag--light-blue' }
+          },
+          title: {
+            classes: 'govuk-link--no-visited-state',
+            text: 'Project name'
+          }
+        }
+      ])
+    })
+
+    test.each([null, 'INCOMPLETE', undefined])(
+      'correctly returns Not yet started for %s',
+      (value) => {
+        expect(transformProjectDetailsTaskList({ projectName: value })).toEqual(
+          [
+            {
+              href: marineLicenceRoutes.MARINE_LICENCE_PROJECT_NAME,
+              status: {
+                tag: { text: 'Not yet started', classes: 'govuk-tag--blue' }
+              },
+              title: {
+                classes: 'govuk-link--no-visited-state',
+                text: 'Project name'
+              }
+            }
+          ]
+        )
       }
-    ])
+    )
   })
 
-  test('transformTaskList correctly returns In Progress', () => {
-    expect(
-      transformTaskList({
-        projectName: 'IN_PROGRESS'
-      })
-    ).toEqual([
-      {
-        href: marineLicenceRoutes.MARINE_LICENCE_PROJECT_NAME,
-        status: {
-          tag: { text: 'In Progress', classes: 'govuk-tag--light-blue' }
-        },
-        title: { classes: 'govuk-link--no-visited-state', text: 'Project name' }
+  describe('transformSiteDetailsTaskList', () => {
+    test('correctly returns Completed status', () => {
+      expect(
+        transformSiteDetailsTaskList({ siteDetails: 'COMPLETED' })
+      ).toEqual([
+        {
+          href: marineLicenceRoutes.MARINE_LICENCE_SITE_DETAILS,
+          status: { text: 'Completed' },
+          title: {
+            classes: 'govuk-link--no-visited-state',
+            text: 'Site details'
+          }
+        }
+      ])
+    })
+
+    test('correctly returns In Progress', () => {
+      expect(
+        transformSiteDetailsTaskList({ siteDetails: 'IN_PROGRESS' })
+      ).toEqual([
+        {
+          href: marineLicenceRoutes.MARINE_LICENCE_SITE_DETAILS,
+          status: {
+            tag: { text: 'In Progress', classes: 'govuk-tag--light-blue' }
+          },
+          title: {
+            classes: 'govuk-link--no-visited-state',
+            text: 'Site details'
+          }
+        }
+      ])
+    })
+
+    test.each([null, 'INCOMPLETE', undefined])(
+      'correctly returns Not yet started for %s',
+      (value) => {
+        expect(transformSiteDetailsTaskList({ siteDetails: value })).toEqual([
+          {
+            href: marineLicenceRoutes.MARINE_LICENCE_SITE_DETAILS,
+            status: {
+              tag: { text: 'Not yet started', classes: 'govuk-tag--blue' }
+            },
+            title: {
+              classes: 'govuk-link--no-visited-state',
+              text: 'Site details'
+            }
+          }
+        ])
       }
-    ])
+    )
   })
 
-  test('transformTaskList correctly returns Not yet started for null', () => {
-    expect(
-      transformTaskList({
-        projectName: null
-      })
-    ).toEqual([
-      {
-        href: marineLicenceRoutes.MARINE_LICENCE_PROJECT_NAME,
-        status: {
-          tag: { text: 'Not yet started', classes: 'govuk-tag--blue' }
-        },
-        title: { classes: 'govuk-link--no-visited-state', text: 'Project name' }
-      }
-    ])
-  })
+  describe('transformOtherPermissionsTaskList', () => {
+    test('correctly returns Completed status', () => {
+      expect(
+        transformOtherPermissionsTaskList({ specialLegalPowers: 'COMPLETED' })
+      ).toEqual([
+        {
+          href: marineLicenceRoutes.MARINE_LICENCE_SPECIAL_LEGAL_POWERS,
+          status: { text: 'Completed' },
+          title: {
+            classes: 'govuk-link--no-visited-state',
+            text: 'Special legal powers'
+          }
+        }
+      ])
+    })
 
-  test('transformTaskList correctly returns Not yet started for INCOMPLETE', () => {
-    expect(
-      transformTaskList({
-        projectName: 'INCOMPLETE'
-      })
-    ).toEqual([
-      {
-        href: marineLicenceRoutes.MARINE_LICENCE_PROJECT_NAME,
-        status: {
-          tag: { text: 'Not yet started', classes: 'govuk-tag--blue' }
-        },
-        title: { classes: 'govuk-link--no-visited-state', text: 'Project name' }
-      }
-    ])
-  })
+    test('correctly returns In Progress', () => {
+      expect(
+        transformOtherPermissionsTaskList({ specialLegalPowers: 'IN_PROGRESS' })
+      ).toEqual([
+        {
+          href: marineLicenceRoutes.MARINE_LICENCE_SPECIAL_LEGAL_POWERS,
+          status: {
+            tag: { text: 'In Progress', classes: 'govuk-tag--light-blue' }
+          },
+          title: {
+            classes: 'govuk-link--no-visited-state',
+            text: 'Special legal powers'
+          }
+        }
+      ])
+    })
 
-  test('transformTaskList correctly returns Not yet started for undefined', () => {
-    expect(
-      transformTaskList({
-        projectName: undefined
-      })
-    ).toEqual([
-      {
-        href: marineLicenceRoutes.MARINE_LICENCE_PROJECT_NAME,
-        status: {
-          tag: { text: 'Not yet started', classes: 'govuk-tag--blue' }
-        },
-        title: { classes: 'govuk-link--no-visited-state', text: 'Project name' }
+    test.each([null, 'INCOMPLETE', undefined])(
+      'correctly returns Not yet started for %s',
+      (value) => {
+        expect(
+          transformOtherPermissionsTaskList({ specialLegalPowers: value })
+        ).toEqual([
+          {
+            href: marineLicenceRoutes.MARINE_LICENCE_SPECIAL_LEGAL_POWERS,
+            status: {
+              tag: { text: 'Not yet started', classes: 'govuk-tag--blue' }
+            },
+            title: {
+              classes: 'govuk-link--no-visited-state',
+              text: 'Special legal powers'
+            }
+          }
+        ])
       }
-    ])
+    )
   })
 })

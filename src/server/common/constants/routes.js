@@ -34,6 +34,8 @@ export const exemptionRoutes = {
   COOKIES: '/help/cookies',
   PRIVACY: '/help/privacy',
   ADMIN_EXEMPTIONS: '/admin/exemptions',
+  ADMIN_EMP: '/admin/emp',
+  ADMIN_BACKFILL: '/admin/backfill-areas',
   EXEMPTION: '/exemption'
 }
 
@@ -43,6 +45,14 @@ export const marineLicenceRoutes = {
   MARINE_LICENCE_PROJECT_NAME: '/marine-licence/project-name',
   MARINE_LICENCE_TASK_LIST: '/marine-licence/task-list',
   MARINE_LICENCE_DELETE: '/marine-licence/delete',
+  MARINE_LICENCE_SPECIAL_LEGAL_POWERS: '/marine-licence/special-legal-powers',
+  MARINE_LICENCE_SITE_DETAILS: '/marine-licence/site-details',
+  MARINE_LICENCE_COORDINATES_TYPE_CHOICE:
+    '/marine-licence/how-do-you-want-to-provide-the-coordinates',
+  MARINE_LICENCE_CHOOSE_FILE_UPLOAD_TYPE:
+    '/marine-licence/choose-file-type-to-upload',
+  MARINE_LICENCE_FILE_UPLOAD: '/marine-licence/upload-file',
+  MARINE_LICENCE_UPLOAD_AND_WAIT: '/marine-licence/upload-and-wait',
   MARINE_LICENCE_VIEW_DETAILS: '/marine-licence/view-details',
   MARINE_LICENCE_VIEW_DETAILS_PUBLIC: '/marine-licence/view-public-details',
   MARINE_LICENCE_VIEW_DETAILS_INTERNAL_USER: '/view-marine-licence-details'
@@ -84,6 +94,8 @@ export const routes = {
 
 export const entraIdRoutes = [
   routes.VIEW_DETAILS_INTERNAL_USER,
+  routes.ADMIN_BACKFILL,
+  routes.ADMIN_EMP,
   marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS_INTERNAL_USER,
   routes.ADMIN_EXEMPTIONS
 ]

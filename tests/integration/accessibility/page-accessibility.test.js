@@ -172,9 +172,29 @@ describe('Page accessibility checks (Axe)', () => {
       isMarineLicence: true
     },
     {
+      url: marineLicenceRoutes.MARINE_LICENCE_SPECIAL_LEGAL_POWERS,
+      title:
+        'Does your organisation have special legal powers to do any of this project?',
+      isMarineLicence: true,
+      session: { ...agentSession, shouldShowOrgOrUserName: false }
+    },
+    {
       url: marineLicenceRoutes.MARINE_LICENCE_TASK_LIST,
       title: 'Marine licence start page',
-      isMarineLicence: true
+      isMarineLicence: true,
+      session: { ...agentSession, shouldShowOrgOrUserName: false }
+    },
+    {
+      url: marineLicenceRoutes.MARINE_LICENCE_SITE_DETAILS,
+      title: 'Site details'
+    },
+    {
+      url: marineLicenceRoutes.MARINE_LICENCE_COORDINATES_TYPE_CHOICE,
+      title: 'How do you want to provide the site location?'
+    },
+    {
+      url: marineLicenceRoutes.MARINE_LICENCE_CHOOSE_FILE_UPLOAD_TYPE,
+      title: 'Choose file type'
     },
     {
       url: marineLicenceRoutes.MARINE_LICENCE_CHECK_YOUR_ANSWERS,
@@ -255,6 +275,21 @@ describe('Page accessibility checks (Axe)', () => {
     {
       url: `${marineLicenceRoutes.MARINE_LICENCE_CONFIRMATION}?applicationReference=123`,
       title: 'Application sent'
+    },
+    {
+      url: `${routes.ADMIN_EXEMPTIONS}`,
+      title: 'Exemptions Admin',
+      auth: { credentials: { isTeamAdmin: true } }
+    },
+    {
+      url: `${routes.ADMIN_EMP}`,
+      title: 'Exemptions not sent to EMP',
+      auth: { credentials: { isTeamAdmin: true } }
+    },
+    {
+      url: `${routes.ADMIN_BACKFILL}`,
+      title: 'Exemptions without Marine Plan or Coastal Operations Areas',
+      auth: { credentials: { isTeamAdmin: true } }
     }
   ]
 
@@ -266,7 +301,8 @@ describe('Page accessibility checks (Axe)', () => {
       exemption = mockExemptionData,
       marineLicence = mockMarineLicenceApplication,
       isMarineLicence = false,
-      session
+      session,
+      auth
     }) => {
       if (session) {
         vi.mocked(postloginUserSession.get).mockResolvedValue('organisation')
@@ -288,7 +324,8 @@ describe('Page accessibility checks (Axe)', () => {
       }
       const response = await makeGetRequest({
         url,
-        server: getServer()
+        server: getServer(),
+        auth
       })
 
       expect(response.statusCode).toBe(statusCodes.ok)
