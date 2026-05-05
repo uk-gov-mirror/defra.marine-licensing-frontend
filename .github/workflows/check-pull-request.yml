@@ -74,6 +74,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build app assets
+        run: npm run build
+
       - name: Run Vitest shard
         run: npm run test:ci -- --shard=${{ matrix.shard }}/4
 
