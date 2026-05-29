@@ -169,12 +169,12 @@ using port `3000`, or run only `redis-frontend` and `defra-id-stub` while develo
 
 #### Troubleshooting
 
-| Symptom | What to try |
-| --- | --- |
-| `ERR_TOO_MANY_REDIRECTS` on `/signin` | Run `bash scripts/devcontainer-stub-proxy.sh`, confirm `curl http://127.0.0.1:3200/health` returns 200, clear cookies for `localhost`, restart `npm run dev`. |
-| `ECONNREFUSED` to `127.0.0.1:3200` on startup | Start stub: `docker compose up -d defra-id-stub`. Run the proxy script. |
-| `Cannot connect to the Docker daemon` | Start Docker on the host. Rebuild the dev container after changing `.devcontainer/devcontainer.json`. |
-| Port `3000` already in use | Stop `npm run dev` or the Compose frontend container before starting the other. |
+| Symptom                                       | What to try                                                                                                                                                   |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ERR_TOO_MANY_REDIRECTS` on `/signin`         | Run `bash scripts/devcontainer-stub-proxy.sh`, confirm `curl http://127.0.0.1:3200/health` returns 200, clear cookies for `localhost`, restart `npm run dev`. |
+| `ECONNREFUSED` to `127.0.0.1:3200` on startup | Start stub: `docker compose up -d defra-id-stub`. Run the proxy script.                                                                                       |
+| `Cannot connect to the Docker daemon`         | Start Docker on the host. Rebuild the dev container after changing `.devcontainer/devcontainer.json`.                                                         |
+| Port `3000` already in use                    | Stop `npm run dev` or the Compose frontend container before starting the other.                                                                               |
 
 ### Production
 
