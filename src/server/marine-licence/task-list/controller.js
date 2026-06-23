@@ -12,7 +12,11 @@ import {
   transformSharingTaskList,
   transformWaterFrameworkDirectiveTaskList
 } from '#src/server/marine-licence/task-list/utils.js'
-import { authenticatedGetRequest } from '#src/server/common/helpers/authenticated-requests.js'
+import {
+  authenticatedGetRequest,
+  authenticatedPatchRequest,
+  authenticatedPostRequest
+} from '#src/server/common/helpers/authenticated-requests.js'
 import { marineLicenceRoutes } from '#src/server/common/constants/routes.js'
 import { PROJECT_TYPE } from '#src/server/common/constants/projects.js'
 import { getUserSession } from '#src/server/common/plugins/auth/utils.js'
@@ -121,6 +125,42 @@ export const taskListController = {
       waterFrameworkDirectiveTaskList: transformed.waterFrameworkDirective,
       hasCompletedAllTasks
     })
+  }
+}
+
+// TEMP: dev-only controller to trigger policy calculation — remove before merging
+export const calculatePoliciesController = {
+  async handler(request, h) {
+    const marineLicence = getMarineLicenceCache(request)
+    const { id } = marineLicence
+
+    await authenticatedPostRequest(
+      request,
+      '/marine-licence/calculate-marine-plan-policies',
+      JSON.stringify({ id })
+    )
+
+    return h.redirect(marineLicenceRoutes.MARINE_LICENCE_TASK_LIST)
+  }
+}
+
+// TEMP: dev-only controller to test policy response saving — remove before merging
+export const savePolicyResponseController = {
+  async handler(request, h) {
+    const marineLicence = getMarineLicenceCache(request)
+    const { id } = marineLicence
+
+    await authenticatedPatchRequest(
+      request,
+      '/marine-licence/marine-plan-policy-response',
+      {
+        id,
+        policyCode: 'NW-P1',
+        response: 'This is a dummy test response from the DEV button.'
+      }
+    )
+
+    return h.redirect(marineLicenceRoutes.MARINE_LICENCE_TASK_LIST)
   }
 }
 

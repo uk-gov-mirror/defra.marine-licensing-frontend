@@ -52,6 +52,22 @@
           }) 
         }}
       {% endif %}
+      {# TEMP: trigger policy calculation for local testing — remove before merging #}
+      <form method="POST" action="/marine-licence/task-list">
+        <input type="hidden" name="csrfToken" value="{{csrfToken}}" />
+        {{ govukButton({
+          text: "DEV: Calculate policies",
+          classes: "govuk-button--secondary"
+        }) }}
+      </form>
+      {# TEMP: trigger policy response save for local testing — remove before merging #}
+      <form method="POST" action="/marine-licence/task-list/dev-save-policy-response">
+        <input type="hidden" name="csrfToken" value="{{csrfToken}}" />
+        {{ govukButton({
+          text: "DEV: Save policy response",
+          classes: "govuk-button--secondary"
+        }) }}
+      </form>
     </div>
   </div>
 {% endblock %}
