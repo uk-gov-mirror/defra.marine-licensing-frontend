@@ -71,6 +71,11 @@ const marineLicencePages = [
     title: 'Invoice contact details'
   },
   {
+    url: marineLicenceRoutes.MARINE_LICENCE_INVOICE_PURCHASE_ORDER_DETAILS,
+    title: 'Do you require a purchase order number on the invoice?',
+    session: agentSession
+  },
+  {
     url: marineLicenceRoutes.MARINE_LICENCE_PUBLIC_REGISTER,
     title: 'Sharing your project information publicly'
   },
