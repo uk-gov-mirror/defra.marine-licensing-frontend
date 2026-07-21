@@ -27,7 +27,7 @@ describe('#internationalInvoiceAddress', () => {
   })
 
   describe('#internationalInvoiceAddressSubmitController', () => {
-    test('Should save to cache and redirect to the same page without calling the backend', async () => {
+    test('Should save to cache and redirect to invoice contact details without calling the backend', async () => {
       const payload = {
         country: 'united kingdom',
         address: '123 Example Street\nExampletown\nExampleshire'
@@ -56,7 +56,7 @@ describe('#internationalInvoiceAddress', () => {
         }
       )
       expect(h.redirect).toHaveBeenCalledWith(
-        marineLicenceRoutes.MARINE_LICENCE_INTERNATIONAL_INVOICE_ADDRESS
+        marineLicenceRoutes.MARINE_LICENCE_INVOICE_CONTACT_DETAILS
       )
       expect(h.view).not.toHaveBeenCalled()
     })

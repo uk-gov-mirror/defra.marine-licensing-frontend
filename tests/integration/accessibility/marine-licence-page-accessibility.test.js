@@ -67,6 +67,10 @@ const marineLicencePages = [
     title: 'UK invoice address'
   },
   {
+    url: marineLicenceRoutes.MARINE_LICENCE_INVOICE_CONTACT_DETAILS,
+    title: 'Invoice contact details'
+  },
+  {
     url: marineLicenceRoutes.MARINE_LICENCE_PUBLIC_REGISTER,
     title: 'Sharing your project information publicly'
   },
