@@ -4,6 +4,7 @@ import {
   setMarineLicenceCache
 } from '#src/server/common/helpers/marine-licence/session-cache/utils.js'
 import { transformCoordinatesForApi } from '#src/server/common/helpers/site-details/coordinate-transform.js'
+import { snapshotSiteActivityLabels } from '#src/server/common/helpers/activity-details/snapshot-activity-labels.js'
 import { routes, apiRoutes } from '#src/server/common/constants/routes.js'
 import Boom from '@hapi/boom'
 
@@ -15,7 +16,7 @@ export const prepareFileUploadDataForSave = (siteDetails, request) => {
     const geoJSON = site.geoJSON
     const featureCount = site.featureCount || 0
 
-    const siteToSave = {
+    const siteToSave = snapshotSiteActivityLabels({
       coordinatesType: 'file',
       fileUploadType: site.fileUploadType,
       geoJSON,
@@ -30,7 +31,7 @@ export const prepareFileUploadDataForSave = (siteDetails, request) => {
       },
       siteName: site.siteName,
       activityDetails: site.activityDetails
-    }
+    })
 
     request.logger.info(
       {
@@ -51,14 +52,14 @@ export const prepareManualCoordinateDataForSave = (siteDetails) => {
   const dataToSave = []
 
   for (const site of siteDetails) {
-    const siteToSave = {
+    const siteToSave = snapshotSiteActivityLabels({
       coordinatesType: site.coordinatesType,
       coordinatesEntry: site.coordinatesEntry,
       coordinateSystem: site.coordinateSystem,
       coordinates: site.coordinates,
       siteName: site.siteName,
       activityDetails: site.activityDetails
-    }
+    })
 
     if (site.coordinatesEntry === 'single') {
       siteToSave.circleWidth = site.circleWidth
