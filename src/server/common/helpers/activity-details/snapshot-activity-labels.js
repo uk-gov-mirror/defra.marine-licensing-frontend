@@ -72,7 +72,7 @@ export const snapshotActivityLabels = (activity = {}) => {
 }
 
 export const snapshotSiteActivityLabels = (site = {}) => {
-  if (!site?.activityDetails) {
+  if (!Array.isArray(site?.activityDetails)) {
     return site
   }
 

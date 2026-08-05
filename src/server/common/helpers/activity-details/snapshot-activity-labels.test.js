@@ -53,4 +53,13 @@ describe('snapshotActivityLabels', () => {
       'Pontoons'
     ])
   })
+
+  test('snapshotSiteActivityLabels leaves non-array activityDetails unchanged', () => {
+    const site = {
+      siteName: 'Site 1',
+      activityDetails: { description: 'Test activity' }
+    }
+
+    expect(snapshotSiteActivityLabels(site)).toEqual(site)
+  })
 })
