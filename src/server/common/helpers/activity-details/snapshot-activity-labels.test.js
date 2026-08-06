@@ -24,10 +24,81 @@ describe('snapshotActivityLabels', () => {
     ])
   })
 
+  test('returns non-object activity unchanged', () => {
+    expect(snapshotActivityLabels(null)).toBeNull()
+    expect(snapshotActivityLabels('not-an-object')).toBe('not-an-object')
+  })
+
+  test('returns empty object when called with no argument', () => {
+    expect(snapshotActivityLabels()).toEqual({})
+  })
+
+  test('keeps existing type and subtype labels', () => {
+    const result = snapshotActivityLabels({
+      activityType: 'construction',
+      activitySubType: 'construction-type-1',
+      activityTypeLabel: 'Existing type label',
+      activitySubTypeLabel: 'Existing subtype label'
+    })
+
+    expect(result.activityTypeLabel).toBe('Existing type label')
+    expect(result.activitySubTypeLabel).toBe('Existing subtype label')
+  })
+
+  test('normalises a single selection string and skips empty selections', () => {
+    const result = snapshotActivityLabels({
+      activityType: 'construction',
+      activities: {
+        selections: 'CON1'
+      }
+    })
+
+    expect(result.activities.selections).toEqual(['CON1'])
+    expect(result.activities.selectionLabels).toEqual([
+      'Aquaculture trestles or fixed walkways'
+    ])
+
+    const emptySelections = snapshotActivityLabels({
+      activities: { selections: undefined }
+    })
+
+    expect(emptySelections.activities.selections).toEqual([])
+    expect(emptySelections.activities.selectionLabels).toEqual([])
+  })
+
+  test('omits activity labels when type or subtype are missing', () => {
+    const result = snapshotActivityLabels({
+      activities: { selections: ['CON1'] }
+    })
+
+    expect(result.activityTypeLabel).toBeUndefined()
+    expect(result.activitySubTypeLabel).toBeUndefined()
+    expect(result.activities.selectionLabels).toEqual([
+      'Aquaculture trestles or fixed walkways'
+    ])
+  })
+
+  test('skips activities when not a plain object', () => {
+    const result = snapshotActivityLabels({
+      activityType: 'construction',
+      activities: 'invalid'
+    })
+
+    expect(result.activities).toBe('invalid')
+    expect(result.activityTypeLabel).toBe(ACTIVITY_TYPE_LABELS.construction)
+  })
+
   test('formats other selection with free text', () => {
     expect(
       resolveSelectionLabel('other', 'construction', 'Custom structure')
     ).toBe('Other structures: Custom structure')
+  })
+
+  test('resolveSelectionLabel falls back to selection key then null', () => {
+    expect(resolveSelectionLabel('UNKNOWN_CODE', 'construction')).toBe(
+      'UNKNOWN_CODE'
+    )
+    expect(resolveSelectionLabel(undefined, 'construction')).toBeNull()
   })
 
   test('resolveActivityTypeLabel returns null for unknown type', () => {
@@ -61,5 +132,12 @@ describe('snapshotActivityLabels', () => {
     }
 
     expect(snapshotSiteActivityLabels(site)).toEqual(site)
+  })
+
+  test('snapshotSiteActivityLabels returns site when activityDetails is missing', () => {
+    const site = { siteName: 'Site 1' }
+
+    expect(snapshotSiteActivityLabels(site)).toEqual(site)
+    expect(snapshotSiteActivityLabels()).toEqual({})
   })
 })
