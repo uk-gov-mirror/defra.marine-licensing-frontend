@@ -39,17 +39,38 @@ const getViewDetailsRoute = (projectType, status) => {
     : routes.VIEW_DETAILS
 }
 
-const getActiveActions = (id, escapedProjectName, viewRoute, canWithdraw) => {
-  const marginClass = canWithdraw
+const getActiveActions = (id, escapedProjectName, viewRoute, withdrawRoute) => {
+  const marginClass = withdrawRoute
     ? 'govuk-link govuk-!-margin-right-4 '
     : 'govuk-link '
 
   let buttons = `<a href="${viewRoute}/${id}" class="${marginClass}govuk-link--no-visited-state" aria-label="View details of ${escapedProjectName}">View details</a>`
 
-  if (canWithdraw) {
-    buttons += `<a href="${routes.WITHDRAW_EXEMPTION}/${id}" class="govuk-link govuk-link--no-visited-state" aria-label="Withdraw ${escapedProjectName}">Withdraw</a>`
+  if (withdrawRoute) {
+    buttons += `<a href="${withdrawRoute}/${id}" class="govuk-link govuk-link--no-visited-state" aria-label="Withdraw ${escapedProjectName}">Withdraw</a>`
   }
   return buttons
+}
+
+const getMarineLicenceActions = (
+  id,
+  escapedProjectName,
+  viewRoute,
+  status,
+  isOwnProject
+) => {
+  if (status === PROJECT_STATUS.DRAFT && isOwnProject) {
+    return getDraftActions(id, escapedProjectName, MARINE_LICENCE_KEY)
+  }
+
+  const canWithdraw = status === PROJECT_STATUS.SUBMITTED && isOwnProject
+
+  return getActiveActions(
+    id,
+    escapedProjectName,
+    viewRoute,
+    canWithdraw ? marineLicenceRoutes.MARINE_LICENCE_WITHDRAW : null
+  )
 }
 
 export const sortProjectsByStatus = (projects) => {
@@ -69,9 +90,13 @@ export const getActionButtons = (project) => {
   const viewRoute = getViewDetailsRoute(projectType, status)
 
   if (projectType === MARINE_LICENCE_KEY) {
-    return status === PROJECT_STATUS.DRAFT && isOwnProject
-      ? getDraftActions(id, escapedProjectName, projectType)
-      : getActiveActions(id, escapedProjectName, viewRoute)
+    return getMarineLicenceActions(
+      id,
+      escapedProjectName,
+      viewRoute,
+      status,
+      !!isOwnProject
+    )
   }
 
   const canWithdraw = status === PROJECT_STATUS.ACTIVE && !!isOwnProject
@@ -79,7 +104,12 @@ export const getActionButtons = (project) => {
   if (isOwnProject) {
     return status === PROJECT_STATUS.DRAFT
       ? getDraftActions(id, escapedProjectName, projectType)
-      : getActiveActions(id, escapedProjectName, viewRoute, canWithdraw)
+      : getActiveActions(
+          id,
+          escapedProjectName,
+          viewRoute,
+          canWithdraw ? routes.WITHDRAW_EXEMPTION : null
+        )
   }
 
   return project.status === PROJECT_STATUS.DRAFT

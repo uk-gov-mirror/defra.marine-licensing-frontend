@@ -1,45 +1,5 @@
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
 
-{% set rows = [] %}
-
-{% set rows = (rows.push({
-  key: {
-    text: "Application type"
-  },
-  value: {
-    text: 'Marine licence application'
-  }
-},{
-  key: {
-    text: "Status"
-  },
-  value: {
-    html: params.statusTag
-  }
-},{
-  key: {
-    text: "Reference number"
-  },
-  value: {
-    text: params.applicationReference
-  }
-}, {
-  key: {
-    text: "Date submitted"
-  },
-  value: {
-    text: params.submittedAt
-  }
-},{
-  key: {
-    text: "Date of transfer"
-  },
-  value: {
-    text: params.transferredDate
-  }
-}), rows) %}
-
-
 {{ govukSummaryList({
   card: {
     title: {
@@ -49,5 +9,54 @@
       id: "application-details-card"
     }
   },
-  rows: rows
+  rows: [
+    {
+      key: {
+        text: "Application type"
+      },
+      value: {
+        text: 'Marine licence application'
+      }
+    },
+    {
+      key: {
+        text: "Status"
+      },
+      value: {
+        html: params.statusTag
+      }
+    },
+    {
+      key: {
+        text: "Reference number"
+      },
+      value: {
+        text: params.applicationReference
+      }
+    },
+    {
+      key: {
+        text: "Date submitted"
+      },
+      value: {
+        text: params.submittedAt
+      }
+    },
+    {
+      key: {
+        text: "Date of transfer"
+      },
+      value: {
+        text: params.transferredDate
+      }
+    } if params.transferredDate else undefined,
+    {
+      key: {
+        text: "Date withdrawn"
+      },
+      value: {
+        text: params.withdrawnAt
+      }
+    } if params.withdrawnAt else undefined
+  ]
 }) }}

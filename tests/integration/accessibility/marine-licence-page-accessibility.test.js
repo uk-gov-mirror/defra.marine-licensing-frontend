@@ -5,7 +5,8 @@ import {
   mockManualCoordinatesMarineLicence,
   mockMarineLicenceApplication,
   mockMarineLicenceWithMarinePlanPolicies,
-  mockSubmittedMarineLicenceApplication
+  mockSubmittedMarineLicenceApplication,
+  mockWithdrawnMarineLicenceApplication
 } from '~/src/server/test-helpers/mocks/marine-licence-mocks.js'
 import {
   mockMarineLicence,
@@ -238,6 +239,16 @@ const marineLicencePages = [
   {
     url: marineLicenceRoutes.MARINE_LICENCE_DELETE,
     title: 'Are you sure you want to delete this project?'
+  },
+  {
+    url: marineLicenceRoutes.MARINE_LICENCE_WITHDRAW,
+    title: 'Are you sure you want to withdraw this application?',
+    marineLicence: mockSubmittedMarineLicenceApplication
+  },
+  {
+    url: `${marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS}/${mockWithdrawnMarineLicenceApplication.id}`,
+    title: mockWithdrawnMarineLicenceApplication.projectName,
+    marineLicence: mockWithdrawnMarineLicenceApplication
   },
   {
     url: `${marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS}/${mockSubmittedMarineLicenceApplication.id}`,
