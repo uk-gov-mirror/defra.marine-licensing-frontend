@@ -3,7 +3,7 @@ import {
   resolveActivityTypeLabel,
   resolveSelectionLabel,
   snapshotActivityLabels,
-  snapshotSiteActivityLabels
+  snapshotActivityDetails
 } from '#src/server/common/helpers/activity-details/snapshot-activity-labels.js'
 
 describe('snapshotActivityLabels', () => {
@@ -105,39 +105,28 @@ describe('snapshotActivityLabels', () => {
     expect(resolveActivityTypeLabel('unknown')).toBeNull()
   })
 
-  test('snapshotSiteActivityLabels maps all activities', () => {
-    const site = snapshotSiteActivityLabels({
-      siteName: 'Site 1',
-      activityDetails: [
-        {
-          activityType: 'deposit',
-          activitySubType: 'deposit-type-2',
-          activities: { selections: ['DEP11'] }
-        }
-      ]
-    })
+  test('snapshotActivityDetails maps all activities', () => {
+    const activityDetails = snapshotActivityDetails([
+      {
+        activityType: 'deposit',
+        activitySubType: 'deposit-type-2',
+        activities: { selections: ['DEP11'] }
+      }
+    ])
 
-    expect(site.activityDetails[0].activityTypeLabel).toBe(
+    expect(activityDetails[0].activityTypeLabel).toBe(
       ACTIVITY_TYPE_LABELS.deposit
     )
-    expect(site.activityDetails[0].activities.selectionLabels).toEqual([
-      'Pontoons'
-    ])
+    expect(activityDetails[0].activities.selectionLabels).toEqual(['Pontoons'])
   })
 
-  test('snapshotSiteActivityLabels leaves non-array activityDetails unchanged', () => {
-    const site = {
-      siteName: 'Site 1',
-      activityDetails: { description: 'Test activity' }
-    }
+  test('snapshotActivityDetails leaves non-array activityDetails unchanged', () => {
+    const activityDetails = { description: 'Test activity' }
 
-    expect(snapshotSiteActivityLabels(site)).toEqual(site)
+    expect(snapshotActivityDetails(activityDetails)).toEqual(activityDetails)
   })
 
-  test('snapshotSiteActivityLabels returns site when activityDetails is missing', () => {
-    const site = { siteName: 'Site 1' }
-
-    expect(snapshotSiteActivityLabels(site)).toEqual(site)
-    expect(snapshotSiteActivityLabels()).toEqual({})
+  test('snapshotActivityDetails returns value when activityDetails is missing', () => {
+    expect(snapshotActivityDetails(undefined)).toBeUndefined()
   })
 })

@@ -17,12 +17,7 @@ import {
   mockManualCoordinatesMarineLicence
 } from '#src/server/test-helpers/mocks/marine-licence-mocks.js'
 import { apiRoutes } from '#src/server/common/constants/routes.js'
-import { snapshotActivityLabels } from '#src/server/common/helpers/activity-details/snapshot-activity-labels.js'
-
-const withActivityLabels = (activityDetails) =>
-  Array.isArray(activityDetails)
-    ? activityDetails.map(snapshotActivityLabels)
-    : activityDetails
+import { snapshotActivityDetails } from '#src/server/common/helpers/activity-details/snapshot-activity-labels.js'
 
 vi.mock('../authenticated-requests.js')
 vi.mock('./session-cache/utils.js')
@@ -47,7 +42,7 @@ describe('save-site-details', () => {
       expect(result[0]).toEqual({
         coordinatesType: 'file',
         fileUploadType: 'kml',
-        activityDetails: withActivityLabels(
+        activityDetails: snapshotActivityDetails(
           mockMarineLicenceApplication.siteDetails[0].activityDetails
         ),
         geoJSON: mockMarineLicenceApplication.siteDetails[0].geoJSON,
@@ -340,7 +335,7 @@ describe('save-site-details', () => {
         {
           siteDetails: {
             ...siteDetails,
-            activityDetails: withActivityLabels(siteDetails.activityDetails)
+            activityDetails: snapshotActivityDetails(siteDetails.activityDetails)
           },
           siteIndex: 0,
           id: mockMarineLicenceApplication.id

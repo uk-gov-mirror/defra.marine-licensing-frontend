@@ -71,13 +71,7 @@ export const snapshotActivityLabels = (activity = {}) => {
   return next
 }
 
-export const snapshotSiteActivityLabels = (site = {}) => {
-  if (!Array.isArray(site?.activityDetails)) {
-    return site
-  }
-
-  return {
-    ...site,
-    activityDetails: site.activityDetails.map(snapshotActivityLabels)
-  }
-}
+export const snapshotActivityDetails = (activityDetails) =>
+  Array.isArray(activityDetails)
+    ? activityDetails.map(snapshotActivityLabels)
+    : activityDetails
