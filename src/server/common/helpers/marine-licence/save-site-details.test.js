@@ -335,7 +335,9 @@ describe('save-site-details', () => {
         {
           siteDetails: {
             ...siteDetails,
-            activityDetails: snapshotActivityDetails(siteDetails.activityDetails)
+            activityDetails: snapshotActivityDetails(
+              siteDetails.activityDetails
+            )
           },
           siteIndex: 0,
           id: mockMarineLicenceApplication.id
