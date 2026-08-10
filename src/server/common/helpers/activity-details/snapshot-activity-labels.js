@@ -34,24 +34,16 @@ export const snapshotActivityLabels = (activity = {}) => {
     return activity
   }
 
-  const {
-    activityType,
-    activitySubType,
-    activityTypeLabel,
-    activitySubTypeLabel,
-    activities
-  } = activity
+  const { activityType, activitySubType, activities } = activity
 
   const next = { ...activity }
 
   if (activityType) {
-    next.activityTypeLabel =
-      activityTypeLabel || resolveActivityTypeLabel(activityType)
+    next.activityTypeLabel = resolveActivityTypeLabel(activityType)
   }
 
   if (activitySubType) {
-    next.activitySubTypeLabel =
-      activitySubTypeLabel || formatActivitySubTypeLabel(activitySubType)
+    next.activitySubTypeLabel = formatActivitySubTypeLabel(activitySubType)
   }
 
   if (activities && typeof activities === 'object') {

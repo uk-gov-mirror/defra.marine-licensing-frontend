@@ -33,16 +33,18 @@ describe('snapshotActivityLabels', () => {
     expect(snapshotActivityLabels()).toEqual({})
   })
 
-  test('keeps existing type and subtype labels', () => {
+  test('re-resolves type and subtype labels when keys change via change link', () => {
     const result = snapshotActivityLabels({
-      activityType: 'construction',
-      activitySubType: 'construction-type-1',
-      activityTypeLabel: 'Existing type label',
-      activitySubTypeLabel: 'Existing subtype label'
+      activityType: 'removal',
+      activitySubType: 'removal-type-2',
+      activityTypeLabel: 'Construction, alteration or improvement of any works',
+      activitySubTypeLabel: 'Construction of new marine works'
     })
 
-    expect(result.activityTypeLabel).toBe('Existing type label')
-    expect(result.activitySubTypeLabel).toBe('Existing subtype label')
+    expect(result.activityTypeLabel).toBe(ACTIVITY_TYPE_LABELS.removal)
+    expect(result.activitySubTypeLabel).toBe(
+      'Removal as part of an ongoing or routine activity'
+    )
   })
 
   test('normalises a single selection string and skips empty selections', () => {
