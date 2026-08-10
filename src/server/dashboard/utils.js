@@ -100,16 +100,12 @@ export const getActionButtons = (project) => {
   }
 
   const canWithdraw = status === PROJECT_STATUS.ACTIVE && !!isOwnProject
+  const withdrawRoute = canWithdraw ? routes.WITHDRAW_EXEMPTION : null
 
   if (isOwnProject) {
     return status === PROJECT_STATUS.DRAFT
       ? getDraftActions(id, escapedProjectName, projectType)
-      : getActiveActions(
-          id,
-          escapedProjectName,
-          viewRoute,
-          canWithdraw ? routes.WITHDRAW_EXEMPTION : null
-        )
+      : getActiveActions(id, escapedProjectName, viewRoute, withdrawRoute)
   }
 
   return project.status === PROJECT_STATUS.DRAFT

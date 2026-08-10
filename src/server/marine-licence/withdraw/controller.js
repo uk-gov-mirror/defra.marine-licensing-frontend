@@ -34,7 +34,7 @@ export const withdrawMarineLicenceController = {
       const service = getMarineLicenceService(request)
       const marineLicence = await service.getMarineLicenceById(marineLicenceId)
 
-      if (!marineLicence || marineLicence.status !== PROJECT_STATUS.SUBMITTED) {
+      if (marineLicence?.status !== PROJECT_STATUS.SUBMITTED) {
         request.logger.error(
           { marineLicenceId, status: marineLicence?.status },
           'Marine licence cannot be withdrawn'
