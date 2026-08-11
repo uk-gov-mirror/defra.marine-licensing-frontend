@@ -23,6 +23,42 @@ describe('Application Details Card Component', () => {
     })
   })
 
+  test('should display the status tag and date withdrawn for a withdrawn exemption', () => {
+    const card = renderComponentJSDOM('application-details-card', {
+      applicationReference: 'EXE/2025/10121',
+      dateSubmitted: '2025-09-18T08:56:34.000Z',
+      whoExemptionIsFor: 'Test Organisation',
+      status: 'Withdrawn',
+      statusTagClass: 'govuk-tag--grey',
+      withdrawnAt: '2025-10-02T08:56:34.000Z',
+      isReadOnly: true
+    })
+
+    validateApplicationDetails(card, {
+      applicationDetails: {
+        Status: 'Withdrawn',
+        'Date withdrawn': '2 October 2025'
+      }
+    })
+    expect(within(card).getByText('Withdrawn')).toHaveClass('govuk-tag--grey')
+  })
+
+  test('should not display date withdrawn for an active exemption', () => {
+    const card = renderComponentJSDOM('application-details-card', {
+      applicationReference: 'EXE/2025/10121',
+      dateSubmitted: '2025-09-18T08:56:34.000Z',
+      whoExemptionIsFor: 'Test Organisation',
+      status: 'Active',
+      statusTagClass: 'govuk-tag--green',
+      isReadOnly: true
+    })
+
+    validateApplicationDetails(card, {
+      applicationDetails: { Status: 'Active' }
+    })
+    expect(within(card).queryByText('Date withdrawn')).not.toBeInTheDocument()
+  })
+
   test('should not display who the exemption is for if it is not provided', () => {
     const card = renderComponentJSDOM('application-details-card', {
       applicationReference: 'EXE/2025/10121',

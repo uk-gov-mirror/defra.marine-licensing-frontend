@@ -11,8 +11,19 @@ import {
 } from '#src/server/common/helpers/view-details/utils.js'
 import { EXEMPTIONS_KEY } from '#src/server/common/constants/exemptions.js'
 import { withAnswersLinkType } from '#src/server/common/helpers/mcms-context/is-downloadable-pdf.js'
+import { getUserSession } from '#src/server/common/plugins/auth/utils.js'
 
 export const VIEW_DETAILS_VIEW_ROUTE = 'exemption/view-details/index'
+
+const getApplicantName = async (request, exemption) => {
+  if (exemption.organisation?.name) {
+    return exemption.organisation.name
+  }
+
+  const userSession = await getUserSession(request, request.state?.userSession)
+  return userSession?.displayName
+}
+
 export const viewDetailsController = {
   async handler(request, h) {
     const { exemptionId } = request.params
@@ -50,17 +61,20 @@ export const viewDetailsController = {
         exemption.siteDetails
       )
 
-      // Format the page caption with application reference
-      const pageCaption = `${exemption.applicationReference}${isApplicantView ? ' - Exempt activity notification' : ''}`
       const statusTagClass = getTagStyle(exemption.status)
+
+      const whoExemptionIsFor = isApplicantView
+        ? await getApplicantName(request, exemption)
+        : exemption.whoExemptionIsFor
 
       return h.view(VIEW_DETAILS_VIEW_ROUTE, {
         pageTitle: exemption.projectName,
-        pageCaption,
+        pageCaption: exemption.applicationReference,
         backLink: isApplicantView ? routes.DASHBOARD : null,
         isReadOnly: true,
         isApplicantView,
         ...exemption,
+        whoExemptionIsFor,
         mcmsContext: withAnswersLinkType(exemption.mcmsContext),
         statusTagClass,
         siteDetails,

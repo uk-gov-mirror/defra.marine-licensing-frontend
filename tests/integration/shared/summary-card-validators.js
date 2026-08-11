@@ -117,6 +117,11 @@ export const validateApplicationDetails = (document, expected) => {
     '#application-details-card',
     expected.applicationDetails
   )
+
+  const card = document.querySelector('#application-details-card')
+  for (const key of expected.applicationDetailsMissingRows ?? []) {
+    expect(within(card).queryByText(key)).not.toBeInTheDocument()
+  }
 }
 
 /**

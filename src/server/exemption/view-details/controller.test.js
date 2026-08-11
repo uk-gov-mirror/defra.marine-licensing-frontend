@@ -13,8 +13,13 @@ import {
 
 import { makeGetRequest } from '#src/server/test-helpers/server-requests.js'
 import { getAuthProvider } from '#src/server/common/helpers/authenticated-requests.js'
+import { getUserSession } from '#src/server/common/plugins/auth/utils.js'
 
 vi.mock('~/src/services/exemption-service/index.js')
+vi.mock('~/src/server/common/plugins/auth/utils.js', async (importOriginal) => ({
+  ...(await importOriginal()),
+  getUserSession: vi.fn().mockResolvedValue(null)
+}))
 vi.mock('~/src/server/common/helpers/authenticated-requests.js', () => ({
   getAuthProvider: vi.fn().mockReturnValue('defra-id')
 }))
@@ -273,7 +278,7 @@ describe('view details controller', () => {
           expect.objectContaining({
             isApplicantView: true,
             pageTitle: submittedExemption.projectName,
-            pageCaption: 'EXE/2025/00003 - Exempt activity notification',
+            pageCaption: 'EXE/2025/00003',
             backLink: '/projects',
             isReadOnly: true,
             projectName: submittedExemption.projectName,
@@ -442,28 +447,55 @@ describe('view details controller', () => {
         expect(mockH.view.mock.calls[0][1].whoExemptionIsFor).toBeUndefined()
       })
 
-      test('should pass whoExemptionIsFor as undefined if the applicant is viewing the page', async () => {
-        const submittedExemption = createSubmittedExemption({
-          organisation: { name: 'Test' }
+      describe('whoExemptionIsFor for the applicant view', () => {
+        const handleApplicantRequest = async (exemption) => {
+          vi.mocked(getExemptionService).mockReturnValue({
+            getExemptionById: vi.fn().mockResolvedValue(exemption)
+          })
+
+          const mockRequest = {
+            path: '/exemption/view-details/:exemptionId',
+            params: { exemptionId: validExemptionId },
+            logger: { error: vi.fn() },
+            state: { userSession: { sessionId: 'session-id' } },
+            auth: { credentials: { strategy: 'defra-id' } }
+          }
+          const mockH = { view: vi.fn() }
+
+          await viewDetailsController.handler(mockRequest, mockH)
+          return mockH.view.mock.calls[0][1]
+        }
+
+        test('should use the organisation name when the exemption has one', async () => {
+          const viewData = await handleApplicantRequest(
+            createSubmittedExemption({ organisation: { name: 'Dredging Co' } })
+          )
+
+          expect(viewData.whoExemptionIsFor).toBe('Dredging Co')
+          expect(getUserSession).not.toHaveBeenCalled()
         })
-        const mockExemptionServiceInstance = {
-          getExemptionById: vi.fn().mockResolvedValue(submittedExemption)
-        }
 
-        vi.mocked(getExemptionService).mockReturnValue(
-          mockExemptionServiceInstance
-        )
+        test('should fall back to the signed in user name when there is no organisation', async () => {
+          vi.mocked(getUserSession).mockResolvedValue({
+            displayName: 'Dave Barnett'
+          })
 
-        const mockRequest = {
-          path: '/exemption/view-details/:exemptionId',
-          params: { exemptionId: validExemptionId },
-          logger: { error: vi.fn() },
-          auth: { credentials: { strategy: 'defra-id' } }
-        }
-        const mockH = { view: vi.fn() }
+          const viewData = await handleApplicantRequest(
+            createSubmittedExemption({ organisation: undefined })
+          )
 
-        await viewDetailsController.handler(mockRequest, mockH)
-        expect(mockH.view.mock.calls[0][1].whoExemptionIsFor).toBeUndefined()
+          expect(viewData.whoExemptionIsFor).toBe('Dave Barnett')
+        })
+
+        test('should pass whoExemptionIsFor as undefined when there is no organisation or user session', async () => {
+          vi.mocked(getUserSession).mockResolvedValue(null)
+
+          const viewData = await handleApplicantRequest(
+            createSubmittedExemption({ organisation: undefined })
+          )
+
+          expect(viewData.whoExemptionIsFor).toBeUndefined()
+        })
       })
 
       test('should handle file upload data error and use fallback', async () => {
