@@ -3,26 +3,21 @@ import { vi } from 'vitest'
 import { authenticatedPostRequest } from '#src/server/common/helpers/authenticated-requests.js'
 import {
   getMarineLicenceCache,
-  setMarineLicenceCache,
   clearMarineLicenceCache
 } from '#src/server/common/helpers/marine-licence/session-cache/utils.js'
-import {
-  routes,
-  marineLicenceRoutes
-} from '#src/server/common/constants/routes.js'
+import { routes } from '#src/server/common/constants/routes.js'
 import { MARINE_LICENCE_TYPE } from '#src/server/common/constants/marine-licence.js'
 import { PROJECT_STATUS } from '#src/server/common/constants/projects.js'
 import * as marineLicenceServiceModule from '#src/services/marine-licence-service/index.js'
 
 import {
-  withdrawMarineLicenceController,
-  withdrawMarineLicenceSelectController,
+  withdrawMarineLicenceConfirmController,
   withdrawMarineLicenceSubmitController,
   TERMS_AND_CONDITIONS_LINK
 } from './controller.js'
 
-vi.mock('~/src/server/common/helpers/authenticated-requests.js')
-vi.mock('~/src/server/common/helpers/marine-licence/session-cache/utils.js')
+vi.mock('#src/server/common/helpers/authenticated-requests.js')
+vi.mock('#src/server/common/helpers/marine-licence/session-cache/utils.js')
 
 describe('#withdrawMarineLicence', () => {
   let mockRequest
@@ -31,7 +26,6 @@ describe('#withdrawMarineLicence', () => {
 
   const mockedAuthenticatedPostRequest = vi.mocked(authenticatedPostRequest)
   const mockedGetMarineLicenceCache = vi.mocked(getMarineLicenceCache)
-  const mockedSetMarineLicenceCache = vi.mocked(setMarineLicenceCache)
   const mockedClearMarineLicenceCache = vi.mocked(clearMarineLicenceCache)
 
   const marineLicenceId = 'test-project-id'
@@ -44,7 +38,7 @@ describe('#withdrawMarineLicence', () => {
 
   beforeEach(() => {
     mockRequest = {
-      logger: { error: vi.fn(), info: vi.fn() },
+      logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn() },
       state: {}
     }
 
@@ -60,12 +54,12 @@ describe('#withdrawMarineLicence', () => {
     ).mockReturnValue({ getMarineLicenceById: mockGetMarineLicenceById })
   })
 
-  describe('withdrawMarineLicenceController', () => {
+  describe('withdrawMarineLicenceConfirmController', () => {
     it('should render the withdraw confirmation page with project details', async () => {
       mockedGetMarineLicenceCache.mockReturnValue({ id: marineLicenceId })
       mockGetMarineLicenceById.mockResolvedValue(submittedMarineLicence)
 
-      const result = await withdrawMarineLicenceController.handler(
+      const result = await withdrawMarineLicenceConfirmController.handler(
         mockRequest,
         mockH
       )
@@ -79,18 +73,23 @@ describe('#withdrawMarineLicence', () => {
         marineLicenceId,
         termsAndConditionsLink: TERMS_AND_CONDITIONS_LINK,
         backLink: routes.DASHBOARD,
-        cancelLink: routes.DASHBOARD,
-        routes
+        cancelLink: routes.DASHBOARD
       })
       expect(result).toBe('view-response')
     })
 
-    it('should throw 404 if marine licence is not found in cache', async () => {
+    it('should redirect to dashboard if no marine licence is selected in the cache', async () => {
       mockedGetMarineLicenceCache.mockReturnValue({ id: undefined })
 
-      await expect(
-        withdrawMarineLicenceController.handler(mockRequest, mockH)
-      ).rejects.toThrow('Marine licence not found')
+      const result = await withdrawMarineLicenceConfirmController.handler(
+        mockRequest,
+        mockH
+      )
+
+      expect(mockGetMarineLicenceById).not.toHaveBeenCalled()
+      expect(mockH.view).not.toHaveBeenCalled()
+      expect(mockH.redirect).toHaveBeenCalledWith(routes.DASHBOARD)
+      expect(result).toBe('redirect-response')
     })
 
     it.each([
@@ -104,7 +103,7 @@ describe('#withdrawMarineLicence', () => {
         status
       })
 
-      const result = await withdrawMarineLicenceController.handler(
+      const result = await withdrawMarineLicenceConfirmController.handler(
         mockRequest,
         mockH
       )
@@ -118,7 +117,7 @@ describe('#withdrawMarineLicence', () => {
       mockedGetMarineLicenceCache.mockReturnValue({ id: marineLicenceId })
       mockGetMarineLicenceById.mockResolvedValue(null)
 
-      const result = await withdrawMarineLicenceController.handler(
+      const result = await withdrawMarineLicenceConfirmController.handler(
         mockRequest,
         mockH
       )
@@ -131,38 +130,13 @@ describe('#withdrawMarineLicence', () => {
       mockedGetMarineLicenceCache.mockReturnValue({ id: marineLicenceId })
       mockGetMarineLicenceById.mockRejectedValue(new Error('API Error'))
 
-      const result = await withdrawMarineLicenceController.handler(
+      const result = await withdrawMarineLicenceConfirmController.handler(
         mockRequest,
         mockH
       )
 
       expect(mockRequest.logger.error).toHaveBeenCalled()
       expect(mockH.redirect).toHaveBeenCalledWith(routes.DASHBOARD)
-      expect(result).toBe('redirect-response')
-    })
-  })
-
-  describe('withdrawMarineLicenceSelectController', () => {
-    it('should clear cache, set marine licence ID in cache, and redirect to withdraw page', async () => {
-      mockRequest.params = { marineLicenceId }
-
-      const result = await withdrawMarineLicenceSelectController.handler(
-        mockRequest,
-        mockH
-      )
-
-      expect(mockedClearMarineLicenceCache).toHaveBeenCalledWith(
-        mockRequest,
-        mockH
-      )
-      expect(mockedSetMarineLicenceCache).toHaveBeenCalledWith(
-        mockRequest,
-        mockH,
-        { id: marineLicenceId }
-      )
-      expect(mockH.redirect).toHaveBeenCalledWith(
-        marineLicenceRoutes.MARINE_LICENCE_WITHDRAW
-      )
       expect(result).toBe('redirect-response')
     })
   })

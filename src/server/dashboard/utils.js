@@ -40,11 +40,9 @@ const getViewDetailsRoute = (projectType, status) => {
 }
 
 const getActiveActions = (id, escapedProjectName, viewRoute, withdrawRoute) => {
-  const marginClass = withdrawRoute
-    ? 'govuk-link govuk-!-margin-right-4 '
-    : 'govuk-link '
+  const marginClass = withdrawRoute ? ' govuk-!-margin-right-4' : ''
 
-  let buttons = `<a href="${viewRoute}/${id}" class="${marginClass}govuk-link--no-visited-state" aria-label="View details of ${escapedProjectName}">View details</a>`
+  let buttons = `<a href="${viewRoute}/${id}" class="govuk-link${marginClass} govuk-link--no-visited-state" aria-label="View details of ${escapedProjectName}">View details</a>`
 
   if (withdrawRoute) {
     buttons += `<a href="${withdrawRoute}/${id}" class="govuk-link govuk-link--no-visited-state" aria-label="Withdraw ${escapedProjectName}">Withdraw</a>`
@@ -52,13 +50,13 @@ const getActiveActions = (id, escapedProjectName, viewRoute, withdrawRoute) => {
   return buttons
 }
 
-const getMarineLicenceActions = (
+const getMarineLicenceActions = ({
   id,
   escapedProjectName,
   viewRoute,
   status,
   isOwnProject
-) => {
+}) => {
   if (status === PROJECT_STATUS.DRAFT && isOwnProject) {
     return getDraftActions(id, escapedProjectName, MARINE_LICENCE_KEY)
   }
@@ -90,16 +88,16 @@ export const getActionButtons = (project) => {
   const viewRoute = getViewDetailsRoute(projectType, status)
 
   if (projectType === MARINE_LICENCE_KEY) {
-    return getMarineLicenceActions(
+    return getMarineLicenceActions({
       id,
       escapedProjectName,
       viewRoute,
       status,
-      !!isOwnProject
-    )
+      isOwnProject
+    })
   }
 
-  const canWithdraw = status === PROJECT_STATUS.ACTIVE && !!isOwnProject
+  const canWithdraw = status === PROJECT_STATUS.ACTIVE && isOwnProject
   const withdrawRoute = canWithdraw ? routes.WITHDRAW_EXEMPTION : null
 
   if (isOwnProject) {

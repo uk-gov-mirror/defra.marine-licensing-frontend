@@ -1,5 +1,5 @@
 import {
-  withdrawMarineLicenceController,
+  withdrawMarineLicenceConfirmController,
   withdrawMarineLicenceSelectController,
   withdrawMarineLicenceSubmitController
 } from '#src/server/marine-licence/withdraw/controller.js'
@@ -9,7 +9,7 @@ export const withdrawMarineLicenceRoutes = [
   {
     method: 'GET',
     path: marineLicenceRoutes.MARINE_LICENCE_WITHDRAW,
-    ...withdrawMarineLicenceController
+    ...withdrawMarineLicenceConfirmController
   },
   {
     method: 'GET',

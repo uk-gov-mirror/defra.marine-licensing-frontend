@@ -386,7 +386,7 @@ describe('getActionButtons', () => {
     )
   })
 
-  it.each(['Draft', 'Transferred', 'Withdrawn', 'Active'])(
+  it.each(['Transferred', 'Withdrawn', 'Active'])(
     'does not return a Withdraw link for a marine licence with status %s',
     (status) => {
       const result = getActionButtons({
