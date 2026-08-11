@@ -5,38 +5,27 @@ import { getStatusLabelText } from '#src/server/dashboard/utils.js'
 
 const APPLICATION_DATE_FORMAT = 'd MMM yyyy'
 
-const DATE_FORMAT = 'd MMM yyyy'
-
 export const buildApplicationDetailsCardData = (marineLicence) => {
   const {
     applicationReference,
     status,
     submittedAt,
+    rejectedDate,
+    rejectedReasons,
+    rejectedInformation,
     transferredDate,
     withdrawnAt
   } = marineLicence
 
-  return {
-    applicationReference,
-    submittedAt: formatDate(submittedAt, DATE_FORMAT),
-    transferredDate: formatDate(transferredDate, DATE_FORMAT),
-    withdrawnAt: formatDate(withdrawnAt, DATE_FORMAT),
-    isTransferred: status === PROJECT_STATUS.TRANSFERRED,
-    isWithdrawn: status === PROJECT_STATUS.WITHDRAWN,
-    statusTag: `<strong class="govuk-tag ${getTagStyle(status)}">${escapeHtml(status)}</strong>`
-    rejectedDate,
-    rejectedReasons,
-    rejectedInformation,
-    transferredDate
-  } = marineLicence
-
   const isTransferred = status === PROJECT_STATUS.TRANSFERRED
   const isRejected = status === PROJECT_STATUS.REJECTED
+  const isWithdrawn = status === PROJECT_STATUS.WITHDRAWN
 
   return {
     applicationReference,
     submittedAt: formatDate(submittedAt, APPLICATION_DATE_FORMAT),
     transferredDate: formatDate(transferredDate, APPLICATION_DATE_FORMAT),
+    withdrawnAt: formatDate(withdrawnAt, APPLICATION_DATE_FORMAT),
     rejectedDate: formatDate(rejectedDate, APPLICATION_DATE_FORMAT),
     rejectedReasons: rejectedReasons
       ? rejectedReasons.split(',')
@@ -44,7 +33,8 @@ export const buildApplicationDetailsCardData = (marineLicence) => {
     rejectedInformation,
     isTransferred,
     isRejected,
-    showApplicationDetailsCard: isTransferred || isRejected,
+    isWithdrawn,
+    showApplicationDetailsCard: isTransferred || isRejected || isWithdrawn,
     status,
     statusTag: `<strong class="govuk-tag ${getTagStyle(status)}">${getStatusLabelText(status)}</strong>`
   }

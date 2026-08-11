@@ -6,7 +6,7 @@ import {
   mockMarineLicenceApplication,
   mockMarineLicenceWithMarinePlanPolicies,
   mockSubmittedMarineLicenceApplication,
-  mockWithdrawnMarineLicenceApplication
+  mockWithdrawnMarineLicenceApplication,
   mockTransferredMarineLicenceApplication,
   mockRejectedMarineLicenceApplication
 } from '~/src/server/test-helpers/mocks/marine-licence-mocks.js'

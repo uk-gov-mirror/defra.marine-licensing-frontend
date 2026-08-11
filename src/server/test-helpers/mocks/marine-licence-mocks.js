@@ -180,6 +180,8 @@ export const mockWithdrawnMarineLicenceApplication = {
   status: PROJECT_STATUS.WITHDRAWN,
   submittedAt: '2026-05-26T10:00:00Z',
   withdrawnAt: '2026-06-26T10:00:00Z'
+}
+
 export const mockRejectedMarineLicenceApplication = {
   ...mockSubmittedMarineLicenceApplication,
   status: PROJECT_STATUS.REJECTED,
