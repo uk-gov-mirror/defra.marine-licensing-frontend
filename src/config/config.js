@@ -302,6 +302,15 @@ export const config = convict({
       env: 'MARINE_LICENSING_BACKEND_API_URL'
     }
   },
+  addressLookup: {
+    apiUrl: {
+      doc: 'Endpoint for the DEFRA address lookup API',
+      format: String,
+      nullable: true,
+      default: 'http://localhost:3002/api/address-lookup/v2.1/addresses',
+      env: 'MARINE_LICENSING_ADDRESS_LOOKUP_API_URL'
+    }
+  },
   marineLicence: {
     enabled: {
       doc: 'Enable the Marine Licence journey',

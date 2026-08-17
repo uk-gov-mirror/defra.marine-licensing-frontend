@@ -21,6 +21,23 @@ export const isInvoiceAddressUkOrInternationalErrorMessages = {
     "Select whether the invoice contact's address is UK or international"
 }
 
+const INVOICE_ADDRESS_POSTCODE_SEARCH_TITLE =
+  "What is the invoice contact's UK address?"
+
+export const invoiceAddressPostcodeSearchSettings = {
+  pageTitle: INVOICE_ADDRESS_POSTCODE_SEARCH_TITLE,
+  heading: INVOICE_ADDRESS_POSTCODE_SEARCH_TITLE
+}
+
+export const invoiceAddressPostcodeSearchErrorMessages = {
+  POSTCODE_REQUIRED: 'Enter the postcode',
+  POSTCODE_INVALID: 'Enter a valid postcode',
+  PROPERTY_NAME_OR_NUMBER_MAX_LENGTH:
+    'The property name or number must be 50 characters or fewer',
+  NO_ADDRESSES_FOUND:
+    'We could not find any addresses for that postcode. Enter a known postcode, or enter the address manually.'
+}
+
 const UK_INVOICE_ADDRESS_TITLE = 'UK invoice address'
 
 export const ukInvoiceAddressSettings = {

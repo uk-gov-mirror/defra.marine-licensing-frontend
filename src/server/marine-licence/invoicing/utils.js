@@ -18,6 +18,13 @@ export const getInvoiceAddressBackLink = (action) => {
   return marineLicenceRoutes.MARINE_LICENCE_IS_INVOICE_ADDRESS_UK_OR_INTERNATIONAL
 }
 
+export const getUkInvoiceAddressBackLink = (action) => {
+  if (isInAddressChangeFlow(action)) {
+    return marineLicenceRoutes.MARINE_LICENCE_CHECK_INVOICING_DETAILS
+  }
+  return marineLicenceRoutes.MARINE_LICENCE_INVOICE_ADDRESS_POSTCODE_SEARCH
+}
+
 export const getInvoiceCancelLink = (action, invoicing) =>
   isInChangeFlow(action, invoicing)
     ? undefined

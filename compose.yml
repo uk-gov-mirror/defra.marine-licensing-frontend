@@ -44,6 +44,7 @@ services:
       NODE_ENV: development
       USE_SINGLE_INSTANCE_CACHE: true
       MARINE_LICENSING_BACKEND_API_URL: http://marine-licensing-backend:3001
+      MARINE_LICENSING_ADDRESS_LOOKUP_API_URL: http://marine-licensing-api-stub:3002/api/address-lookup/v2.1/addresses
       ENABLE_MARINE_LICENCE: true
     volumes:
       - ./compose/users:/users
