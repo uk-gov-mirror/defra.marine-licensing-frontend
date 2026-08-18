@@ -9,17 +9,13 @@ describe('#invoiceAddressPostcodeSearchSchema', () => {
     expect(error).toBeUndefined()
   })
 
-  test('should validate when propertyNameOrNumber is empty', () => {
+  test.each([
+    ['empty', ''],
+    ['omitted', undefined]
+  ])('should validate when propertyNameOrNumber is %s', (_name, value) => {
     const { error } = invoiceAddressPostcodeSearchSchema.validate({
       postcode: 'NE4 7AR',
-      propertyNameOrNumber: ''
-    })
-    expect(error).toBeUndefined()
-  })
-
-  test('should validate when propertyNameOrNumber is omitted', () => {
-    const { error } = invoiceAddressPostcodeSearchSchema.validate({
-      postcode: 'NE4 7AR'
+      ...(value === undefined ? {} : { propertyNameOrNumber: value })
     })
     expect(error).toBeUndefined()
   })

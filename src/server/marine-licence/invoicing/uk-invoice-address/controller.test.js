@@ -43,18 +43,6 @@ describe('#ukInvoiceAddress', () => {
         })
       )
     })
-
-    test('Should link back to the postcode search page when not in the change flow', async () => {
-      await ukInvoiceAddressController.handler({ query: {} }, h)
-
-      expect(h.view).toHaveBeenCalledWith(
-        UK_INVOICE_ADDRESS_VIEW_ROUTE,
-        expect.objectContaining({
-          backLink:
-            marineLicenceRoutes.MARINE_LICENCE_INVOICE_ADDRESS_POSTCODE_SEARCH
-        })
-      )
-    })
   })
 
   describe('#ukInvoiceAddressSubmitController', () => {

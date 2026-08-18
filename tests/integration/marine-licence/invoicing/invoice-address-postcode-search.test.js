@@ -132,6 +132,12 @@ describe('Invoice address postcode search', () => {
       'href',
       marineLicenceRoutes.MARINE_LICENCE_CHECK_INVOICING_DETAILS
     )
+    // The form deliberately has no action, so the browser posts back to the current URL
+    // with ?action=change intact. Giving it one would drop the query string and silently
+    // strip the change flow on submit.
+    expect(
+      document.querySelector('#postcode').closest('form')
+    ).not.toHaveAttribute('action')
   })
 
   // One representative case: the schema rules themselves are covered exhaustively in
@@ -176,6 +182,51 @@ describe('Invoice address postcode search', () => {
       inputLabel: 'Postcode',
       errorMessage:
         'We could not find any addresses for that postcode. Enter a known postcode, or enter the address manually.'
+    })
+  })
+
+  // The other half of the above: the handler has to read the query on POST too, or the
+  // links revert after a failed search even when the browser preserves the query string.
+  test('should keep the change flow links after a submit', async () => {
+    mockMarineLicence(mockMarineLicenceApplication)
+    vi.spyOn(addressLookup, 'lookupAddresses').mockResolvedValue({
+      results: []
+    })
+
+    const { document } = await submitForm({
+      requestUrl: `${marineLicenceRoutes.MARINE_LICENCE_INVOICE_ADDRESS_POSTCODE_SEARCH}?action=change`,
+      server: getServer(),
+      formData: { postcode: 'ZZ1 1ZZ', propertyNameOrNumber: '' }
+    })
+
+    expect(queryByRole(document, 'link', { name: 'Cancel' })).toBeNull()
+    getByRole(document, 'button', { name: 'Save and continue' })
+    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+      'href',
+      marineLicenceRoutes.MARINE_LICENCE_CHECK_INVOICING_DETAILS
+    )
+  })
+
+  test('should show the service unavailable error when the lookup fails', async () => {
+    mockMarineLicence(mockMarineLicenceApplication)
+    vi.spyOn(addressLookup, 'lookupAddresses').mockResolvedValue({
+      results: [],
+      error: true
+    })
+
+    const { document, response } = await submitForm({
+      requestUrl:
+        marineLicenceRoutes.MARINE_LICENCE_INVOICE_ADDRESS_POSTCODE_SEARCH,
+      server: getServer(),
+      formData: { postcode: 'NE4 7AR', propertyNameOrNumber: '' }
+    })
+
+    expect(response.statusCode).toBe(statusCodes.ok)
+    expectInputError({
+      document,
+      inputLabel: 'Postcode',
+      errorMessage:
+        'There is a problem with the address lookup service. Try again later, or enter the address manually.'
     })
   })
 

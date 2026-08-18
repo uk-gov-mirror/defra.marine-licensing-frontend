@@ -67,60 +67,9 @@ describe('#invoiceAddressPostcodeSearch', () => {
       )
     })
 
-    test('Should prefill a previous search from the cache', async () => {
-      vi.spyOn(cacheUtils, 'getMarineLicenceCache').mockReturnValue({
-        ...mockMarineLicenceApplication,
-        invoicing: {
-          ...mockMarineLicenceApplication.invoicing,
-          invoiceAddressSearch: {
-            postcode: 'NE4 7AR',
-            propertyNameOrNumber: 'Tyneside House'
-          }
-        }
-      })
-
-      await invoiceAddressPostcodeSearchController.handler({ query: {} }, h)
-
-      expect(h.view).toHaveBeenCalledWith(
-        INVOICE_ADDRESS_POSTCODE_SEARCH_VIEW_ROUTE,
-        expect.objectContaining({
-          payload: {
-            postcode: 'NE4 7AR',
-            propertyNameOrNumber: 'Tyneside House'
-          }
-        })
-      )
-    })
-
-    test('Should not show a cancel link, and show the correct button text and back link when using the change link', async () => {
-      await invoiceAddressPostcodeSearchController.handler(
-        { query: { action: 'change' } },
-        h
-      )
-
-      expect(h.view).toHaveBeenCalledWith(
-        INVOICE_ADDRESS_POSTCODE_SEARCH_VIEW_ROUTE,
-        expect.objectContaining({
-          cancelLink: undefined,
-          buttonText: 'Save and continue',
-          backLink: marineLicenceRoutes.MARINE_LICENCE_CHECK_INVOICING_DETAILS
-        })
-      )
-    })
-
-    test('Should redirect to the UK or international page when the address type is not UK', async () => {
-      vi.spyOn(cacheUtils, 'getMarineLicenceCache').mockReturnValue({
-        ...mockMarineLicenceApplication,
-        invoicing: { invoiceAddressType: 'international' }
-      })
-
-      await invoiceAddressPostcodeSearchController.handler({ query: {} }, h)
-
-      expect(h.redirect).toHaveBeenCalledWith(
-        marineLicenceRoutes.MARINE_LICENCE_IS_INVOICE_ADDRESS_UK_OR_INTERNATIONAL
-      )
-      expect(h.view).not.toHaveBeenCalled()
-    })
+    // Prefill from the cache, the change-flow links and the non-UK redirect are asserted
+    // through the rendered page in
+    // tests/integration/marine-licence/invoicing/invoice-address-postcode-search.test.js
   })
 
   describe('#invoiceAddressPostcodeSearchSubmitController', () => {
@@ -241,6 +190,20 @@ describe('#invoiceAddressPostcodeSearch', () => {
         expect.not.objectContaining({ errorSummary: expect.anything() })
       )
       expect(h.redirect).not.toHaveBeenCalled()
+    })
+
+    test('Should not show the truncation error when the filter still matched something', async () => {
+      vi.spyOn(addressLookup, 'lookupAddresses').mockResolvedValue({
+        results: [anAddress],
+        truncated: true
+      })
+
+      await submit({ postcode: 'NE4 7AR', propertyNameOrNumber: 'Tyneside' })
+
+      expect(h.view).toHaveBeenCalledWith(
+        INVOICE_ADDRESS_POSTCODE_SEARCH_VIEW_ROUTE,
+        expect.not.objectContaining({ errorSummary: expect.anything() })
+      )
     })
 
     test('Should stay on the page without an error when there are many results', async () => {

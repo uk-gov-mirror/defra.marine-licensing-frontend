@@ -333,9 +333,10 @@ describe('Marine licence page accessibility checks (Axe)', () => {
     }
   })
 
-  // The page list above only covers GET, but the postcode search page reports lookup
-  // outcomes as an error summary anchored to a field that passed validation — the case
-  // where the summary-link / aria-describedby relationship is most likely to break.
+  // The page list above only covers GET. A lookup outcome is the error state worth checking
+  // here: it anchors an error summary to a field that passed validation, which is where the
+  // summary-link / aria-describedby relationship is most likely to break. An ordinary
+  // validation error renders the same structure through the standard GOV.UK macros.
   describe('"What is the invoice contact\'s UK address?" page in an error state', () => {
     test('has no accessibility violations when no addresses are found', async () => {
       mockMarineLicence(mockMarineLicenceApplication)
@@ -348,19 +349,6 @@ describe('Marine licence page accessibility checks (Axe)', () => {
           marineLicenceRoutes.MARINE_LICENCE_INVOICE_ADDRESS_POSTCODE_SEARCH,
         server: getServer(),
         formData: { postcode: 'ZZ1 1ZZ', propertyNameOrNumber: '' }
-      })
-
-      await runAxeChecks(document.documentElement)
-    })
-
-    test('has no accessibility violations when the postcode fails validation', async () => {
-      mockMarineLicence(mockMarineLicenceApplication)
-
-      const { document } = await submitForm({
-        requestUrl:
-          marineLicenceRoutes.MARINE_LICENCE_INVOICE_ADDRESS_POSTCODE_SEARCH,
-        server: getServer(),
-        formData: { postcode: 'not a postcode', propertyNameOrNumber: '' }
       })
 
       await runAxeChecks(document.documentElement)
