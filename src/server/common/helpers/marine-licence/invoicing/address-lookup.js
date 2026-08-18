@@ -19,17 +19,15 @@ const matchesPropertyNameOrNumber = (result, searchTerm) =>
       .includes(searchTerm)
   )
 
-export const filterByPropertyNameOrNumber = (
-  propertyNameOrNumber,
-  results = []
-) => {
+export const filterByPropertyNameOrNumber = (results, propertyNameOrNumber) => {
+  const addresses = results ?? []
   const searchTerm = (propertyNameOrNumber ?? '').trim().toLowerCase()
 
   if (!searchTerm) {
-    return results
+    return addresses
   }
 
-  return results.filter((result) =>
+  return addresses.filter((result) =>
     matchesPropertyNameOrNumber(result, searchTerm)
   )
 }
