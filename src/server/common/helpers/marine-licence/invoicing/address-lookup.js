@@ -20,8 +20,8 @@ const matchesPropertyNameOrNumber = (result, searchTerm) =>
   )
 
 export const filterByPropertyNameOrNumber = (
-  results = [],
-  propertyNameOrNumber
+  propertyNameOrNumber,
+  results = []
 ) => {
   const searchTerm = (propertyNameOrNumber ?? '').trim().toLowerCase()
 
