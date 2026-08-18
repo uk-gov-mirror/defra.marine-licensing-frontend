@@ -43,13 +43,13 @@ describe('#oauthToken', () => {
   test('should request a token with the client credentials grant', async () => {
     Wreck.post.mockResolvedValue(mockTokenResponse())
 
-    const token = await getAccessToken(request, { timeout: 1000 })
+    const token = await getAccessToken(request)
 
     expect(token).toBe('a-token')
     expect(Wreck.post).toHaveBeenCalledWith(oauthTokenUrl, {
       payload: expect.any(String),
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      timeout: 1000
+      timeout: config.get('addressLookup').timeout
     })
 
     expect(querystring.parse(Wreck.post.mock.calls[0][1].payload)).toEqual({
@@ -117,7 +117,19 @@ describe('#oauthToken', () => {
 
     expect(token).toBeNull()
     expect(request.logger.error).toHaveBeenCalledWith(
-      { statusCode: 503 },
+      expect.objectContaining({ statusCode: 503, oauthTokenUrl }),
+      'Address lookup token request failed'
+    )
+  })
+
+  test('should log the token URL alongside the status code so a wrong URL is obvious', async () => {
+    Wreck.post.mockRejectedValue(createWreckResponseError(404))
+
+    const token = await getAccessToken(request)
+
+    expect(token).toBeNull()
+    expect(request.logger.error).toHaveBeenCalledWith(
+      expect.objectContaining({ statusCode: 404, oauthTokenUrl }),
       'Address lookup token request failed'
     )
   })
@@ -131,7 +143,7 @@ describe('#oauthToken', () => {
 
     expect(token).toBeNull()
     expect(request.logger.error).toHaveBeenCalledWith(
-      { statusCode: 200 },
+      { statusCode: 200, oauthTokenUrl },
       'Address lookup token response did not contain an access token'
     )
   })
@@ -144,8 +156,8 @@ describe('#oauthToken', () => {
 
     expect(token).toBeNull()
     expect(request.logger.error).toHaveBeenCalledWith(
-      error,
-      'Address lookup token request threw an error'
+      expect.objectContaining({ err: error }),
+      'Address lookup token request failed'
     )
   })
 
@@ -167,7 +179,7 @@ describe('#oauthToken', () => {
     expect(logged).not.toContain(CLIENT_SECRET)
     expect(logged).not.toContain('a-token')
     expect(request.logger.error).toHaveBeenCalledWith(
-      { statusCode: 503 },
+      expect.objectContaining({ statusCode: 503, oauthTokenUrl }),
       'Address lookup token request failed'
     )
   })

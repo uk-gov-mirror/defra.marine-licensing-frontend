@@ -136,7 +136,7 @@ describe('#addressLookup', () => {
             Authorization: 'Bearer a-valid-token'
           },
           json: true,
-          timeout: expect.any(Number)
+          timeout: config.get('addressLookup').timeout
         }
       )
     })
@@ -269,9 +269,33 @@ describe('#addressLookup', () => {
 
       expect(result).toEqual({ results: [], error: true })
       expect(request.logger.error).toHaveBeenCalledWith(
-        { statusCode: 500 },
+        expect.objectContaining({ statusCode: 500, apiUrl }),
         'Address lookup request failed'
       )
+    })
+
+    test('should log the called URL alongside the status code so a wrong URL is obvious', async () => {
+      Wreck.get.mockRejectedValue(createWreckResponseError(404))
+
+      const result = await lookupAddresses(request, { postcode: 'NE4 7AR' })
+
+      expect(result).toEqual({ results: [], error: true })
+      expect(request.logger.error).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 404, apiUrl }),
+        'Address lookup request failed'
+      )
+    })
+
+    test('should return an error when a 200 response is not JSON', async () => {
+      // Wreck hands back a raw buffer when the content-type is not JSON - a proxy error
+      // page, say - which must not be reported as "no addresses found".
+      Wreck.get.mockResolvedValue(
+        mockLookupResponse({ payload: Buffer.from('<html>Bad Gateway</html>') })
+      )
+
+      const result = await lookupAddresses(request, { postcode: 'NE4 7AR' })
+
+      expect(result).toEqual({ results: [], error: true })
     })
 
     test('should return an error when the request throws', async () => {
@@ -282,8 +306,8 @@ describe('#addressLookup', () => {
 
       expect(result).toEqual({ results: [], error: true })
       expect(request.logger.error).toHaveBeenCalledWith(
-        error,
-        'Address lookup request threw an error'
+        expect.objectContaining({ err: error }),
+        'Address lookup request failed'
       )
     })
 
@@ -313,37 +337,11 @@ describe('#addressLookup', () => {
         expect(result).toEqual({ results: [tynesideHouse] })
         expect(Wreck.get).toHaveBeenCalledTimes(2)
         expect(getAccessToken).toHaveBeenNthCalledWith(2, request, {
-          forceRefresh: true,
-          timeout: expect.any(Number)
+          forceRefresh: true
         })
         expect(Wreck.get.mock.calls[1][1].headers.Authorization).toBe(
           'Bearer a-fresh-token'
         )
-      })
-
-      test('should share one deadline across the token fetch and both attempts', async () => {
-        Wreck.get
-          .mockRejectedValueOnce(createWreckResponseError(401))
-          .mockResolvedValueOnce(
-            mockLookupResponse({ payload: { results: [tynesideHouse] } })
-          )
-
-        await lookupAddresses(request, { postcode: 'NE4 7AR' })
-
-        const budget = config.get('addressLookup').timeout
-        const timeouts = [
-          getAccessToken.mock.calls[0][1].timeout,
-          Wreck.get.mock.calls[0][1].timeout,
-          getAccessToken.mock.calls[1][1].timeout,
-          Wreck.get.mock.calls[1][1].timeout
-        ]
-
-        // Each call gets what is left of the one budget, so no call can ask for
-        // more than the configured timeout and the retry cannot extend it.
-        expect(
-          timeouts.every((timeout) => timeout > 0 && timeout <= budget)
-        ).toBe(true)
-        expect([...timeouts].sort((a, b) => b - a)).toEqual(timeouts)
       })
 
       test('should return an error when the retried request is also unauthorised', async () => {
@@ -354,7 +352,7 @@ describe('#addressLookup', () => {
         expect(result).toEqual({ results: [], error: true })
         expect(Wreck.get).toHaveBeenCalledTimes(2)
         expect(request.logger.error).toHaveBeenCalledWith(
-          { statusCode: 401 },
+          expect.objectContaining({ statusCode: 401, apiUrl }),
           'Address lookup request failed'
         )
       })

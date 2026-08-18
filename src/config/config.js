@@ -1,23 +1,464 @@
 import convict from 'convict'
-import { appSchema } from './schema/app.js'
-import { authSchema } from './schema/auth.js'
-import { journeysSchema } from './schema/journeys.js'
-import { logSchema } from './schema/logging.js'
-import { servicesSchema } from './schema/services.js'
-import { sessionSchema } from './schema/session.js'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { configDotenv } from 'dotenv'
+import { requiredFromEnvInCdp } from './required-from-env-in-cdp.js'
+import { addressLookupSchema } from './address-lookup.js'
 
-export {
-  isCdpProductionLikeEnvironment,
-  isNotCdpProductionLikeEnvironment
-} from './formats.js'
+const dirname = path.dirname(fileURLToPath(import.meta.url))
+
+const oneDay = 1000 * 60 * 60 * 24
+const fourHoursMs = 14400000
+const oneWeekMs = 604800000
+const fiftyMB = 50_000_000 // 50 MB :== 50 * 1000 * 1000
+const localhost = 'http://localhost:3000'
+
+const isProduction = process.env.NODE_ENV === 'production'
+const isTest = process.env.NODE_ENV === 'test'
+const isDevelopment = process.env.NODE_ENV === 'development'
+
+if (isDevelopment) {
+  configDotenv()
+}
 
 export const config = convict({
-  ...appSchema,
-  ...journeysSchema,
-  ...logSchema,
-  ...sessionSchema,
-  ...servicesSchema,
-  ...authSchema
+  serviceVersion: {
+    doc: 'The service version, this variable is injected into your docker container in CDP environments',
+    format: String,
+    nullable: true,
+    default: null,
+    env: 'SERVICE_VERSION'
+  },
+  env: {
+    doc: 'The application environment.',
+    format: ['production', 'development', 'test'],
+    default: 'development',
+    env: 'NODE_ENV'
+  },
+  port: {
+    doc: 'The port to bind.',
+    format: 'port',
+    default: 3000,
+    env: 'PORT'
+  },
+  staticCacheTimeout: {
+    doc: 'Static cache timeout in milliseconds',
+    format: Number,
+    default: oneWeekMs,
+    env: 'STATIC_CACHE_TIMEOUT'
+  },
+  serviceName: {
+    doc: 'Applications Service Name',
+    format: String,
+    default: 'Get permission for marine work'
+  },
+  appBaseUrl: {
+    doc: 'Base URL for the application (used for CDP upload redirects)',
+    format: requiredFromEnvInCdp,
+    default: localhost,
+    env: 'APP_BASE_URL'
+  },
+  mcms: {
+    url: {
+      doc: 'Base URL of the MCMS service the IAT hands users off to at the end of a journey',
+      format: String,
+      default: 'https://marinelicensingtest.marinemanagement.org.uk/',
+      env: 'MCMS_URL'
+    },
+    path: {
+      doc: 'Path appended to the MCMS base URL for the IAT handoff — relative, no leading slash',
+      format: String,
+      default: 'mmofox5uat/fox/mmo/MMO_IAT_INTEGRATION',
+      env: 'MCMS_PATH'
+    }
+  },
+  survey: {
+    exemption: {
+      midJourneyUrl: {
+        doc: 'Mid-journey feedback survey linked from the service banner on exemption screens',
+        format: String,
+        default:
+          'https://forms.office.com/pages/responsepage.aspx?id=UCQKdycCYkyQx044U38RAjXEiYXnHG1DvkWr_VjRfzZUNERIRURNOFNVT0tXSlo1NUdONUYxQjNKUy4u&route=shorturl',
+        env: 'SURVEY_EXEMPTION_MID_JOURNEY_URL'
+      },
+      confirmationUrl: {
+        doc: 'End-of-journey feedback survey linked from the exemption confirmation page',
+        format: String,
+        default:
+          'https://forms.office.com/pages/responsepage.aspx?id=UCQKdycCYkyQx044U38RAjXEiYXnHG1DvkWr_VjRfzZURFMxRkhCSzQyVlRKQzdZNDEyVDhSMFdSNy4u&route=shorturl',
+        env: 'SURVEY_EXEMPTION_CONFIRMATION_URL'
+      }
+    },
+    marineLicence: {
+      midJourneyUrl: {
+        doc: 'Mid-journey feedback survey linked from the service banner on marine licence screens',
+        format: String,
+        default: 'https://forms.cloud.microsoft/e/MHPbixhs4i',
+        env: 'SURVEY_MARINE_LICENCE_MID_JOURNEY_URL'
+      },
+      confirmationUrl: {
+        doc: 'End-of-journey feedback survey linked from the marine licence confirmation page',
+        format: String,
+        default: 'https://forms.cloud.microsoft/e/vUT96ZvAez',
+        env: 'SURVEY_MARINE_LICENCE_CONFIRMATION_URL'
+      }
+    }
+  },
+  root: {
+    doc: 'Project root',
+    format: String,
+    default: path.resolve(dirname, '../..')
+  },
+  assetPath: {
+    doc: 'Asset path',
+    format: String,
+    default: '/public',
+    env: 'ASSET_PATH'
+  },
+  isProduction: {
+    doc: 'If this application running in the production environment',
+    format: Boolean,
+    default: isProduction
+  },
+  isDevelopment: {
+    doc: 'If this application running in the development environment',
+    format: Boolean,
+    default: isDevelopment
+  },
+  isTest: {
+    doc: 'If this application running in the test environment',
+    format: Boolean,
+    default: isTest
+  },
+  log: {
+    enabled: {
+      doc: 'Is logging enabled',
+      format: Boolean,
+      default: process.env.NODE_ENV !== 'test',
+      env: 'LOG_ENABLED'
+    },
+    level: {
+      doc: 'Logging level',
+      format: ['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'],
+      default: 'info',
+      env: 'LOG_LEVEL'
+    },
+    format: {
+      doc: 'Format to output logs in.',
+      format: ['ecs', 'pino-pretty'],
+      default: isProduction ? 'ecs' : 'pino-pretty',
+      env: 'LOG_FORMAT'
+    },
+    redact: {
+      doc: 'Log paths to redact',
+      format: Array,
+      default: isProduction
+        ? ['req.headers.authorization', 'req.headers.cookie', 'res.headers']
+        : []
+    }
+  },
+  httpProxy: {
+    doc: 'HTTP Proxy',
+    format: String,
+    nullable: true,
+    default: null,
+    env: 'HTTP_PROXY'
+  },
+  isSecureContextEnabled: {
+    doc: 'Enable Secure Context',
+    format: Boolean,
+    default: isProduction,
+    env: 'ENABLE_SECURE_CONTEXT'
+  },
+  isMetricsEnabled: {
+    doc: 'Enable metrics reporting',
+    format: Boolean,
+    default: isProduction,
+    env: 'ENABLE_METRICS'
+  },
+  session: {
+    cache: {
+      engine: {
+        doc: 'backend cache is written to',
+        format: ['redis', 'memory'],
+        default: isProduction ? 'redis' : 'memory',
+        env: 'SESSION_CACHE_ENGINE'
+      },
+      name: {
+        doc: 'server side session cache name',
+        format: String,
+        default: 'session',
+        env: 'SESSION_CACHE_NAME'
+      },
+      ttl: {
+        doc: 'server side session cache ttl',
+        format: Number,
+        default: fourHoursMs,
+        env: 'SESSION_CACHE_TTL'
+      }
+    },
+    cookie: {
+      ttl: {
+        doc: 'Session cookie ttl',
+        format: Number,
+        default: fourHoursMs,
+        env: 'SESSION_COOKIE_TTL'
+      },
+      password: {
+        doc: 'session cookie password',
+        format: requiredFromEnvInCdp,
+        default: 'the-password-must-be-at-least-32-characters-long',
+        env: 'SESSION_COOKIE_PASSWORD',
+        sensitive: true
+      },
+      secure: {
+        doc: 'set secure flag on cookie',
+        format: Boolean,
+        default: isProduction,
+        env: 'SESSION_COOKIE_SECURE'
+      }
+    }
+  },
+  redis: {
+    host: {
+      doc: 'Redis cache host',
+      format: requiredFromEnvInCdp,
+      default: '127.0.0.1',
+      env: 'REDIS_HOST'
+    },
+    username: {
+      doc: 'Redis cache username',
+      format: requiredFromEnvInCdp,
+      default: '',
+      env: 'REDIS_USERNAME'
+    },
+    password: {
+      doc: 'Redis cache password',
+      format: requiredFromEnvInCdp,
+      default: '',
+      sensitive: true,
+      env: 'REDIS_PASSWORD'
+    },
+    keyPrefix: {
+      doc: 'Redis cache key prefix name used to isolate the cached results across multiple clients',
+      format: String,
+      default: 'marine-licensing-frontend:',
+      env: 'REDIS_KEY_PREFIX'
+    },
+    ttl: {
+      doc: 'Redis cache global ttl',
+      format: Number,
+      default: oneDay,
+      env: 'REDIS_TTL'
+    },
+    useSingleInstanceCache: {
+      doc: 'Connect to a single instance of redis instead of a cluster.',
+      format: Boolean,
+      default: !isProduction,
+      env: 'USE_SINGLE_INSTANCE_CACHE'
+    },
+    useTLS: {
+      doc: 'Connect to redis using TLS',
+      format: Boolean,
+      default: isProduction,
+      env: 'REDIS_TLS'
+    }
+  },
+  nunjucks: {
+    watch: {
+      doc: 'Reload templates when they are changed.',
+      format: Boolean,
+      default: isDevelopment
+    },
+    noCache: {
+      doc: 'Use a cache and recompile templates each time',
+      format: Boolean,
+      default: isDevelopment
+    }
+  },
+  tracing: {
+    header: {
+      doc: 'Which header to track',
+      format: String,
+      default: 'x-cdp-request-id',
+      env: 'TRACING_HEADER'
+    }
+  },
+  backend: {
+    apiUrl: {
+      doc: 'Endpoint for the backend API service',
+      format: requiredFromEnvInCdp,
+      nullable: true,
+      default: 'http://localhost:3001',
+      env: 'MARINE_LICENSING_BACKEND_API_URL'
+    }
+  },
+  addressLookup: addressLookupSchema,
+  marineLicence: {
+    enabled: {
+      doc: 'Enable the Marine Licence journey',
+      format: Boolean,
+      default: false,
+      env: 'ENABLE_MARINE_LICENCE'
+    }
+  },
+  selfService: {
+    enabled: {
+      doc: 'Enable the Self Service IAT journey',
+      format: Boolean,
+      default: false,
+      env: 'ENABLE_SELF_SERVICE'
+    },
+    dataQualityEnabled: {
+      doc: 'Enable IAT data-quality scan and warning logs at server startup',
+      format: Boolean,
+      default: false,
+      env: 'ENABLE_IAT_DATA_QUALITY'
+    }
+  },
+  defraId: {
+    accountManagementUrl: {
+      doc: 'Defra ID account management portal URL',
+      format: requiredFromEnvInCdp,
+      env: 'DEFRA_ID_ACCOUNT_MANAGEMENT_URL',
+      default: '#'
+    },
+    oidcConfigurationUrl: {
+      doc: 'Defra ID OIDC Configuration URL',
+      format: requiredFromEnvInCdp,
+      default:
+        'http://localhost:3200/cdp-defra-id-stub/.well-known/openid-configuration',
+      env: 'DEFRA_ID_OIDC_CONFIGURATION_URL'
+    },
+    clientId: {
+      doc: 'The Defra Identity client ID.',
+      format: requiredFromEnvInCdp,
+      default: 'client-test',
+      env: 'DEFRA_ID_CLIENT_ID'
+    },
+    clientSecret: {
+      doc: 'The Defra Identity client secret.',
+      format: requiredFromEnvInCdp,
+      default: 'test_value',
+      env: 'DEFRA_ID_CLIENT_SECRET',
+      sensitive: true
+    },
+    serviceId: {
+      doc: 'The Defra Identity service ID.',
+      format: requiredFromEnvInCdp,
+      default: 'service-test',
+      env: 'DEFRA_ID_SERVICE_ID'
+    },
+    scopes: {
+      doc: 'Defra ID Scopes',
+      format: Array,
+      sensitive: true,
+      env: 'AUTH_DEFRA_ID_SCOPES',
+      default: ['openid', 'offline_access']
+    },
+    redirectUrl: {
+      doc: 'The Defra Identity redirect URl.',
+      format: String,
+      default: localhost,
+      env: 'APP_BASE_URL'
+    },
+    cspRedirectHosts: {
+      doc: 'The Defra ID hosts that are redirected to before signin, for CSP form-action',
+      format: Array,
+      default: [],
+      env: 'DEFRA_ID_REDIRECT_HOSTS'
+    },
+    refreshTokens: {
+      doc: 'True if Defra Identity refresh tokens are enabled.',
+      format: Boolean,
+      default: true,
+      env: 'DEFRA_ID_REFRESH_TOKENS'
+    }
+  },
+  entraId: {
+    oidcConfigurationUrl: {
+      doc: 'Entra ID OIDC configuration URL',
+      format: requiredFromEnvInCdp,
+      env: 'ENTRA_ID_OIDC_CONFIGURATION_URL',
+      default:
+        'http://localhost:3200/cdp-defra-id-stub/.well-known/openid-configuration'
+    },
+    clientId: {
+      doc: 'ENTRA ID client ID',
+      format: requiredFromEnvInCdp,
+      env: 'ENTRA_ID_CLIENT_ID',
+      default: 'entra-test'
+    },
+    clientSecret: {
+      doc: 'ENTRA ID client secret',
+      format: requiredFromEnvInCdp,
+      sensitive: true,
+      env: 'ENTRA_ID_CLIENT_SECRET',
+      default: 'test_value'
+    },
+    scopes: {
+      doc: 'ENTRA ID scopes',
+      format: Array,
+      sensitive: true,
+      env: 'ENTRA_ID_SCOPES',
+      default: ['api://f68226cb-8dbc-44ef-a24e-d4e4835b16ff/.default']
+    },
+    redirectUrl: {
+      doc: 'ENTRA ID redirect URl.',
+      format: String,
+      default: localhost,
+      env: 'APP_BASE_URL'
+    },
+    teamAdminEmails: {
+      doc: 'Team admin emails',
+      format: Array,
+      default: [],
+      env: 'ENTRA_ID_TEAM_ADMIN_EMAILS'
+    }
+  },
+  cdpUploader: {
+    cdpUploadServiceBaseUrl: {
+      doc: 'CDP Uploader service base URL',
+      format: requiredFromEnvInCdp,
+      default: 'http://localhost:7337',
+      env: 'CDP_UPLOADER_BASE_URL'
+    },
+    timeout: {
+      doc: 'Request timeout for CDP Uploader calls in milliseconds',
+      format: Number,
+      default: 30000,
+      env: 'CDP_UPLOADER_TIMEOUT'
+    },
+    maxFileSize: {
+      doc: 'Maximum file size in bytes (50MB)',
+      format: Number,
+      default: fiftyMB,
+      env: 'CDP_UPLOADER_MAX_FILE_SIZE'
+    },
+    s3Bucket: {
+      doc: 'S3 Bucket for uploads to be placed in after the virus scan',
+      format: requiredFromEnvInCdp,
+      default: 'mmo-uploads',
+      env: 'CDP_UPLOAD_BUCKET'
+    }
+  },
+  clarityProjectId: {
+    doc: 'Microsoft Clarity Project ID',
+    format: String,
+    default: '',
+    env: 'CLARITY_PROJECT_ID'
+  },
+  cdpEnvironment: {
+    doc: 'The CDP environment the app is currently in, with the addition of "local"',
+    format: ['local', 'dev', 'test', 'perf-test', 'ext-test', 'prod'],
+    default: process.env.ENVIRONMENT ?? 'local'
+  },
+  enableBrowserLogging: {
+    doc: 'Enable / disable browser logging in the browser and at the api level',
+    format: Boolean,
+    default: true,
+    env: 'ENABLE_BROWSER_LOGGING'
+  }
 })
 
 config.validate({ allowed: 'strict' })

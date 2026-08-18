@@ -2,7 +2,6 @@ import Wreck from '@hapi/wreck'
 import { getTraceId } from '@defra/hapi-tracing'
 import { config } from '#src/config/config.js'
 import { getAccessToken } from '#src/server/common/helpers/marine-licence/invoicing/address-lookup-token.js'
-import { getUpstreamStatusCode } from '#src/server/common/helpers/marine-licence/invoicing/address-lookup-errors.js'
 
 const HTTP_STATUS_NO_CONTENT = 204
 const HTTP_STATUS_UNAUTHORIZED = 401
@@ -50,6 +49,13 @@ const parseLookupResponse = ({ res, payload }) => {
     return { results: [], totalResults: 0 }
   }
 
+  // json: true only parses when the content-type says JSON, so anything else - a proxy
+  // error page served as a 200, an empty body - arrives as a raw buffer. Treat that as a
+  // failure rather than reporting "no addresses found" for a search that never happened.
+  if (Buffer.isBuffer(payload) || typeof payload !== 'object') {
+    throw new Error('Address lookup response was not JSON')
+  }
+
   const results = Array.isArray(payload?.results) ? payload.results : []
 
   return {
@@ -73,40 +79,26 @@ const buildLookupHeaders = (token) => {
   return headers
 }
 
-// Wreck has no AbortSignal support, so the single deadline is kept as a budget:
-// every call gets whatever is left of it, and the retry can't extend it.
-const remainingTimeout = (deadline) => {
-  const remaining = deadline - Date.now()
-
-  if (remaining <= 0) {
-    throw new Error('Address lookup exceeded its deadline')
-  }
-
-  return remaining
-}
-
-const performLookup = (url, token, deadline) =>
+const performLookup = (url, token) =>
   Wreck.get(url, {
     headers: buildLookupHeaders(token),
     json: true,
-    timeout: remainingTimeout(deadline)
+    timeout: config.get('addressLookup').timeout
   })
 
 // Returns the lookup response, retrying once with a fresh token if the first
 // attempt is rejected as unauthorised (the cached token was revoked or expired early).
-const lookupWithTokenRetry = async (request, url, deadline) => {
-  const token = await getAccessToken(request, {
-    timeout: remainingTimeout(deadline)
-  })
+const lookupWithTokenRetry = async (request, url) => {
+  const token = await getAccessToken(request)
 
   if (!token) {
     return null
   }
 
   try {
-    return await performLookup(url, token, deadline)
+    return await performLookup(url, token)
   } catch (error) {
-    if (getUpstreamStatusCode(error) !== HTTP_STATUS_UNAUTHORIZED) {
+    if (error.output?.statusCode !== HTTP_STATUS_UNAUTHORIZED) {
       throw error
     }
 
@@ -114,29 +106,14 @@ const lookupWithTokenRetry = async (request, url, deadline) => {
       'Address lookup returned 401, refreshing the access token and retrying'
     )
 
-    const refreshedToken = await getAccessToken(request, {
-      forceRefresh: true,
-      timeout: remainingTimeout(deadline)
-    })
+    const refreshedToken = await getAccessToken(request, { forceRefresh: true })
 
     if (!refreshedToken) {
       return null
     }
 
-    return performLookup(url, refreshedToken, deadline)
+    return performLookup(url, refreshedToken)
   }
-}
-
-const handleLookupError = (request, error) => {
-  const statusCode = getUpstreamStatusCode(error)
-
-  if (statusCode) {
-    request.logger.error({ statusCode }, 'Address lookup request failed')
-  } else {
-    request.logger.error(error, 'Address lookup request threw an error')
-  }
-
-  return { results: [], error: true }
 }
 
 export const lookupAddresses = async (
@@ -144,10 +121,9 @@ export const lookupAddresses = async (
   { postcode, propertyNameOrNumber }
 ) => {
   const url = buildLookupUrl(postcode)
-  const deadline = Date.now() + config.get('addressLookup').timeout
 
   try {
-    const response = await lookupWithTokenRetry(request, url, deadline)
+    const response = await lookupWithTokenRetry(request, url)
 
     if (!response) {
       return { results: [], error: true }
@@ -163,6 +139,15 @@ export const lookupAddresses = async (
       ...(totalResults > results.length ? { truncated: true } : {})
     }
   } catch (error) {
-    return handleLookupError(request, error)
+    // apiUrl is in the context because a 404 here is almost always a misconfigured URL.
+    request.logger.error(
+      {
+        statusCode: error.output?.statusCode,
+        apiUrl: config.get('addressLookup').apiUrl,
+        err: error
+      },
+      'Address lookup request failed'
+    )
+    return { results: [], error: true }
   }
 }

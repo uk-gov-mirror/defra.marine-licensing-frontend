@@ -1,7 +1,6 @@
 import Wreck from '@hapi/wreck'
 import querystring from 'node:querystring'
 import { config } from '#src/config/config.js'
-import { getUpstreamStatusCode } from '#src/server/common/helpers/marine-licence/invoicing/address-lookup-errors.js'
 
 const MILLISECONDS_PER_SECOND = 1000
 // Renew a minute early so a token can't expire in flight.
@@ -27,8 +26,18 @@ const buildTokenRequestBody = () => {
   })
 }
 
-const requestNewToken = async (request, timeout) => {
-  const { oauthTokenUrl } = config.get('addressLookup')
+// Parsed by hand rather than with json: true, so a token endpoint that omits or
+// mislabels its content-type still yields a token.
+const parseTokenPayload = (payload) => {
+  try {
+    return JSON.parse(payload.toString('utf8'))
+  } catch {
+    return null
+  }
+}
+
+const requestNewToken = async (request) => {
+  const { oauthTokenUrl, timeout } = config.get('addressLookup')
 
   const response = await Wreck.post(oauthTokenUrl, {
     payload: buildTokenRequestBody(),
@@ -36,14 +45,11 @@ const requestNewToken = async (request, timeout) => {
     timeout
   })
 
-  const statusCode = response.res?.statusCode
-  // Parsed by hand rather than with json: true, so a token endpoint that omits
-  // or mislabels its content-type still yields a token.
-  const data = JSON.parse(response.payload.toString('utf8'))
+  const data = parseTokenPayload(response.payload)
 
   if (!data?.access_token) {
     request.logger.error(
-      { statusCode },
+      { statusCode: response.res?.statusCode, oauthTokenUrl },
       'Address lookup token response did not contain an access token'
     )
     return null
@@ -62,7 +68,7 @@ const requestNewToken = async (request, timeout) => {
 
 export const getAccessToken = async (
   request,
-  { forceRefresh = false, timeout } = {}
+  { forceRefresh = false } = {}
 ) => {
   if (!forceRefresh && cachedToken && Date.now() < cachedToken.expiresAt) {
     return cachedToken.token
@@ -71,19 +77,18 @@ export const getAccessToken = async (
   cachedToken = null
 
   try {
-    return await requestNewToken(request, timeout)
+    return await requestNewToken(request)
   } catch (error) {
-    const statusCode = getUpstreamStatusCode(error)
-
-    if (statusCode) {
-      request.logger.error(
-        { statusCode },
-        'Address lookup token request failed'
-      )
-      return null
-    }
-
-    request.logger.error(error, 'Address lookup token request threw an error')
+    // oauthTokenUrl is in the context because a 404 or 401 here is almost always a
+    // misconfigured URL or credential rather than an outage.
+    request.logger.error(
+      {
+        statusCode: error.output?.statusCode,
+        oauthTokenUrl: config.get('addressLookup').oauthTokenUrl,
+        err: error
+      },
+      'Address lookup token request failed'
+    )
     return null
   }
 }

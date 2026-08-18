@@ -2,47 +2,56 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 describe('isCdpProductionLikeEnvironment', () => {
   test('should return true for prod environment', async () => {
-    const { isCdpProductionLikeEnvironment } = await import('./config.js')
+    const { isCdpProductionLikeEnvironment } =
+      await import('./required-from-env-in-cdp.js')
     expect(isCdpProductionLikeEnvironment('prod')).toBe(true)
   })
 
   test('should return true for perf-test environment', async () => {
-    const { isCdpProductionLikeEnvironment } = await import('./config.js')
+    const { isCdpProductionLikeEnvironment } =
+      await import('./required-from-env-in-cdp.js')
     expect(isCdpProductionLikeEnvironment('perf-test')).toBe(true)
   })
 
   test('should return true for test environment', async () => {
-    const { isCdpProductionLikeEnvironment } = await import('./config.js')
+    const { isCdpProductionLikeEnvironment } =
+      await import('./required-from-env-in-cdp.js')
     expect(isCdpProductionLikeEnvironment('test')).toBe(true)
   })
 
   test('should return false for local environment', async () => {
-    const { isCdpProductionLikeEnvironment } = await import('./config.js')
+    const { isCdpProductionLikeEnvironment } =
+      await import('./required-from-env-in-cdp.js')
     expect(isCdpProductionLikeEnvironment('local')).toBe(false)
   })
 
   test('should return false for dev environment', async () => {
-    const { isCdpProductionLikeEnvironment } = await import('./config.js')
+    const { isCdpProductionLikeEnvironment } =
+      await import('./required-from-env-in-cdp.js')
     expect(isCdpProductionLikeEnvironment('dev')).toBe(false)
   })
 
   test('should return false for ext-test environment', async () => {
-    const { isCdpProductionLikeEnvironment } = await import('./config.js')
+    const { isCdpProductionLikeEnvironment } =
+      await import('./required-from-env-in-cdp.js')
     expect(isCdpProductionLikeEnvironment('ext-test')).toBe(false)
   })
 
   test('should return false for undefined environment', async () => {
-    const { isCdpProductionLikeEnvironment } = await import('./config.js')
+    const { isCdpProductionLikeEnvironment } =
+      await import('./required-from-env-in-cdp.js')
     expect(isCdpProductionLikeEnvironment(undefined)).toBe(false)
   })
 
   test('should return false for null environment', async () => {
-    const { isCdpProductionLikeEnvironment } = await import('./config.js')
+    const { isCdpProductionLikeEnvironment } =
+      await import('./required-from-env-in-cdp.js')
     expect(isCdpProductionLikeEnvironment(null)).toBe(false)
   })
 
   test('should return false for unknown environment', async () => {
-    const { isCdpProductionLikeEnvironment } = await import('./config.js')
+    const { isCdpProductionLikeEnvironment } =
+      await import('./required-from-env-in-cdp.js')
     expect(isCdpProductionLikeEnvironment('unknown')).toBe(false)
   })
 })
