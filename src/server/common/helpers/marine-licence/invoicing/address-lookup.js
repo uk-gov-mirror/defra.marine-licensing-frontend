@@ -53,7 +53,7 @@ const parseLookupResponse = ({ res, payload }) => {
   // error page served as a 200, an empty body - arrives as a raw buffer. Treat that as a
   // failure rather than reporting "no addresses found" for a search that never happened.
   if (Buffer.isBuffer(payload) || typeof payload !== 'object') {
-    throw new Error('Address lookup response was not JSON')
+    throw new TypeError('Address lookup response was not JSON')
   }
 
   const results = Array.isArray(payload?.results) ? payload.results : []
