@@ -1,6 +1,8 @@
+import Wreck from '@hapi/wreck'
 import { getTraceId } from '@defra/hapi-tracing'
 import { config } from '#src/config/config.js'
 import { getAccessToken } from '#src/server/common/helpers/marine-licence/invoicing/address-lookup-token.js'
+import { getUpstreamStatusCode } from '#src/server/common/helpers/marine-licence/invoicing/address-lookup-errors.js'
 
 const HTTP_STATUS_NO_CONTENT = 204
 const HTTP_STATUS_UNAUTHORIZED = 401
@@ -43,17 +45,16 @@ const buildLookupUrl = (postcode) => {
 
 // header.totalResults is how many the API has for the postcode; results is what it
 // returned, capped at maxresults. The difference is what tells us the set is truncated.
-const parseLookupResponse = async (response) => {
-  if (response.status === HTTP_STATUS_NO_CONTENT) {
+const parseLookupResponse = ({ res, payload }) => {
+  if (res?.statusCode === HTTP_STATUS_NO_CONTENT) {
     return { results: [], totalResults: 0 }
   }
 
-  const data = await response.json()
-  const results = Array.isArray(data?.results) ? data.results : []
+  const results = Array.isArray(payload?.results) ? payload.results : []
 
   return {
     results,
-    totalResults: Number(data?.header?.totalResults) || results.length
+    totalResults: Number(payload?.header?.totalResults) || results.length
   }
 }
 
@@ -72,44 +73,70 @@ const buildLookupHeaders = (token) => {
   return headers
 }
 
-const performLookup = (url, token, signal) =>
-  fetch(url, {
-    method: 'GET',
+// Wreck has no AbortSignal support, so the single deadline is kept as a budget:
+// every call gets whatever is left of it, and the retry can't extend it.
+const remainingTimeout = (deadline) => {
+  const remaining = deadline - Date.now()
+
+  if (remaining <= 0) {
+    throw new Error('Address lookup exceeded its deadline')
+  }
+
+  return remaining
+}
+
+const performLookup = (url, token, deadline) =>
+  Wreck.get(url, {
     headers: buildLookupHeaders(token),
-    signal
+    json: true,
+    timeout: remainingTimeout(deadline)
   })
 
 // Returns the lookup response, retrying once with a fresh token if the first
 // attempt is rejected as unauthorised (the cached token was revoked or expired early).
-// The signal is a single deadline shared by every call, so the retry can't multiply
-// the configured timeout.
-const lookupWithTokenRetry = async (request, url, signal) => {
-  const token = await getAccessToken(request, { signal })
+const lookupWithTokenRetry = async (request, url, deadline) => {
+  const token = await getAccessToken(request, {
+    timeout: remainingTimeout(deadline)
+  })
 
   if (!token) {
     return null
   }
 
-  const response = await performLookup(url, token, signal)
+  try {
+    return await performLookup(url, token, deadline)
+  } catch (error) {
+    if (getUpstreamStatusCode(error) !== HTTP_STATUS_UNAUTHORIZED) {
+      throw error
+    }
 
-  if (response.status !== HTTP_STATUS_UNAUTHORIZED) {
-    return response
+    request.logger.info(
+      'Address lookup returned 401, refreshing the access token and retrying'
+    )
+
+    const refreshedToken = await getAccessToken(request, {
+      forceRefresh: true,
+      timeout: remainingTimeout(deadline)
+    })
+
+    if (!refreshedToken) {
+      return null
+    }
+
+    return performLookup(url, refreshedToken, deadline)
+  }
+}
+
+const handleLookupError = (request, error) => {
+  const statusCode = getUpstreamStatusCode(error)
+
+  if (statusCode) {
+    request.logger.error({ statusCode }, 'Address lookup request failed')
+  } else {
+    request.logger.error(error, 'Address lookup request threw an error')
   }
 
-  request.logger.info(
-    'Address lookup returned 401, refreshing the access token and retrying'
-  )
-
-  const refreshedToken = await getAccessToken(request, {
-    forceRefresh: true,
-    signal
-  })
-
-  if (!refreshedToken) {
-    return null
-  }
-
-  return performLookup(url, refreshedToken, signal)
+  return { results: [], error: true }
 }
 
 export const lookupAddresses = async (
@@ -117,24 +144,16 @@ export const lookupAddresses = async (
   { postcode, propertyNameOrNumber }
 ) => {
   const url = buildLookupUrl(postcode)
-  const signal = AbortSignal.timeout(config.get('addressLookup').timeout)
+  const deadline = Date.now() + config.get('addressLookup').timeout
 
   try {
-    const response = await lookupWithTokenRetry(request, url, signal)
+    const response = await lookupWithTokenRetry(request, url, deadline)
 
     if (!response) {
       return { results: [], error: true }
     }
 
-    if (!response.ok) {
-      request.logger.error(
-        { statusCode: response.status },
-        'Address lookup request failed'
-      )
-      return { results: [], error: true }
-    }
-
-    const { results, totalResults } = await parseLookupResponse(response)
+    const { results, totalResults } = parseLookupResponse(response)
 
     // Filtering happens here because the API only searches by postcode, so a truncated
     // result set means a property search can miss an address that genuinely exists.
@@ -144,7 +163,6 @@ export const lookupAddresses = async (
       ...(totalResults > results.length ? { truncated: true } : {})
     }
   } catch (error) {
-    request.logger.error(error, 'Address lookup request threw an error')
-    return { results: [], error: true }
+    return handleLookupError(request, error)
   }
 }

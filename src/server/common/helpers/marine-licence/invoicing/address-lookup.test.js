@@ -1,13 +1,21 @@
 import { vi } from 'vitest'
+import Wreck from '@hapi/wreck'
 import {
   lookupAddresses,
   normalisePostcode,
   filterByPropertyNameOrNumber
 } from '#src/server/common/helpers/marine-licence/invoicing/address-lookup.js'
 import { getAccessToken } from '#src/server/common/helpers/marine-licence/invoicing/address-lookup-token.js'
-import { createMockRequest } from '#src/server/test-helpers/mocks/helpers.js'
+import {
+  createMockRequest,
+  createWreckResponseError
+} from '#src/server/test-helpers/mocks/helpers.js'
 import { config } from '#src/config/config.js'
 import { getTraceId } from '@defra/hapi-tracing'
+
+vi.mock('@hapi/wreck', () => ({
+  default: { get: vi.fn(), post: vi.fn() }
+}))
 
 vi.mock(
   '#src/server/common/helpers/marine-licence/invoicing/address-lookup-token.js',
@@ -39,10 +47,9 @@ const quaysideHouse = {
   postcode: 'NE4 7AR'
 }
 
-const mockFetchResponse = ({ ok = true, status = 200, body = {} } = {}) => ({
-  ok,
-  status,
-  json: vi.fn().mockResolvedValue(body)
+const mockLookupResponse = ({ statusCode = 200, payload = {} } = {}) => ({
+  res: { statusCode },
+  payload
 })
 
 describe('#addressLookup', () => {
@@ -50,13 +57,12 @@ describe('#addressLookup', () => {
   const apiUrl = config.get('addressLookup').apiUrl
 
   beforeEach(() => {
-    vi.stubGlobal('fetch', vi.fn())
+    Wreck.get.mockReset()
     getAccessToken.mockResolvedValue('a-valid-token')
     getTraceId.mockReturnValue(null)
   })
 
   afterEach(() => {
-    vi.unstubAllGlobals()
     vi.restoreAllMocks()
   })
 
@@ -114,34 +120,36 @@ describe('#addressLookup', () => {
 
   describe('#lookupAddresses', () => {
     test('should call the lookup API with a normalised, encoded postcode and a bearer token', async () => {
-      fetch.mockResolvedValue(
-        mockFetchResponse({ body: { results: [tynesideHouse] } })
+      Wreck.get.mockResolvedValue(
+        mockLookupResponse({ payload: { results: [tynesideHouse] } })
       )
 
       await lookupAddresses(request, { postcode: 'ne4 7ar' })
 
       const { maxResults } = config.get('addressLookup')
 
-      expect(fetch).toHaveBeenCalledWith(
+      expect(Wreck.get).toHaveBeenCalledWith(
         `${apiUrl}?postcode=NE47AR&maxresults=${maxResults}`,
         {
-          method: 'GET',
           headers: {
             'Content-Type': 'application/json',
             Authorization: 'Bearer a-valid-token'
           },
-          signal: expect.any(AbortSignal)
+          json: true,
+          timeout: expect.any(Number)
         }
       )
     })
 
     test('should propagate the CDP tracing header when a trace id is present', async () => {
       getTraceId.mockReturnValue('trace-abc-123')
-      fetch.mockResolvedValue(mockFetchResponse({ body: { results: [] } }))
+      Wreck.get.mockResolvedValue(
+        mockLookupResponse({ payload: { results: [] } })
+      )
 
       await lookupAddresses(request, { postcode: 'NE4 7AR' })
 
-      expect(fetch.mock.calls[0][1].headers).toEqual(
+      expect(Wreck.get.mock.calls[0][1].headers).toEqual(
         expect.objectContaining({
           [config.get('tracing.header')]: 'trace-abc-123'
         })
@@ -149,8 +157,10 @@ describe('#addressLookup', () => {
     })
 
     test('should return the results from a successful response', async () => {
-      fetch.mockResolvedValue(
-        mockFetchResponse({ body: { results: [tynesideHouse, quaysideHouse] } })
+      Wreck.get.mockResolvedValue(
+        mockLookupResponse({
+          payload: { results: [tynesideHouse, quaysideHouse] }
+        })
       )
 
       const result = await lookupAddresses(request, { postcode: 'NE4 7AR' })
@@ -159,8 +169,10 @@ describe('#addressLookup', () => {
     })
 
     test('should filter the results by property name or number', async () => {
-      fetch.mockResolvedValue(
-        mockFetchResponse({ body: { results: [tynesideHouse, quaysideHouse] } })
+      Wreck.get.mockResolvedValue(
+        mockLookupResponse({
+          payload: { results: [tynesideHouse, quaysideHouse] }
+        })
       )
 
       const result = await lookupAddresses(request, {
@@ -172,13 +184,11 @@ describe('#addressLookup', () => {
     })
 
     test('should return no results for a 204 No Content response', async () => {
-      // A real 204 Response reports ok: true and has no body, so json() must
-      // never be called - rejecting here proves we short-circuit before parsing.
-      fetch.mockResolvedValue({
-        ok: true,
-        status: 204,
-        json: vi.fn().mockRejectedValue(new Error('204 has no body'))
-      })
+      // A 204 carries no body, so with json: true Wreck hands back the raw
+      // empty buffer rather than a parsed object.
+      Wreck.get.mockResolvedValue(
+        mockLookupResponse({ statusCode: 204, payload: Buffer.alloc(0) })
+      )
 
       const result = await lookupAddresses(request, { postcode: 'NE4 7AR' })
 
@@ -186,15 +196,15 @@ describe('#addressLookup', () => {
     })
 
     describe('truncated result sets', () => {
-      const bodyWithTotal = (results, totalResults) => ({
+      const payloadWithTotal = (results, totalResults) => ({
         header: { totalResults: String(totalResults) },
         results
       })
 
       test('should flag truncation when the API has more addresses than it returned', async () => {
-        fetch.mockResolvedValue(
-          mockFetchResponse({
-            body: bodyWithTotal([tynesideHouse, quaysideHouse], 250)
+        Wreck.get.mockResolvedValue(
+          mockLookupResponse({
+            payload: payloadWithTotal([tynesideHouse, quaysideHouse], 250)
           })
         )
 
@@ -204,9 +214,9 @@ describe('#addressLookup', () => {
       })
 
       test('should not flag truncation when every address was returned', async () => {
-        fetch.mockResolvedValue(
-          mockFetchResponse({
-            body: bodyWithTotal([tynesideHouse, quaysideHouse], 2)
+        Wreck.get.mockResolvedValue(
+          mockLookupResponse({
+            payload: payloadWithTotal([tynesideHouse, quaysideHouse], 2)
           })
         )
 
@@ -217,8 +227,8 @@ describe('#addressLookup', () => {
       })
 
       test('should not flag truncation when the response has no header', async () => {
-        fetch.mockResolvedValue(
-          mockFetchResponse({ body: { results: [tynesideHouse] } })
+        Wreck.get.mockResolvedValue(
+          mockLookupResponse({ payload: { results: [tynesideHouse] } })
         )
 
         const result = await lookupAddresses(request, { postcode: 'NE4 7AR' })
@@ -227,9 +237,9 @@ describe('#addressLookup', () => {
       })
 
       test('should keep the truncation flag when a property filter matches nothing', async () => {
-        fetch.mockResolvedValue(
-          mockFetchResponse({
-            body: bodyWithTotal([tynesideHouse, quaysideHouse], 250)
+        Wreck.get.mockResolvedValue(
+          mockLookupResponse({
+            payload: payloadWithTotal([tynesideHouse, quaysideHouse], 250)
           })
         )
 
@@ -243,7 +253,9 @@ describe('#addressLookup', () => {
     })
 
     test('should return no results when the response has no results array', async () => {
-      fetch.mockResolvedValue(mockFetchResponse({ body: { header: {} } }))
+      Wreck.get.mockResolvedValue(
+        mockLookupResponse({ payload: { header: {} } })
+      )
 
       const result = await lookupAddresses(request, { postcode: 'NE4 7AR' })
 
@@ -251,7 +263,7 @@ describe('#addressLookup', () => {
     })
 
     test('should return an error when the API responds with a failure status', async () => {
-      fetch.mockResolvedValue(mockFetchResponse({ ok: false, status: 500 }))
+      Wreck.get.mockRejectedValue(createWreckResponseError(500))
 
       const result = await lookupAddresses(request, { postcode: 'NE4 7AR' })
 
@@ -264,7 +276,7 @@ describe('#addressLookup', () => {
 
     test('should return an error when the request throws', async () => {
       const error = new Error('network down')
-      fetch.mockRejectedValue(error)
+      Wreck.get.mockRejectedValue(error)
 
       const result = await lookupAddresses(request, { postcode: 'NE4 7AR' })
 
@@ -282,7 +294,7 @@ describe('#addressLookup', () => {
         const result = await lookupAddresses(request, { postcode: 'NE4 7AR' })
 
         expect(result).toEqual({ results: [], error: true })
-        expect(fetch).not.toHaveBeenCalled()
+        expect(Wreck.get).not.toHaveBeenCalled()
       })
 
       test('should refresh the token and retry once on a 401', async () => {
@@ -290,52 +302,57 @@ describe('#addressLookup', () => {
           .mockResolvedValueOnce('a-stale-token')
           .mockResolvedValueOnce('a-fresh-token')
 
-        fetch
-          .mockResolvedValueOnce(mockFetchResponse({ ok: false, status: 401 }))
+        Wreck.get
+          .mockRejectedValueOnce(createWreckResponseError(401))
           .mockResolvedValueOnce(
-            mockFetchResponse({ body: { results: [tynesideHouse] } })
+            mockLookupResponse({ payload: { results: [tynesideHouse] } })
           )
 
         const result = await lookupAddresses(request, { postcode: 'NE4 7AR' })
 
         expect(result).toEqual({ results: [tynesideHouse] })
-        expect(fetch).toHaveBeenCalledTimes(2)
+        expect(Wreck.get).toHaveBeenCalledTimes(2)
         expect(getAccessToken).toHaveBeenNthCalledWith(2, request, {
           forceRefresh: true,
-          signal: expect.any(AbortSignal)
+          timeout: expect.any(Number)
         })
-        expect(fetch.mock.calls[1][1].headers.Authorization).toBe(
+        expect(Wreck.get.mock.calls[1][1].headers.Authorization).toBe(
           'Bearer a-fresh-token'
         )
       })
 
       test('should share one deadline across the token fetch and both attempts', async () => {
-        fetch
-          .mockResolvedValueOnce(mockFetchResponse({ ok: false, status: 401 }))
+        Wreck.get
+          .mockRejectedValueOnce(createWreckResponseError(401))
           .mockResolvedValueOnce(
-            mockFetchResponse({ body: { results: [tynesideHouse] } })
+            mockLookupResponse({ payload: { results: [tynesideHouse] } })
           )
 
         await lookupAddresses(request, { postcode: 'NE4 7AR' })
 
-        const signals = [
-          getAccessToken.mock.calls[0][1].signal,
-          fetch.mock.calls[0][1].signal,
-          getAccessToken.mock.calls[1][1].signal,
-          fetch.mock.calls[1][1].signal
+        const budget = config.get('addressLookup').timeout
+        const timeouts = [
+          getAccessToken.mock.calls[0][1].timeout,
+          Wreck.get.mock.calls[0][1].timeout,
+          getAccessToken.mock.calls[1][1].timeout,
+          Wreck.get.mock.calls[1][1].timeout
         ]
 
-        expect(signals[0]).toBeInstanceOf(AbortSignal)
-        expect(new Set(signals).size).toBe(1)
+        // Each call gets what is left of the one budget, so no call can ask for
+        // more than the configured timeout and the retry cannot extend it.
+        expect(
+          timeouts.every((timeout) => timeout > 0 && timeout <= budget)
+        ).toBe(true)
+        expect([...timeouts].sort((a, b) => b - a)).toEqual(timeouts)
       })
 
       test('should return an error when the retried request is also unauthorised', async () => {
-        fetch.mockResolvedValue(mockFetchResponse({ ok: false, status: 401 }))
+        Wreck.get.mockRejectedValue(createWreckResponseError(401))
 
         const result = await lookupAddresses(request, { postcode: 'NE4 7AR' })
 
         expect(result).toEqual({ results: [], error: true })
-        expect(fetch).toHaveBeenCalledTimes(2)
+        expect(Wreck.get).toHaveBeenCalledTimes(2)
         expect(request.logger.error).toHaveBeenCalledWith(
           { statusCode: 401 },
           'Address lookup request failed'
@@ -347,12 +364,12 @@ describe('#addressLookup', () => {
           .mockResolvedValueOnce('a-stale-token')
           .mockResolvedValueOnce(null)
 
-        fetch.mockResolvedValue(mockFetchResponse({ ok: false, status: 401 }))
+        Wreck.get.mockRejectedValue(createWreckResponseError(401))
 
         const result = await lookupAddresses(request, { postcode: 'NE4 7AR' })
 
         expect(result).toEqual({ results: [], error: true })
-        expect(fetch).toHaveBeenCalledTimes(1)
+        expect(Wreck.get).toHaveBeenCalledTimes(1)
       })
     })
   })
