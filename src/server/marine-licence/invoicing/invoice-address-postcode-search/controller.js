@@ -16,7 +16,11 @@ import {
   getInvoiceAddressButtonText
 } from '#src/server/marine-licence/invoicing/utils.js'
 import { lookupAddresses } from '#src/server/common/helpers/marine-licence/invoicing/address-lookup.js'
-import { buildNoAddressesFoundError } from '#src/server/marine-licence/invoicing/invoice-address-postcode-search/utils.js'
+import {
+  buildNoAddressesFoundError,
+  buildLookupUnavailableError,
+  buildTooManyAddressesError
+} from '#src/server/marine-licence/invoicing/invoice-address-postcode-search/utils.js'
 
 export const INVOICE_ADDRESS_POSTCODE_SEARCH_VIEW_ROUTE =
   'marine-licence/invoicing/invoice-address-postcode-search/index'
@@ -28,6 +32,24 @@ const getPageParams = (action, invoicing) => ({
   buttonText: getInvoiceAddressButtonText(action, invoicing),
   manualEntryLink: marineLicenceRoutes.MARINE_LICENCE_UK_INVOICE_ADDRESS
 })
+
+const getLookupErrorViewParams = ({ results, error, truncated }) => {
+  if (error) {
+    return buildLookupUnavailableError()
+  }
+
+  if (results.length > 0) {
+    return {}
+  }
+
+  // Zero results from a truncated set means the property search was applied to only
+  // part of the postcode's addresses, so "no addresses found" would be overstating it.
+  if (truncated) {
+    return buildTooManyAddressesError()
+  }
+
+  return buildNoAddressesFoundError()
+}
 
 export const invoiceAddressPostcodeSearchController = {
   async handler(request, h) {
@@ -82,24 +104,18 @@ export const invoiceAddressPostcodeSearchSubmitController = {
       propertyNameOrNumber: payload.propertyNameOrNumber
     }
 
-    const { results } = await lookupAddresses(request, invoiceAddressSearch)
+    const lookup = await lookupAddresses(request, invoiceAddressSearch)
+    const { results, error } = lookup
 
-    // TEMP DEBUG - remove before merge
-    request.logger.info(
-      {
-        invoiceAddressSearch,
-        resultCount: results.length,
-        results
-      },
-      'TEMP DEBUG address lookup results'
-    )
-
+    // Results are cached for the select-address page (a later ticket) to read.
+    // On a lookup failure the previous results are kept rather than overwritten
+    // with an empty list, so a transient outage doesn't discard a good search.
     await setMarineLicenceCache(request, h, {
       ...marineLicence,
       invoicing: {
         ...invoicing,
         invoiceAddressSearch,
-        invoiceAddressSearchResults: results
+        ...(error ? {} : { invoiceAddressSearchResults: results })
       }
     })
 
@@ -107,7 +123,7 @@ export const invoiceAddressPostcodeSearchSubmitController = {
       ...getPageParams(action, invoicing),
       projectName: marineLicence.projectName,
       payload: invoiceAddressSearch,
-      ...(results.length === 0 ? buildNoAddressesFoundError() : {})
+      ...getLookupErrorViewParams(lookup)
     })
   }
 }

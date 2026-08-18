@@ -10,7 +10,11 @@ import * as authRequests from '#src/server/common/helpers/authenticated-requests
 import { marineLicenceRoutes } from '#src/server/common/constants/routes.js'
 import { mockMarineLicenceApplication } from '#src/server/test-helpers/mocks/marine-licence-mocks.js'
 import { createMockH } from '#src/server/test-helpers/mocks/helpers.js'
-import { invoiceAddressPostcodeSearchErrorMessages } from '#src/server/common/validation/invoicing/constants.js'
+import {
+  buildNoAddressesFoundError,
+  buildLookupUnavailableError,
+  buildTooManyAddressesError
+} from '#src/server/marine-licence/invoicing/invoice-address-postcode-search/utils.js'
 
 vi.mock('#/src/server/common/helpers/marine-licence/session-cache/utils.js')
 
@@ -120,11 +124,16 @@ describe('#invoiceAddressPostcodeSearch', () => {
   })
 
   describe('#invoiceAddressPostcodeSearchSubmitController', () => {
-    const submit = (payload, query = {}) =>
-      invoiceAddressPostcodeSearchSubmitController.handler(
-        { payload, query, logger: { error: vi.fn() } },
+    let logger
+
+    const submit = (payload, query = {}) => {
+      logger = { error: vi.fn(), info: vi.fn() }
+
+      return invoiceAddressPostcodeSearchSubmitController.handler(
+        { payload, query, logger },
         h
       )
+    }
 
     test('Should look up addresses using the postcode and property name or number', async () => {
       vi.spyOn(addressLookup, 'lookupAddresses').mockResolvedValue({
@@ -142,33 +151,82 @@ describe('#invoiceAddressPostcodeSearch', () => {
       )
     })
 
-    test('Should stay on the page with the no addresses found error when there are zero results', async () => {
+    // The shape these builders produce is owned by utils.test.js; these assert only that
+    // the right builder is chosen for each lookup outcome.
+    test.each([
+      [
+        'no addresses found when there are zero results',
+        { results: [] },
+        buildNoAddressesFoundError
+      ],
+      [
+        'service unavailable when the lookup fails',
+        { results: [], error: true },
+        buildLookupUnavailableError
+      ],
+      [
+        'too many addresses when a filtered search hits a truncated result set',
+        { results: [], truncated: true },
+        buildTooManyAddressesError
+      ],
+      [
+        'service unavailable in preference to the truncation error',
+        { results: [], truncated: true, error: true },
+        buildLookupUnavailableError
+      ]
+    ])('Should stay on the page and show %s', async (_name, lookup, build) => {
+      vi.spyOn(addressLookup, 'lookupAddresses').mockResolvedValue(lookup)
+
+      await submit({ postcode: 'NE4 7AR', propertyNameOrNumber: 'Nowhere' })
+
+      expect(h.view).toHaveBeenCalledWith(
+        INVOICE_ADDRESS_POSTCODE_SEARCH_VIEW_ROUTE,
+        expect.objectContaining(build())
+      )
+      expect(h.redirect).not.toHaveBeenCalled()
+    })
+
+    test('Should not log the search terms or the looked up addresses', async () => {
       vi.spyOn(addressLookup, 'lookupAddresses').mockResolvedValue({
-        results: []
+        results: [anAddress]
+      })
+
+      await submit({ postcode: 'NE4 7AR', propertyNameOrNumber: 'The Mill' })
+
+      const logged = JSON.stringify([
+        ...logger.info.mock.calls,
+        ...logger.error.mock.calls
+      ])
+
+      expect(logged).not.toContain('NE4 7AR')
+      expect(logged).not.toContain('The Mill')
+      expect(logged).not.toContain(anAddress.addressLine)
+    })
+
+    test('Should keep previously cached results when the lookup fails', async () => {
+      vi.spyOn(cacheUtils, 'getMarineLicenceCache').mockReturnValue({
+        ...mockMarineLicenceApplication,
+        invoicing: {
+          ...mockMarineLicenceApplication.invoicing,
+          invoiceAddressSearchResults: [anAddress]
+        }
+      })
+      vi.spyOn(addressLookup, 'lookupAddresses').mockResolvedValue({
+        results: [],
+        error: true
       })
 
       await submit({ postcode: 'NE4 7AR' })
 
-      expect(h.view).toHaveBeenCalledWith(
-        INVOICE_ADDRESS_POSTCODE_SEARCH_VIEW_ROUTE,
+      expect(cacheUtils.setMarineLicenceCache).toHaveBeenCalledWith(
+        expect.anything(),
+        h,
         expect.objectContaining({
-          errorSummary: [
-            {
-              href: '#postcode',
-              text: invoiceAddressPostcodeSearchErrorMessages.NO_ADDRESSES_FOUND,
-              field: 'postcode'
-            }
-          ],
-          errors: {
-            postcode: {
-              href: '#postcode',
-              text: invoiceAddressPostcodeSearchErrorMessages.NO_ADDRESSES_FOUND,
-              field: 'postcode'
-            }
-          }
+          invoicing: expect.objectContaining({
+            invoiceAddressSearchResults: [anAddress]
+          })
         })
       )
-      expect(h.redirect).not.toHaveBeenCalled()
     })
 
     test('Should stay on the page without an error when there is one result', async () => {

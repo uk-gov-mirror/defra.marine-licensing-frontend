@@ -1,5 +1,10 @@
 import { vi } from 'vitest'
-import { getByRole, getByText, getByLabelText } from '@testing-library/dom'
+import {
+  getByRole,
+  getByText,
+  getByLabelText,
+  queryByRole
+} from '@testing-library/dom'
 import { marineLicenceRoutes } from '~/src/server/common/constants/routes.js'
 import {
   mockMarineLicence,
@@ -113,23 +118,25 @@ describe('Invoice address postcode search', () => {
     })
   })
 
-  test('should show a validation error when the postcode is missing', async () => {
+  test('page content when using the change link', async () => {
     mockMarineLicence(mockMarineLicenceApplication)
 
-    const { document } = await submitForm({
-      requestUrl:
-        marineLicenceRoutes.MARINE_LICENCE_INVOICE_ADDRESS_POSTCODE_SEARCH,
-      server: getServer(),
-      formData: { postcode: '', propertyNameOrNumber: '' }
+    const document = await loadPage({
+      requestUrl: `${marineLicenceRoutes.MARINE_LICENCE_INVOICE_ADDRESS_POSTCODE_SEARCH}?action=change`,
+      server: getServer()
     })
 
-    expectInputError({
-      document,
-      inputLabel: 'Postcode',
-      errorMessage: 'Enter the postcode'
-    })
+    expect(queryByRole(document, 'link', { name: 'Cancel' })).toBeNull()
+    getByRole(document, 'button', { name: 'Save and continue' })
+    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+      'href',
+      marineLicenceRoutes.MARINE_LICENCE_CHECK_INVOICING_DETAILS
+    )
   })
 
+  // One representative case: the schema rules themselves are covered exhaustively in
+  // validation/invoicing/invoice-address-postcode-search/schema.test.js. This proves the
+  // failAction -> view -> error summary wiring, which is identical for every rule.
   test('should show a validation error when the postcode is invalid', async () => {
     mockMarineLicence(mockMarineLicenceApplication)
 
@@ -147,26 +154,9 @@ describe('Invoice address postcode search', () => {
     })
   })
 
-  test('should show a validation error when the property name or number is too long', async () => {
-    mockMarineLicence(mockMarineLicenceApplication)
-
-    const { document } = await submitForm({
-      requestUrl:
-        marineLicenceRoutes.MARINE_LICENCE_INVOICE_ADDRESS_POSTCODE_SEARCH,
-      server: getServer(),
-      formData: {
-        postcode: 'NE4 7AR',
-        propertyNameOrNumber: 'a'.repeat(51)
-      }
-    })
-
-    expectInputError({
-      document,
-      inputLabel: 'Property name or number (optional)',
-      errorMessage: 'The property name or number must be 50 characters or fewer'
-    })
-  })
-
+  // One representative lookup-outcome case: all three outcomes render through the same
+  // buildPostcodeError -> #postcode -> error summary path, and which message is selected
+  // for which outcome is covered in the controller unit tests.
   test('should show the no addresses found error when the lookup returns no results', async () => {
     mockMarineLicence(mockMarineLicenceApplication)
     vi.spyOn(addressLookup, 'lookupAddresses').mockResolvedValue({

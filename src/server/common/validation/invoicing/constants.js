@@ -35,7 +35,11 @@ export const invoiceAddressPostcodeSearchErrorMessages = {
   PROPERTY_NAME_OR_NUMBER_MAX_LENGTH:
     'The property name or number must be 50 characters or fewer',
   NO_ADDRESSES_FOUND:
-    'We could not find any addresses for that postcode. Enter a known postcode, or enter the address manually.'
+    'We could not find any addresses for that postcode. Enter a known postcode, or enter the address manually.',
+  SERVICE_UNAVAILABLE:
+    'There is a problem with the address lookup service. Try again later, or enter the address manually.',
+  TOO_MANY_ADDRESSES:
+    'There are too many addresses for that postcode to search by property name or number. Enter the address manually.'
 }
 
 const UK_INVOICE_ADDRESS_TITLE = 'UK invoice address'
