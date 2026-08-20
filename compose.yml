@@ -49,7 +49,6 @@ services:
       MARINE_LICENSING_ADDRESS_LOOKUP_CLIENT_ID: local-stub-client-id
       MARINE_LICENSING_ADDRESS_LOOKUP_CLIENT_SECRET: local-stub-client-secret
       MARINE_LICENSING_ADDRESS_LOOKUP_CLIENT_SCOPE: api://stub/.default
-      MARINE_LICENSING_ADDRESS_LOOKUP_REDIRECT_URI: http://marine-licensing-frontend.local:3000
       ENABLE_MARINE_LICENCE: true
     volumes:
       - ./compose/users:/users

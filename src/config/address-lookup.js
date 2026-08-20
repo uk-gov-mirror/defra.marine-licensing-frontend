@@ -1,7 +1,5 @@
 import { requiredFromEnvInCdp } from './required-from-env-in-cdp.js'
 
-const localhost = 'http://localhost:3000'
-
 export const addressLookupSchema = {
   apiUrl: {
     doc: 'Endpoint for the DEFRA address lookup API',
@@ -38,13 +36,6 @@ export const addressLookupSchema = {
     nullable: true,
     default: 'api://stub/.default',
     env: 'MARINE_LICENSING_ADDRESS_LOOKUP_CLIENT_SCOPE'
-  },
-  redirectUri: {
-    doc: 'OAuth redirect uri sent when requesting an address lookup API token',
-    format: requiredFromEnvInCdp,
-    nullable: true,
-    default: localhost,
-    env: 'MARINE_LICENSING_ADDRESS_LOOKUP_REDIRECT_URI'
   },
   maxResults: {
     doc: 'Maximum addresses requested per lookup. Sent explicitly rather than relying on the API default, because property name/number filtering happens client-side over whatever is returned',

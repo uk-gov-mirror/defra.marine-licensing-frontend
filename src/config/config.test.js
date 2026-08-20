@@ -65,8 +65,6 @@ const setAddressLookupEnv = () => {
   process.env.MARINE_LICENSING_ADDRESS_LOOKUP_CLIENT_SECRET = 'lookup-secret'
   process.env.MARINE_LICENSING_ADDRESS_LOOKUP_CLIENT_SCOPE =
     'api://lookup/.default'
-  process.env.MARINE_LICENSING_ADDRESS_LOOKUP_REDIRECT_URI =
-    'https://app.example.com'
 }
 
 describe('config validation', () => {
@@ -256,9 +254,6 @@ describe('config validation', () => {
         )
         expect(errorMessage).toContain(
           'MARINE_LICENSING_ADDRESS_LOOKUP_CLIENT_SCOPE'
-        )
-        expect(errorMessage).toContain(
-          'MARINE_LICENSING_ADDRESS_LOOKUP_REDIRECT_URI'
         )
       }
     })

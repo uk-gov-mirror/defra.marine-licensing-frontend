@@ -27,7 +27,7 @@ const mockTokenResponse = ({
 
 describe('#oauthToken', () => {
   const request = createMockRequest()
-  const { oauthTokenUrl, clientId, clientScope, redirectUri } =
+  const { oauthTokenUrl, clientId, clientScope } =
     config.get('addressLookup')
 
   beforeEach(() => {
@@ -56,8 +56,7 @@ describe('#oauthToken', () => {
       grant_type: 'client_credentials',
       client_id: clientId,
       client_secret: CLIENT_SECRET,
-      scope: clientScope,
-      redirect_uri: redirectUri
+      scope: clientScope
     })
   })
 

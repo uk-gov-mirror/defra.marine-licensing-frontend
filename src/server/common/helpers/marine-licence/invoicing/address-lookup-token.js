@@ -14,13 +14,12 @@ export const resetTokenCache = () => {
 }
 
 const buildTokenRequestBody = () => {
-  const { clientId, clientSecret, clientScope, redirectUri } =
+  const { clientId, clientSecret, clientScope } =
     config.get('addressLookup')
 
   return querystring.stringify({
     client_id: clientId,
     client_secret: clientSecret,
-    redirect_uri: redirectUri,
     scope: clientScope,
     grant_type: 'client_credentials'
   })
