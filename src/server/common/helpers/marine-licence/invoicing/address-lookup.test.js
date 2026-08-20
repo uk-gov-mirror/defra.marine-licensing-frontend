@@ -311,6 +311,135 @@ describe('#addressLookup', () => {
       )
     })
 
+    describe('logging', () => {
+      beforeEach(() => {
+        request.logger.info.mockClear()
+        request.logger.debug.mockClear()
+      })
+
+      test('should log counts at info without the addresses or the postcode', async () => {
+        Wreck.get.mockResolvedValue(
+          mockLookupResponse({
+            payload: {
+              header: { totalResults: 2 },
+              results: [tynesideHouse, quaysideHouse]
+            }
+          })
+        )
+
+        await lookupAddresses(request, { postcode: 'NE4 7AR' })
+
+        expect(request.logger.info).toHaveBeenCalledWith(
+          {
+            event: { action: 'address-lookup-completed' },
+            resultCount: 2,
+            filteredCount: 2,
+            totalResults: 2,
+            truncated: false,
+            propertyFilterApplied: false
+          },
+          'Address lookup completed'
+        )
+
+        const [context] = request.logger.info.mock.calls[0]
+        expect(context).not.toHaveProperty('results')
+        expect(context).not.toHaveProperty('postcode')
+      })
+
+      test('should report the filtered count and the filter flag when a property search narrows the results', async () => {
+        Wreck.get.mockResolvedValue(
+          mockLookupResponse({
+            payload: {
+              header: { totalResults: 2 },
+              results: [tynesideHouse, quaysideHouse]
+            }
+          })
+        )
+
+        await lookupAddresses(request, {
+          postcode: 'NE4 7AR',
+          propertyNameOrNumber: '116'
+        })
+
+        expect(request.logger.info).toHaveBeenCalledWith(
+          expect.objectContaining({
+            resultCount: 2,
+            filteredCount: 1,
+            propertyFilterApplied: true
+          }),
+          'Address lookup completed'
+        )
+      })
+
+      test('should flag a truncated result set at info', async () => {
+        Wreck.get.mockResolvedValue(
+          mockLookupResponse({
+            payload: {
+              header: { totalResults: 250 },
+              results: [tynesideHouse]
+            }
+          })
+        )
+
+        await lookupAddresses(request, { postcode: 'NE4 7AR' })
+
+        expect(request.logger.info).toHaveBeenCalledWith(
+          expect.objectContaining({ totalResults: 250, truncated: true }),
+          'Address lookup completed'
+        )
+      })
+
+      test('should log the normalised postcode and the filtered addresses at debug', async () => {
+        Wreck.get.mockResolvedValue(
+          mockLookupResponse({
+            payload: { results: [tynesideHouse, quaysideHouse] }
+          })
+        )
+
+        await lookupAddresses(request, {
+          postcode: 'ne4 7ar',
+          propertyNameOrNumber: '116'
+        })
+
+        expect(request.logger.debug).toHaveBeenCalledWith(
+          {
+            event: { action: 'address-lookup-results' },
+            postcode: 'NE47AR',
+            propertyNameOrNumber: '116',
+            results: [quaysideHouse]
+          },
+          'Address lookup results'
+        )
+      })
+
+      test('should log a 204 as an empty result rather than staying silent', async () => {
+        Wreck.get.mockResolvedValue(
+          mockLookupResponse({ statusCode: 204, payload: null })
+        )
+
+        await lookupAddresses(request, { postcode: 'NE4 7AR' })
+
+        expect(request.logger.info).toHaveBeenCalledWith(
+          expect.objectContaining({
+            resultCount: 0,
+            filteredCount: 0,
+            totalResults: 0,
+            truncated: false
+          }),
+          'Address lookup completed'
+        )
+      })
+
+      test('should not log an outcome when the lookup fails', async () => {
+        Wreck.get.mockRejectedValue(createWreckResponseError(500))
+
+        await lookupAddresses(request, { postcode: 'NE4 7AR' })
+
+        expect(request.logger.info).not.toHaveBeenCalled()
+        expect(request.logger.debug).not.toHaveBeenCalled()
+      })
+    })
+
     describe('authentication', () => {
       test('should not call the API when no token can be obtained', async () => {
         getAccessToken.mockResolvedValue(null)

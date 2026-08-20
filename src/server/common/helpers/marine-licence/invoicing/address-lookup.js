@@ -116,6 +116,36 @@ const lookupWithTokenRetry = async (request, url) => {
   }
 }
 
+// Counts only at info, so the outcome of every lookup is visible in any environment.
+// The addresses themselves and the postcode are personal data, so they sit at debug and
+// stay off unless LOG_LEVEL is turned up - which is how you inspect a lookup in dev.
+const logLookupOutcome = (
+  request,
+  { postcode, propertyNameOrNumber, results, filtered, totalResults, truncated }
+) => {
+  request.logger.info(
+    {
+      event: { action: 'address-lookup-completed' },
+      resultCount: results.length,
+      filteredCount: filtered.length,
+      totalResults,
+      truncated,
+      propertyFilterApplied: Boolean(propertyNameOrNumber?.trim())
+    },
+    'Address lookup completed'
+  )
+
+  request.logger.debug(
+    {
+      event: { action: 'address-lookup-results' },
+      postcode: normalisePostcode(postcode),
+      propertyNameOrNumber,
+      results: filtered
+    },
+    'Address lookup results'
+  )
+}
+
 export const lookupAddresses = async (
   request,
   { postcode, propertyNameOrNumber }
@@ -134,9 +164,21 @@ export const lookupAddresses = async (
     // Filtering happens here because the API only searches by postcode, so a truncated
     // result set means a property search can miss an address that genuinely exists.
     // Flag it rather than reporting a confident "no addresses found".
+    const filtered = filterByPropertyNameOrNumber(results, propertyNameOrNumber)
+    const truncated = totalResults > results.length
+
+    logLookupOutcome(request, {
+      postcode,
+      propertyNameOrNumber,
+      results,
+      filtered,
+      totalResults,
+      truncated
+    })
+
     return {
-      results: filterByPropertyNameOrNumber(results, propertyNameOrNumber),
-      ...(totalResults > results.length ? { truncated: true } : {})
+      results: filtered,
+      ...(truncated ? { truncated: true } : {})
     }
   } catch (error) {
     // apiUrl is in the context because a 404 here is almost always a misconfigured URL.
