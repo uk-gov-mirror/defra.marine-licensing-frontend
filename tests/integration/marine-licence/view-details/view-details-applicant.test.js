@@ -96,19 +96,19 @@ describe('Marine Licence View Details', () => {
     test('does not render for submitted applications', async () => {
       document = await loadViewDetailsPage(getServer())
 
-      expect(document.querySelector('#application-details-card')).toBeNull()
+      expect(document.querySelector('#application-overview-card')).toBeNull()
     })
 
     test('renders for transferred applications', async () => {
       expect(
-        document.querySelector('#application-details-card')
+        document.querySelector('#application-overview-card')
       ).toBeInTheDocument()
     })
 
     test.each(expectedTransferredApplicationDetailsCard.rows)(
       'renders "$key" row with correct value',
       ({ key, value }) => {
-        const card = document.querySelector('#application-details-card')
+        const card = document.querySelector('#application-overview-card')
         const row = getCardRow(card, key)
 
         expect(row).toBeTruthy()
@@ -132,19 +132,19 @@ describe('Marine Licence View Details', () => {
     test('does not render for submitted applications', async () => {
       document = await loadViewDetailsPage(getServer())
 
-      expect(document.querySelector('#application-details-card')).toBeNull()
+      expect(document.querySelector('#application-overview-card')).toBeNull()
     })
 
     test('renders for rejected applications', async () => {
       expect(
-        document.querySelector('#application-details-card')
+        document.querySelector('#application-overview-card')
       ).toBeInTheDocument()
     })
 
     test.each(expectedRejectedApplicationDetailsCard.rows)(
       'renders "$key" row with correct value',
       ({ key, value }) => {
-        const card = document.querySelector('#application-details-card')
+        const card = document.querySelector('#application-overview-card')
         const row = getCardRow(card, key)
 
         expect(row).toBeTruthy()
@@ -339,6 +339,7 @@ describe('Marine Licence View Details', () => {
       expect(card.textContent).toContain('S-CC-1')
       expect(card.textContent).toContain('First policy wording.')
       expect(card.textContent).toContain('My first consideration.')
+      expect(card.textContent).toContain('Your consideration')
     })
 
     test('does not render a Change link for any row', () => {

@@ -64,7 +64,6 @@
       {% endif %}
 
       {{ appMarineLicenceProjectDetailsCard({
-        projectName: projectName,
         projectBackground: projectBackground,
         isReadOnly: isReadOnly,
         preferredDates: preferredDates
@@ -96,6 +95,7 @@
 
       {{ appMarineLicenceMarinePlanPoliciesCard({
         policies: marinePlanPolicies,
+        isApplicant: isApplicantView,
         isReadOnly: true
       }) }}
 
