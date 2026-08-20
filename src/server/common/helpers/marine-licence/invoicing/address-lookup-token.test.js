@@ -115,8 +115,10 @@ describe('#oauthToken', () => {
 
     expect(token).toBeNull()
     expect(request.logger.error).toHaveBeenCalledWith(
-      expect.objectContaining({ statusCode: 503, oauthTokenUrl }),
-      'Address lookup token request failed'
+      expect.objectContaining({
+        tenant: { message: `statusCode=503 oauthTokenUrl=${oauthTokenUrl}` }
+      }),
+      'Postcode lookup token request failed'
     )
   })
 
@@ -127,8 +129,10 @@ describe('#oauthToken', () => {
 
     expect(token).toBeNull()
     expect(request.logger.error).toHaveBeenCalledWith(
-      expect.objectContaining({ statusCode: 404, oauthTokenUrl }),
-      'Address lookup token request failed'
+      expect.objectContaining({
+        tenant: { message: `statusCode=404 oauthTokenUrl=${oauthTokenUrl}` }
+      }),
+      'Postcode lookup token request failed'
     )
   })
 
@@ -141,8 +145,11 @@ describe('#oauthToken', () => {
 
     expect(token).toBeNull()
     expect(request.logger.error).toHaveBeenCalledWith(
-      { statusCode: 200, oauthTokenUrl },
-      'Address lookup token response did not contain an access token'
+      {
+        event: { action: 'address-lookup-token-missing' },
+        tenant: { message: `statusCode=200 oauthTokenUrl=${oauthTokenUrl}` }
+      },
+      'Postcode lookup token response did not contain an access token'
     )
   })
 
@@ -155,7 +162,7 @@ describe('#oauthToken', () => {
     expect(token).toBeNull()
     expect(request.logger.error).toHaveBeenCalledWith(
       expect.objectContaining({ err: error }),
-      'Address lookup token request failed'
+      'Postcode lookup token request failed'
     )
   })
 
@@ -177,8 +184,10 @@ describe('#oauthToken', () => {
     expect(logged).not.toContain(CLIENT_SECRET)
     expect(logged).not.toContain('a-token')
     expect(request.logger.error).toHaveBeenCalledWith(
-      expect.objectContaining({ statusCode: 503, oauthTokenUrl }),
-      'Address lookup token request failed'
+      expect.objectContaining({
+        tenant: { message: `statusCode=503 oauthTokenUrl=${oauthTokenUrl}` }
+      }),
+      'Postcode lookup token request failed'
     )
   })
 })

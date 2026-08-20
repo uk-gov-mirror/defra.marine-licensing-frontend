@@ -103,7 +103,7 @@ const lookupWithTokenRetry = async (request, url) => {
     }
 
     request.logger.info(
-      'Address lookup returned 401, refreshing the access token and retrying'
+      'Postcode lookup returned 401, refreshing the access token and retrying'
     )
 
     const refreshedToken = await getAccessToken(request, { forceRefresh: true })
@@ -123,17 +123,14 @@ const logLookupOutcome = (
   request,
   { postcode, propertyNameOrNumber, results, filtered, totalResults, truncated }
 ) => {
-  // TEMPORARY (ML-1413) - a probe, delete once it has answered.
-  //
-  // CDP only indexes a pared-down subset of ECS, so the bare top-level keys this line used
-  // to send (resultCount, filteredCount, ...) never reached cdp-logs at all - a dev document
-  // shows event.action present and every one of them missing. See
+  // CDP indexes only a pared-down subset of ECS, so custom top-level keys never reach
+  // cdp-logs. Confirmed on dev: the bare keys this line used to send, and a `labels.*` block
+  // tried alongside them, were both absent from the indexed document while event.action came
+  // through. `tenant.message` arrives intact, so the counts travel there. See
   // https://portal.cdp-int.defra.cloud/documentation/how-to/logging.md
   //
-  // `labels` is absent from CDP's field table; `message` and `tenant.message` are listed as
-  // tenant-definable, but `message` came back as ****** in dev, so none of the three is a
-  // safe bet on its own. Emit the same summary through all three and one dev deploy shows
-  // which survives - then keep the winner and delete the others.
+  // `message` is separately scrubbed on ingest - the run of text before the first `=` is
+  // replaced with ****** when it contains "address" - so it deliberately carries no data.
   const outcomeSummary =
     `resultCount=${results.length} filteredCount=${filtered.length} ` +
     `totalResults=${totalResults} truncated=${truncated} ` +
@@ -142,17 +139,9 @@ const logLookupOutcome = (
   request.logger.info(
     {
       event: { action: 'address-lookup-completed' },
-      // ECS stores every labels value as a keyword, so send strings rather than let the
-      // numbers be coerced on the way in
-      labels: {
-        address_lookup_result_count: String(results.length),
-        address_lookup_filtered_count: String(filtered.length),
-        address_lookup_total_results: String(totalResults),
-        address_lookup_truncated: String(truncated)
-      },
       tenant: { message: outcomeSummary }
     },
-    `Address lookup completed ${outcomeSummary}`
+    'Postcode lookup completed'
   )
 
   request.logger.debug(
@@ -162,7 +151,7 @@ const logLookupOutcome = (
       propertyNameOrNumber,
       results: filtered
     },
-    'Address lookup results'
+    'Postcode lookup results'
   )
 }
 
@@ -204,11 +193,13 @@ export const lookupAddresses = async (
     // apiUrl is in the context because a 404 here is almost always a misconfigured URL.
     request.logger.error(
       {
-        statusCode: error.output?.statusCode,
-        apiUrl: config.get('addressLookup').apiUrl,
+        event: { action: 'address-lookup-failed' },
+        tenant: {
+          message: `statusCode=${error.output?.statusCode} apiUrl=${config.get('addressLookup').apiUrl}`
+        },
         err: error
       },
-      'Address lookup request failed'
+      'Postcode lookup request failed'
     )
     return { results: [], error: true }
   }

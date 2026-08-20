@@ -47,8 +47,13 @@ const requestNewToken = async (request) => {
 
   if (!data?.access_token) {
     request.logger.error(
-      { statusCode: response.res?.statusCode, oauthTokenUrl },
-      'Address lookup token response did not contain an access token'
+      {
+        event: { action: 'address-lookup-token-missing' },
+        tenant: {
+          message: `statusCode=${response.res?.statusCode} oauthTokenUrl=${oauthTokenUrl}`
+        }
+      },
+      'Postcode lookup token response did not contain an access token'
     )
     return null
   }
@@ -81,11 +86,13 @@ export const getAccessToken = async (
     // misconfigured URL or credential rather than an outage.
     request.logger.error(
       {
-        statusCode: error.output?.statusCode,
-        oauthTokenUrl: config.get('addressLookup').oauthTokenUrl,
+        event: { action: 'address-lookup-token-failed' },
+        tenant: {
+          message: `statusCode=${error.output?.statusCode} oauthTokenUrl=${config.get('addressLookup').oauthTokenUrl}`
+        },
         err: error
       },
-      'Address lookup token request failed'
+      'Postcode lookup token request failed'
     )
     return null
   }

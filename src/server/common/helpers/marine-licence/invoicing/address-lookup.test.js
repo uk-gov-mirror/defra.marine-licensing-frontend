@@ -269,8 +269,10 @@ describe('#addressLookup', () => {
 
       expect(result).toEqual({ results: [], error: true })
       expect(request.logger.error).toHaveBeenCalledWith(
-        expect.objectContaining({ statusCode: 500, apiUrl }),
-        'Address lookup request failed'
+        expect.objectContaining({
+          tenant: { message: `statusCode=500 apiUrl=${apiUrl}` }
+        }),
+        'Postcode lookup request failed'
       )
     })
 
@@ -281,8 +283,10 @@ describe('#addressLookup', () => {
 
       expect(result).toEqual({ results: [], error: true })
       expect(request.logger.error).toHaveBeenCalledWith(
-        expect.objectContaining({ statusCode: 404, apiUrl }),
-        'Address lookup request failed'
+        expect.objectContaining({
+          tenant: { message: `statusCode=404 apiUrl=${apiUrl}` }
+        }),
+        'Postcode lookup request failed'
       )
     })
 
@@ -307,7 +311,7 @@ describe('#addressLookup', () => {
       expect(result).toEqual({ results: [], error: true })
       expect(request.logger.error).toHaveBeenCalledWith(
         expect.objectContaining({ err: error }),
-        'Address lookup request failed'
+        'Postcode lookup request failed'
       )
     })
 
@@ -329,22 +333,16 @@ describe('#addressLookup', () => {
 
         await lookupAddresses(request, { postcode: 'NE4 7AR' })
 
-        const expectedSummary =
-          'resultCount=2 filteredCount=2 totalResults=2 truncated=false ' +
-          'propertyFilterApplied=false'
-
         expect(request.logger.info).toHaveBeenCalledWith(
           {
             event: { action: 'address-lookup-completed' },
-            labels: {
-              address_lookup_result_count: '2',
-              address_lookup_filtered_count: '2',
-              address_lookup_total_results: '2',
-              address_lookup_truncated: 'false'
-            },
-            tenant: { message: expectedSummary }
+            tenant: {
+              message:
+                'resultCount=2 filteredCount=2 totalResults=2 truncated=false ' +
+                'propertyFilterApplied=false'
+            }
           },
-          `Address lookup completed ${expectedSummary}`
+          'Postcode lookup completed'
         )
 
         const [context] = request.logger.info.mock.calls[0]
@@ -368,13 +366,15 @@ describe('#addressLookup', () => {
         })
 
         expect(request.logger.info).toHaveBeenCalledWith(
-          expect.objectContaining({
-            labels: expect.objectContaining({
-              address_lookup_result_count: '2',
-              address_lookup_filtered_count: '1'
-            })
-          }),
-          expect.stringContaining('propertyFilterApplied=true')
+          {
+            event: { action: 'address-lookup-completed' },
+            tenant: {
+              message: expect.stringContaining(
+                'resultCount=2 filteredCount=1'
+              )
+            }
+          },
+          'Postcode lookup completed'
         )
       })
 
@@ -391,13 +391,13 @@ describe('#addressLookup', () => {
         await lookupAddresses(request, { postcode: 'NE4 7AR' })
 
         expect(request.logger.info).toHaveBeenCalledWith(
-          expect.objectContaining({
-            labels: expect.objectContaining({
-              address_lookup_total_results: '250',
-              address_lookup_truncated: 'true'
-            })
-          }),
-          expect.stringContaining('totalResults=250 truncated=true')
+          {
+            event: { action: 'address-lookup-completed' },
+            tenant: {
+              message: expect.stringContaining('totalResults=250 truncated=true')
+            }
+          },
+          'Postcode lookup completed'
         )
       })
 
@@ -420,7 +420,7 @@ describe('#addressLookup', () => {
             propertyNameOrNumber: '116',
             results: [quaysideHouse]
           },
-          'Address lookup results'
+          'Postcode lookup results'
         )
       })
 
@@ -432,15 +432,15 @@ describe('#addressLookup', () => {
         await lookupAddresses(request, { postcode: 'NE4 7AR' })
 
         expect(request.logger.info).toHaveBeenCalledWith(
-          expect.objectContaining({
-            labels: expect.objectContaining({
-              address_lookup_result_count: '0',
-              address_lookup_filtered_count: '0',
-              address_lookup_total_results: '0',
-              address_lookup_truncated: 'false'
-            })
-          }),
-          expect.stringContaining('resultCount=0 filteredCount=0')
+          {
+            event: { action: 'address-lookup-completed' },
+            tenant: {
+              message: expect.stringContaining(
+                'resultCount=0 filteredCount=0 totalResults=0 truncated=false'
+              )
+            }
+          },
+          'Postcode lookup completed'
         )
       })
 
@@ -495,8 +495,10 @@ describe('#addressLookup', () => {
         expect(result).toEqual({ results: [], error: true })
         expect(Wreck.get).toHaveBeenCalledTimes(2)
         expect(request.logger.error).toHaveBeenCalledWith(
-          expect.objectContaining({ statusCode: 401, apiUrl }),
-          'Address lookup request failed'
+          expect.objectContaining({
+            tenant: { message: `statusCode=401 apiUrl=${apiUrl}` }
+          }),
+          'Postcode lookup request failed'
         )
       })
 
