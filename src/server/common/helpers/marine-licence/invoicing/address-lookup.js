@@ -116,21 +116,10 @@ const lookupWithTokenRetry = async (request, url) => {
   }
 }
 
-// Counts only at info, so the outcome of every lookup is visible in any environment.
-// The addresses themselves and the postcode are personal data, so they sit at debug and
-// stay off unless LOG_LEVEL is turned up - which is how you inspect a lookup in dev.
 const logLookupOutcome = (
   request,
   { postcode, propertyNameOrNumber, results, filtered, totalResults, truncated }
 ) => {
-  // CDP indexes only a pared-down subset of ECS, so custom top-level keys never reach
-  // cdp-logs. Confirmed on dev: the bare keys this line used to send, and a `labels.*` block
-  // tried alongside them, were both absent from the indexed document while event.action came
-  // through. `tenant.message` arrives intact, so the counts travel there. See
-  // https://portal.cdp-int.defra.cloud/documentation/how-to/logging.md
-  //
-  // `message` is separately scrubbed on ingest - the run of text before the first `=` is
-  // replaced with ****** when it contains "address" - so it deliberately carries no data.
   const outcomeSummary =
     `resultCount=${results.length} filteredCount=${filtered.length} ` +
     `totalResults=${totalResults} truncated=${truncated} ` +
@@ -142,16 +131,6 @@ const logLookupOutcome = (
       tenant: { message: outcomeSummary }
     },
     'Postcode lookup completed'
-  )
-
-  request.logger.debug(
-    {
-      event: { action: 'address-lookup-results' },
-      postcode: normalisePostcode(postcode),
-      propertyNameOrNumber,
-      results: filtered
-    },
-    'Postcode lookup results'
   )
 }
 

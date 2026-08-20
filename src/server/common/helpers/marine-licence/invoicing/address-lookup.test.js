@@ -369,9 +369,7 @@ describe('#addressLookup', () => {
           {
             event: { action: 'address-lookup-completed' },
             tenant: {
-              message: expect.stringContaining(
-                'resultCount=2 filteredCount=1'
-              )
+              message: expect.stringContaining('resultCount=2 filteredCount=1')
             }
           },
           'Postcode lookup completed'
@@ -394,7 +392,9 @@ describe('#addressLookup', () => {
           {
             event: { action: 'address-lookup-completed' },
             tenant: {
-              message: expect.stringContaining('totalResults=250 truncated=true')
+              message: expect.stringContaining(
+                'totalResults=250 truncated=true'
+              )
             }
           },
           'Postcode lookup completed'
