@@ -14,8 +14,7 @@ export const resetTokenCache = () => {
 }
 
 const buildTokenRequestBody = () => {
-  const { clientId, clientSecret, clientScope } =
-    config.get('addressLookup')
+  const { clientId, clientSecret, clientScope } = config.get('addressLookup')
 
   return querystring.stringify({
     client_id: clientId,

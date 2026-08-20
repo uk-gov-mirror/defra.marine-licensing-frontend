@@ -27,8 +27,7 @@ const mockTokenResponse = ({
 
 describe('#oauthToken', () => {
   const request = createMockRequest()
-  const { oauthTokenUrl, clientId, clientScope } =
-    config.get('addressLookup')
+  const { oauthTokenUrl, clientId, clientScope } = config.get('addressLookup')
 
   beforeEach(() => {
     resetTokenCache()
