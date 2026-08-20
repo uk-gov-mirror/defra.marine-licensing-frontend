@@ -1,0 +1,45 @@
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+
+{% if params.amount and params.monitoringAmount %}
+
+{% set rows = [] %}
+
+{% set rowText %}
+{{ params.amount }} (Does not include potential post-consent monitoring of up to {{ params.monitoringAmount }})
+{% endset %}
+
+{% set _ = rows.push({
+     key: { text:  "Maximum application fee estimate accepted" },
+     value: { text: rowText },
+     classes: "govuk-summary-list__row--no-border",
+       actions: {
+      items: [
+        {
+          href: params.changeLink + "?from=check-your-answers",
+          text: "Change",
+          visuallyHiddenText: "fee estimate",
+          classes: "govuk-link--no-visited-state"
+        }
+      ]
+    } if not params.isReadOnly
+   })
+%}
+
+{% if rows | length %}
+
+{{ govukSummaryList({
+    card: {
+      title: {
+        text: "Fee estimate"
+    },
+      
+      attributes: {
+        id: "fee-estimate-card"
+      }
+    },
+    rows: rows
+  }) }}
+
+{% endif %}
+
+{% endif %}

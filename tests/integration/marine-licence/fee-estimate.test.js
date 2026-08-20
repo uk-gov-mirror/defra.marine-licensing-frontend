@@ -1,4 +1,5 @@
-import { getByRole, getByText } from '@testing-library/dom'
+import { JSDOM } from 'jsdom'
+import { getByRole, getByText, queryByRole } from '@testing-library/dom'
 import { marineLicenceRoutes } from '~/src/server/common/constants/routes.js'
 import {
   mockMarineLicence,
@@ -6,16 +7,38 @@ import {
 } from '~/tests/integration/shared/test-setup-helpers.js'
 import { loadPage, submitForm } from '~/tests/integration/shared/app-server.js'
 import { validateErrors } from '~/tests/integration/shared/expect-utils.js'
-import { makePostRequest } from '~/src/server/test-helpers/server-requests.js'
+import {
+  makeGetRequest,
+  makePostRequest
+} from '~/src/server/test-helpers/server-requests.js'
 import { statusCodes } from '~/src/server/common/constants/status-codes.js'
 import { FEES_TERMS_AND_CONDITIONS_URL } from '~/src/server/marine-licence/fee-estimate/controller.js'
 import { mockMarineLicenceApplication } from '~/src/server/test-helpers/mocks/marine-licence-mocks.js'
+import * as marineLicenceService from '~/src/services/marine-licence-service/index.js'
+
+vi.mock('~/src/services/marine-licence-service/index.js')
 
 describe('Fee estimate', () => {
   const getServer = setupTestServer()
   const marineLicence = {
     id: 'marine-licence-123',
     projectName: 'Test Marine Project'
+  }
+
+  const getCheckYourAnswersSessionCookie = async () => {
+    vi.mocked(marineLicenceService.getMarineLicenceService).mockReturnValue({
+      getMarineLicenceById: vi.fn().mockResolvedValue(marineLicence)
+    })
+
+    const cyaResponse = await makeGetRequest({
+      server: getServer(),
+      url: marineLicenceRoutes.MARINE_LICENCE_CHECK_YOUR_ANSWERS
+    })
+
+    const sessionCookie = cyaResponse.headers['set-cookie']
+    return Array.isArray(sessionCookie)
+      ? sessionCookie.join('; ')
+      : sessionCookie
   }
 
   const submitFeeEstimateForm = async (formData) => {
@@ -47,6 +70,66 @@ describe('Fee estimate', () => {
     expect(getByRole(document, 'link', { name: 'Cancel' })).toHaveAttribute(
       'href',
       marineLicenceRoutes.MARINE_LICENCE_TASK_LIST
+    )
+  })
+
+  test('page elements when using a change link', async () => {
+    mockMarineLicence(marineLicence)
+
+    const cookieHeader = await getCheckYourAnswersSessionCookie()
+
+    const response = await makeGetRequest({
+      server: getServer(),
+      url: marineLicenceRoutes.MARINE_LICENCE_FEE_ESTIMATE,
+      headers: { cookie: cookieHeader }
+    })
+    const document = new JSDOM(response.result).window.document
+
+    expect(getByText(document, 'Test Marine Project')).toBeInTheDocument()
+
+    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+      'href',
+      `${marineLicenceRoutes.MARINE_LICENCE_CHECK_YOUR_ANSWERS}#fee-estimate-card`
+    )
+
+    expect(
+      queryByRole(document, 'link', { name: 'Cancel' })
+    ).not.toBeInTheDocument()
+  })
+
+  test('backLink still points to check your answers after returning from the are you sure page', async () => {
+    mockMarineLicence(marineLicence)
+
+    const cookieHeader = await getCheckYourAnswersSessionCookie()
+
+    await makeGetRequest({
+      server: getServer(),
+      url: marineLicenceRoutes.MARINE_LICENCE_FEE_ESTIMATE,
+      headers: { cookie: cookieHeader }
+    })
+
+    const areYouSureResponse = await makeGetRequest({
+      server: getServer(),
+      url: marineLicenceRoutes.MARINE_LICENCE_FEE_ESTIMATE_ARE_YOU_SURE,
+      headers: { cookie: cookieHeader }
+    })
+    const areYouSureDocument = new JSDOM(areYouSureResponse.result).window
+      .document
+
+    expect(
+      getByRole(areYouSureDocument, 'link', { name: 'Back' })
+    ).toHaveAttribute('href', marineLicenceRoutes.MARINE_LICENCE_FEE_ESTIMATE)
+
+    const backOnFeeEstimateResponse = await makeGetRequest({
+      server: getServer(),
+      url: marineLicenceRoutes.MARINE_LICENCE_FEE_ESTIMATE,
+      headers: { cookie: cookieHeader }
+    })
+    const document = new JSDOM(backOnFeeEstimateResponse.result).window.document
+
+    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
+      'href',
+      `${marineLicenceRoutes.MARINE_LICENCE_CHECK_YOUR_ANSWERS}#fee-estimate-card`
     )
   })
 

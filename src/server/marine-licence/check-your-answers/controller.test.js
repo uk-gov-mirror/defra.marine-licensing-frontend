@@ -18,6 +18,10 @@ import {
   routes
 } from '#src/server/common/constants/routes.js'
 import { mockMarineLicenceApplication } from '~/src/server/test-helpers/mocks/marine-licence-mocks.js'
+import {
+  FEE_ESTIMATE_AMOUNT,
+  FEE_ESTIMATE_MONITORING_AMOUNT
+} from '#src/server/common/validation/fee-estimate/constants.js'
 
 vi.mock('#src/server/common/helpers/marine-licence/session-cache/utils.js')
 vi.mock(
@@ -148,10 +152,13 @@ describe('#checkYourAnswersController', () => {
       waterFrameworkDirectiveData: expectedWaterFrameworkDirectiveData,
       waterFrameworkDirectiveChangeLink:
         marineLicenceRoutes.MARINE_LICENCE_WATER_FRAMEWORK_DIRECTIVE_REVIEW_YOUR_ANSWERS,
+      feeEstimateChangeLink: '/marine-licence/fee-estimate',
       invoicingData: expectedInvoicingData,
       invoicingChangeLink:
         marineLicenceRoutes.MARINE_LICENCE_CHECK_INVOICING_DETAILS,
-      marinePlanPolicies: mockPolicies
+      marinePlanPolicies: mockPolicies,
+      amount: FEE_ESTIMATE_AMOUNT,
+      monitoringAmount: FEE_ESTIMATE_MONITORING_AMOUNT
     })
   })
 
@@ -178,13 +185,16 @@ describe('#checkYourAnswersController', () => {
       preferredDates: null,
       coordinatesType: null,
       summaryData: [],
+      feeEstimateChangeLink: '/marine-licence/fee-estimate',
       invoicingChangeLink: '/marine-licence/check-invoicing-details',
       invoicingData: undefined,
       waterFrameworkDirectiveData: {},
       reviewSiteDetailsRoute:
         marineLicenceRoutes.MARINE_LICENCE_REVIEW_SITE_DETAILS,
       publicRegisterRoute: marineLicenceRoutes.MARINE_LICENCE_PUBLIC_REGISTER,
-      marinePlanPolicies: []
+      marinePlanPolicies: [],
+      amount: FEE_ESTIMATE_AMOUNT,
+      monitoringAmount: FEE_ESTIMATE_MONITORING_AMOUNT
     })
   })
 })
