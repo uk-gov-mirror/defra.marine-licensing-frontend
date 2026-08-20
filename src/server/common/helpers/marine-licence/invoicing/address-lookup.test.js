@@ -329,16 +329,22 @@ describe('#addressLookup', () => {
 
         await lookupAddresses(request, { postcode: 'NE4 7AR' })
 
+        const expectedSummary =
+          'resultCount=2 filteredCount=2 totalResults=2 truncated=false ' +
+          'propertyFilterApplied=false'
+
         expect(request.logger.info).toHaveBeenCalledWith(
           {
             event: { action: 'address-lookup-completed' },
-            resultCount: 2,
-            filteredCount: 2,
-            totalResults: 2,
-            truncated: false,
-            propertyFilterApplied: false
+            labels: {
+              address_lookup_result_count: '2',
+              address_lookup_filtered_count: '2',
+              address_lookup_total_results: '2',
+              address_lookup_truncated: 'false'
+            },
+            tenant: { message: expectedSummary }
           },
-          'Address lookup completed'
+          `Address lookup completed ${expectedSummary}`
         )
 
         const [context] = request.logger.info.mock.calls[0]
@@ -363,11 +369,12 @@ describe('#addressLookup', () => {
 
         expect(request.logger.info).toHaveBeenCalledWith(
           expect.objectContaining({
-            resultCount: 2,
-            filteredCount: 1,
-            propertyFilterApplied: true
+            labels: expect.objectContaining({
+              address_lookup_result_count: '2',
+              address_lookup_filtered_count: '1'
+            })
           }),
-          'Address lookup completed'
+          expect.stringContaining('propertyFilterApplied=true')
         )
       })
 
@@ -384,8 +391,13 @@ describe('#addressLookup', () => {
         await lookupAddresses(request, { postcode: 'NE4 7AR' })
 
         expect(request.logger.info).toHaveBeenCalledWith(
-          expect.objectContaining({ totalResults: 250, truncated: true }),
-          'Address lookup completed'
+          expect.objectContaining({
+            labels: expect.objectContaining({
+              address_lookup_total_results: '250',
+              address_lookup_truncated: 'true'
+            })
+          }),
+          expect.stringContaining('totalResults=250 truncated=true')
         )
       })
 
@@ -421,12 +433,14 @@ describe('#addressLookup', () => {
 
         expect(request.logger.info).toHaveBeenCalledWith(
           expect.objectContaining({
-            resultCount: 0,
-            filteredCount: 0,
-            totalResults: 0,
-            truncated: false
+            labels: expect.objectContaining({
+              address_lookup_result_count: '0',
+              address_lookup_filtered_count: '0',
+              address_lookup_total_results: '0',
+              address_lookup_truncated: 'false'
+            })
           }),
-          'Address lookup completed'
+          expect.stringContaining('resultCount=0 filteredCount=0')
         )
       })
 
