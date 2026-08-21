@@ -206,18 +206,35 @@ describe('#invoiceAddressPostcodeSearch', () => {
       )
     })
 
-    test('Should stay on the page without an error when there are many results', async () => {
+    test('Should redirect to the choose your address page when there are many results', async () => {
       vi.spyOn(addressLookup, 'lookupAddresses').mockResolvedValue({
         results: [anAddress, anotherAddress]
       })
 
       await submit({ postcode: 'NE4 7AR' })
 
-      expect(h.view).toHaveBeenCalledWith(
-        INVOICE_ADDRESS_POSTCODE_SEARCH_VIEW_ROUTE,
-        expect.not.objectContaining({ errorSummary: expect.anything() })
+      expect(h.redirect).toHaveBeenCalledWith(
+        marineLicenceRoutes.MARINE_LICENCE_CHOOSE_YOUR_ADDRESS
       )
-      expect(h.redirect).not.toHaveBeenCalled()
+      expect(h.view).not.toHaveBeenCalled()
+    })
+
+    test('Should cache the results before redirecting to the choose your address page', async () => {
+      vi.spyOn(addressLookup, 'lookupAddresses').mockResolvedValue({
+        results: [anAddress, anotherAddress]
+      })
+
+      await submit({ postcode: 'NE4 7AR' })
+
+      expect(cacheUtils.setMarineLicenceCache).toHaveBeenCalledWith(
+        expect.anything(),
+        h,
+        expect.objectContaining({
+          invoicing: expect.objectContaining({
+            invoiceAddressSearchResults: [anAddress, anotherAddress]
+          })
+        })
+      )
     })
 
     test('Should save the search and its results to the cache without calling the backend', async () => {

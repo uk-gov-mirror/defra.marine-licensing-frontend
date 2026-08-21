@@ -45,6 +45,7 @@ export const marineLicenceInvoicingRoutes = {
     '/marine-licence/is-invoice-address-uk-or-international',
   MARINE_LICENCE_INVOICE_ADDRESS_POSTCODE_SEARCH:
     '/marine-licence/invoice-address-postcode-search',
+  MARINE_LICENCE_CHOOSE_YOUR_ADDRESS: '/marine-licence/choose-your-address',
   MARINE_LICENCE_UK_INVOICE_ADDRESS: '/marine-licence/uk-invoice-address',
   MARINE_LICENCE_INTERNATIONAL_INVOICE_ADDRESS:
     '/marine-licence/international-invoice-address',

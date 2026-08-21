@@ -22,6 +22,8 @@ import {
   buildTooManyAddressesError
 } from '#src/server/marine-licence/invoicing/invoice-address-postcode-search/utils.js'
 
+const MULTIPLE_RESULTS_THRESHOLD = 1
+
 export const INVOICE_ADDRESS_POSTCODE_SEARCH_VIEW_ROUTE =
   'marine-licence/invoicing/invoice-address-postcode-search/index'
 
@@ -107,7 +109,7 @@ export const invoiceAddressPostcodeSearchSubmitController = {
     const lookup = await lookupAddresses(request, invoiceAddressSearch)
     const { results, error } = lookup
 
-    // Results are cached for the select-address page (a later ticket) to read.
+    // Results are cached for the choose-your-address page to read.
     // On a lookup failure the previous results are kept rather than overwritten
     // with an empty list, so a transient outage doesn't discard a good search.
     await setMarineLicenceCache(request, h, {
@@ -118,6 +120,12 @@ export const invoiceAddressPostcodeSearchSubmitController = {
         ...(error ? {} : { invoiceAddressSearchResults: results })
       }
     })
+
+    // A single result goes to the confirm-address page (ML-1501), which does not
+    // exist yet, so for now it keeps ML-1413's behaviour of staying on this page.
+    if (!error && results.length > MULTIPLE_RESULTS_THRESHOLD) {
+      return h.redirect(marineLicenceRoutes.MARINE_LICENCE_CHOOSE_YOUR_ADDRESS)
+    }
 
     return h.view(INVOICE_ADDRESS_POSTCODE_SEARCH_VIEW_ROUTE, {
       ...getPageParams(action, invoicing),

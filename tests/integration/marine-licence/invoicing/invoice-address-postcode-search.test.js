@@ -19,11 +19,20 @@ import { statusCodes } from '~/src/server/common/constants/status-codes.js'
 import { invoiceAddressPostcodeSearchSettings } from '~/src/server/common/validation/invoicing/constants.js'
 import { mockMarineLicenceApplication } from '~/src/server/test-helpers/mocks/marine-licence-mocks.js'
 import * as addressLookup from '~/src/server/common/helpers/marine-licence/invoicing/address-lookup.js'
-import { makeGetRequest } from '~/src/server/test-helpers/server-requests.js'
+import {
+  makeGetRequest,
+  makePostRequest
+} from '~/src/server/test-helpers/server-requests.js'
 
 const anAddress = {
   addressLine: 'TYNESIDE HOUSE, SKINNERBURN ROAD, NEWCASTLE UPON TYNE, NE4 7AR',
   buildingName: 'TYNESIDE HOUSE',
+  postcode: 'NE4 7AR'
+}
+
+const anotherAddress = {
+  addressLine: 'QUAYSIDE HOUSE, SKINNERBURN ROAD, NEWCASTLE UPON TYNE, NE4 7AR',
+  buildingName: 'QUAYSIDE HOUSE',
   postcode: 'NE4 7AR'
 }
 
@@ -230,7 +239,9 @@ describe('Invoice address postcode search', () => {
     })
   })
 
-  test('should stay on the page when the lookup returns results', async () => {
+  // A single result belongs on the confirm-address page (ML-1501); until that exists
+  // it keeps ML-1413's behaviour of staying here.
+  test('should stay on the page when the lookup returns a single result', async () => {
     mockMarineLicence(mockMarineLicenceApplication)
 
     const { document, response } = await submitForm({
@@ -243,6 +254,24 @@ describe('Invoice address postcode search', () => {
     expect(response.statusCode).toBe(statusCodes.ok)
     expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
       invoiceAddressPostcodeSearchSettings.heading
+    )
+  })
+
+  test('should go to the choose your address page when the lookup returns more than one result', async () => {
+    mockMarineLicence(mockMarineLicenceApplication)
+    vi.spyOn(addressLookup, 'lookupAddresses').mockResolvedValue({
+      results: [anAddress, anotherAddress]
+    })
+
+    const response = await makePostRequest({
+      url: marineLicenceRoutes.MARINE_LICENCE_INVOICE_ADDRESS_POSTCODE_SEARCH,
+      server: getServer(),
+      formData: { postcode: 'NE4 7AR', propertyNameOrNumber: '' }
+    })
+
+    expect(response.statusCode).toBe(statusCodes.redirect)
+    expect(response.headers.location).toBe(
+      marineLicenceRoutes.MARINE_LICENCE_CHOOSE_YOUR_ADDRESS
     )
   })
 })

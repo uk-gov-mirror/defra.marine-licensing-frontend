@@ -42,6 +42,17 @@ export const invoiceAddressPostcodeSearchErrorMessages = {
     'There are too many addresses for that postcode to search by property name or number. Enter the address manually.'
 }
 
+const CHOOSE_YOUR_ADDRESS_TITLE = 'Choose your address'
+
+export const chooseYourAddressSettings = {
+  pageTitle: CHOOSE_YOUR_ADDRESS_TITLE,
+  heading: CHOOSE_YOUR_ADDRESS_TITLE
+}
+
+export const chooseYourAddressErrorMessages = {
+  SELECTED_ADDRESS_REQUIRED: 'Select an address, or select "None of these"'
+}
+
 const UK_INVOICE_ADDRESS_TITLE = 'UK invoice address'
 
 export const ukInvoiceAddressSettings = {
