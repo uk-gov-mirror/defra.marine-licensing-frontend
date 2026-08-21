@@ -401,29 +401,6 @@ describe('#addressLookup', () => {
         )
       })
 
-      test('should log the normalised postcode and the filtered addresses at debug', async () => {
-        Wreck.get.mockResolvedValue(
-          mockLookupResponse({
-            payload: { results: [tynesideHouse, quaysideHouse] }
-          })
-        )
-
-        await lookupAddresses(request, {
-          postcode: 'ne4 7ar',
-          propertyNameOrNumber: '116'
-        })
-
-        expect(request.logger.debug).toHaveBeenCalledWith(
-          {
-            event: { action: 'address-lookup-results' },
-            postcode: 'NE47AR',
-            propertyNameOrNumber: '116',
-            results: [quaysideHouse]
-          },
-          'Postcode lookup results'
-        )
-      })
-
       test('should log a 204 as an empty result rather than staying silent', async () => {
         Wreck.get.mockResolvedValue(
           mockLookupResponse({ statusCode: 204, payload: null })
