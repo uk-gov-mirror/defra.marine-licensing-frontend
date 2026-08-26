@@ -43,6 +43,70 @@ describe('#ukInvoiceAddress', () => {
         })
       )
     })
+
+    test('Should link back to the postcode lookup', async () => {
+      await ukInvoiceAddressController.handler({ query: {} }, h)
+
+      expect(h.view).toHaveBeenCalledWith(
+        UK_INVOICE_ADDRESS_VIEW_ROUTE,
+        expect.objectContaining({
+          postcodeLookupLink:
+            marineLicenceRoutes.MARINE_LICENCE_INVOICE_ADDRESS_POSTCODE_SEARCH
+        })
+      )
+    })
+
+    test('Should keep the change flow in the postcode lookup link', async () => {
+      await ukInvoiceAddressController.handler(
+        { query: { action: 'change' } },
+        h
+      )
+
+      expect(h.view).toHaveBeenCalledWith(
+        UK_INVOICE_ADDRESS_VIEW_ROUTE,
+        expect.objectContaining({
+          postcodeLookupLink: `${marineLicenceRoutes.MARINE_LICENCE_INVOICE_ADDRESS_POSTCODE_SEARCH}?action=change`
+        })
+      )
+    })
+
+    test('Should default the searched postcode in when no address has been entered', async () => {
+      vi.spyOn(cacheUtils, 'getMarineLicenceCache').mockReturnValue({
+        ...mockMarineLicenceApplication,
+        invoicing: {
+          invoiceAddressType: 'uk',
+          invoiceAddressSearch: { postcode: 'NE4 7AR' }
+        }
+      })
+
+      await ukInvoiceAddressController.handler({ query: {} }, h)
+
+      expect(h.view).toHaveBeenCalledWith(
+        UK_INVOICE_ADDRESS_VIEW_ROUTE,
+        expect.objectContaining({
+          payload: { addressPostcode: 'NE4 7AR' }
+        })
+      )
+    })
+
+    test('Should keep an already entered address rather than the searched postcode', async () => {
+      vi.spyOn(cacheUtils, 'getMarineLicenceCache').mockReturnValue({
+        ...mockMarineLicenceApplication,
+        invoicing: {
+          ...mockMarineLicenceApplication.invoicing,
+          invoiceAddressSearch: { postcode: 'NE4 7AR' }
+        }
+      })
+
+      await ukInvoiceAddressController.handler({ query: {} }, h)
+
+      expect(h.view).toHaveBeenCalledWith(
+        UK_INVOICE_ADDRESS_VIEW_ROUTE,
+        expect.objectContaining({
+          payload: mockMarineLicenceApplication.invoicing.invoiceAddress
+        })
+      )
+    })
   })
 
   describe('#ukInvoiceAddressSubmitController', () => {

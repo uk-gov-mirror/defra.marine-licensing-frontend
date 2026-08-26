@@ -206,18 +206,51 @@ describe('#invoiceAddressPostcodeSearch', () => {
       )
     })
 
-    test('Should stay on the page without an error when there are many results', async () => {
+    test('Should redirect to the choose your address page when there are many results', async () => {
       vi.spyOn(addressLookup, 'lookupAddresses').mockResolvedValue({
         results: [anAddress, anotherAddress]
       })
 
       await submit({ postcode: 'NE4 7AR' })
 
+      expect(h.redirect).toHaveBeenCalledWith(
+        marineLicenceRoutes.MARINE_LICENCE_CHOOSE_YOUR_ADDRESS
+      )
+      expect(h.view).not.toHaveBeenCalled()
+    })
+
+    test('Should stay on the page with the error when the lookup fails, even with pickable results cached', async () => {
+      vi.spyOn(cacheUtils, 'getMarineLicenceCache').mockReturnValue({
+        ...mockMarineLicenceApplication,
+        invoicing: {
+          ...mockMarineLicenceApplication.invoicing,
+          invoiceAddressSearchResults: [anAddress, anotherAddress]
+        }
+      })
+      vi.spyOn(addressLookup, 'lookupAddresses').mockResolvedValue({
+        results: [anAddress, anotherAddress],
+        error: true
+      })
+
+      await submit({ postcode: 'NE4 7AR' })
+
+      expect(h.redirect).not.toHaveBeenCalled()
       expect(h.view).toHaveBeenCalledWith(
         INVOICE_ADDRESS_POSTCODE_SEARCH_VIEW_ROUTE,
-        expect.not.objectContaining({ errorSummary: expect.anything() })
+        expect.objectContaining(buildLookupUnavailableError())
       )
-      expect(h.redirect).not.toHaveBeenCalled()
+    })
+
+    test('Should keep the change flow when redirecting to the choose your address page', async () => {
+      vi.spyOn(addressLookup, 'lookupAddresses').mockResolvedValue({
+        results: [anAddress, anotherAddress]
+      })
+
+      await submit({ postcode: 'NE4 7AR' }, { action: 'change' })
+
+      expect(h.redirect).toHaveBeenCalledWith(
+        `${marineLicenceRoutes.MARINE_LICENCE_CHOOSE_YOUR_ADDRESS}?action=change`
+      )
     })
 
     test('Should save the search and its results to the cache without calling the backend', async () => {

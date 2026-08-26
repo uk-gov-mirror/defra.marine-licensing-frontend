@@ -13,8 +13,10 @@ import { marineLicenceRoutes } from '#src/server/common/constants/routes.js'
 import {
   getInvoiceAddressBackLink,
   getInvoiceCancelLink,
-  getInvoiceAddressButtonText
+  getInvoiceAddressButtonText,
+  withAction
 } from '#src/server/marine-licence/invoicing/utils.js'
+import { hasPickableResults } from '#src/server/marine-licence/invoicing/choose-your-address/utils.js'
 import { lookupAddresses } from '#src/server/common/helpers/marine-licence/invoicing/address-lookup.js'
 import {
   buildNoAddressesFoundError,
@@ -107,7 +109,7 @@ export const invoiceAddressPostcodeSearchSubmitController = {
     const lookup = await lookupAddresses(request, invoiceAddressSearch)
     const { results, error } = lookup
 
-    // Results are cached for the select-address page (a later ticket) to read.
+    // Results are cached for the choose-your-address page to read.
     // On a lookup failure the previous results are kept rather than overwritten
     // with an empty list, so a transient outage doesn't discard a good search.
     await setMarineLicenceCache(request, h, {
@@ -118,6 +120,17 @@ export const invoiceAddressPostcodeSearchSubmitController = {
         ...(error ? {} : { invoiceAddressSearchResults: results })
       }
     })
+
+    // A single result goes to the confirm-address page (ML-1501), which does not
+    // exist yet, so for now it keeps ML-1413's behaviour of staying on this page.
+    if (!error && hasPickableResults(results)) {
+      return h.redirect(
+        withAction(
+          marineLicenceRoutes.MARINE_LICENCE_CHOOSE_YOUR_ADDRESS,
+          action
+        )
+      )
+    }
 
     return h.view(INVOICE_ADDRESS_POSTCODE_SEARCH_VIEW_ROUTE, {
       ...getPageParams(action, invoicing),

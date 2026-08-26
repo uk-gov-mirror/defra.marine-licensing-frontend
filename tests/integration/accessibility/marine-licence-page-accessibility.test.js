@@ -18,7 +18,7 @@ import { agentSession } from '../shared/session-fixtures.js'
 import { selectActivityVariants } from '~/src/server/common/constants/activity-variants.js'
 import { getMarinePlanPolicyLink } from '~/src/server/common/helpers/marine-licence/marine-plan-policy-link.js'
 import { runPageAccessibilityTests } from './page-accessibility-tests.js'
-import { submitForm } from '../shared/app-server.js'
+import { loadPage, submitForm } from '../shared/app-server.js'
 import { runAxeChecks } from '~/.vite/axe-helper.js'
 import * as addressLookup from '~/src/server/common/helpers/marine-licence/invoicing/address-lookup.js'
 
@@ -331,6 +331,31 @@ describe('Marine licence page accessibility checks (Axe)', () => {
     setupMocks: ({ marineLicence = mockMarineLicenceApplication }) => {
       mockMarineLicence(marineLicence)
     }
+  })
+
+  // Not in the page list above: the picker only renders with a multi-result search
+  // cached, which the shared mock application does not have.
+  describe('"Choose your address" page', () => {
+    test('has no accessibility violations', async () => {
+      mockMarineLicence({
+        ...mockMarineLicenceApplication,
+        invoicing: {
+          invoiceAddressType: 'uk',
+          invoiceAddressSearch: { postcode: 'NE4 7AR' },
+          invoiceAddressSearchResults: [
+            { addressLine: '1 HIGH STREET, LONDON, SW1 2AA' },
+            { addressLine: '2 HIGH STREET, LONDON, SW1 2AA' }
+          ]
+        }
+      })
+
+      const document = await loadPage({
+        requestUrl: marineLicenceRoutes.MARINE_LICENCE_CHOOSE_YOUR_ADDRESS,
+        server: getServer()
+      })
+
+      await runAxeChecks(document.documentElement)
+    })
   })
 
   // The page list above only covers GET. A lookup outcome is the error state worth checking
