@@ -173,3 +173,23 @@ export const formatProjectsForDisplay = (projects, isEmployee = false) =>
       }
     }
   })
+
+export const getFilterCategories = () => {
+  return [
+    {
+      heading: {
+        text: 'Submission type'
+      },
+      items: [
+        {
+          href: '/path/to/remove/this/1',
+          text: 'Exempt activity notification'
+        },
+        {
+          href: '/path/to/remove/this/1',
+          text: 'Marine licence application'
+        }
+      ]
+    }
+  ]
+}

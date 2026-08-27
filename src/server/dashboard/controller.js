@@ -1,6 +1,10 @@
 import { authenticatedGetRequest } from '#src/server/common/helpers/authenticated-requests.js'
 import { getUserSession } from '#src/server/common/plugins/auth/utils.js'
-import { sortProjectsByStatus, formatProjectsForDisplay } from './utils.js'
+import {
+  sortProjectsByStatus,
+  formatProjectsForDisplay,
+  getFilterCategories
+} from './utils.js'
 
 export const DASHBOARD_VIEW_ROUTE = 'dashboard/index.njk'
 const DASHBOARD_PAGE_TITLE = 'Projects'
@@ -25,6 +29,8 @@ export const dashboardController = {
 
       const filterValue = request.payload?.filter || FILTER_MY_PROJECTS
 
+      const filterCategories = getFilterCategories()
+
       return h.view(DASHBOARD_VIEW_ROUTE, {
         pageTitle: DASHBOARD_PAGE_TITLE,
         heading: DASHBOARD_PAGE_TITLE,
@@ -33,7 +39,8 @@ export const dashboardController = {
         organisationName,
         filterValue,
         filterMyProjects: FILTER_MY_PROJECTS,
-        filterAllProjects: FILTER_ALL_PROJECTS
+        filterAllProjects: FILTER_ALL_PROJECTS,
+        filterCategories
       })
     } catch (error) {
       request.logger.error({ err: error }, 'Error fetching projects')

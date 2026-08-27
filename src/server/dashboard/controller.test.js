@@ -38,7 +38,8 @@ describe('#dashboard', () => {
         organisationName: '',
         filterValue: 'my-projects',
         filterMyProjects: 'my-projects',
-        filterAllProjects: 'all-projects'
+        filterAllProjects: 'all-projects',
+        filterCategories: expect.any(Object)
       })
     })
 
@@ -95,7 +96,8 @@ describe('#dashboard', () => {
         organisationName: '',
         filterValue: 'my-projects',
         filterMyProjects: 'my-projects',
-        filterAllProjects: 'all-projects'
+        filterAllProjects: 'all-projects',
+        filterCategories: expect.any(Object)
       })
     })
 
@@ -136,7 +138,8 @@ describe('#dashboard', () => {
         organisationName: '',
         filterValue: 'my-projects',
         filterMyProjects: 'my-projects',
-        filterAllProjects: 'all-projects'
+        filterAllProjects: 'all-projects',
+        filterCategories: expect.any(Object)
       })
     })
 
@@ -182,7 +185,8 @@ describe('#dashboard', () => {
         organisationName: '',
         filterValue: 'my-projects',
         filterMyProjects: 'my-projects',
-        filterAllProjects: 'all-projects'
+        filterAllProjects: 'all-projects',
+        filterCategories: expect.any(Object)
       })
     })
   })
