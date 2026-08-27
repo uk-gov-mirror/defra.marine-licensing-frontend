@@ -1,0 +1,16 @@
+{% from "moj/components/filter/macro.njk" import mojFilter %}
+
+<div class="moj-filter-layout__filter">
+  {{ mojFilter({
+    heading: {
+      text: params.heading or "Filter"
+    },
+    submit: params.submit or {
+      attributes: {
+        "data-test-id": "submit-button"
+      }
+    },
+    selectedFilters: params.selectedFilters,
+    optionsHtml: params.optionsHtml
+  }) }}
+</div>

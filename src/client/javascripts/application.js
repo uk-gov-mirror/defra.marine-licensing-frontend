@@ -15,6 +15,7 @@ import { SortableTable } from '@ministryofjustice/frontend'
 import { AccessibleAutocomplete } from './accessible-autocomplete/index.js'
 import { AddAnotherPoint } from './add-another-point/index.js'
 import { BackLinkHistory } from './back-link-history/index.js'
+import { MojFilter } from './moj-filter/index.js'
 import { IatAnswerPrint } from './iat-answer-print/index.js'
 import { ProjectFilter } from './project-filter/index.js'
 import { SiteDetailsMap } from './site-details-map/index.js'
@@ -42,7 +43,6 @@ function syncClarityConsent() {
     }
   }
 }
-
 document.addEventListener('DOMContentLoaded', () => {
   if (globalThis.ENABLE_BROWSER_LOGGING) {
     const errorTracking = new ErrorTracking()
@@ -89,4 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
   for (const element of printElements) {
     new IatAnswerPrint(element) // eslint-disable-line no-new
   }
+
+  // eslint-disable-next-line no-new
+  new MojFilter() // nosonar
 })
