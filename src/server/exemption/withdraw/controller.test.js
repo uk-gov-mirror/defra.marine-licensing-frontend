@@ -163,8 +163,16 @@ describe('#withdraw', () => {
 
         expect(mockH.view).not.toHaveBeenCalled()
         expect(mockRequest.logger.warn).toHaveBeenCalledWith(
-          { exemptionId: 'test-project-id', status },
-          'Exemption cannot be withdrawn'
+          {
+            event: {
+              action: 'exemption-withdraw:not-withdrawable',
+              outcome: 'failure',
+              reference: 'test-project-id',
+              reason:
+                'Activity period has ended or the exemption is already withdrawn'
+            }
+          },
+          `Exemption test-project-id cannot be withdrawn: status ${status}`
         )
         expect(mockH.redirect).toHaveBeenCalledWith(routes.DASHBOARD)
         expect(result).toBe('redirect-response')

@@ -40,8 +40,16 @@ export const withdrawExemptionController = {
 
       if (!WITHDRAWABLE_EXEMPTION_STATUSES.includes(savedExemption.status)) {
         request.logger.warn(
-          { exemptionId, status: savedExemption.status },
-          'Exemption cannot be withdrawn'
+          {
+            event: {
+              action: 'exemption-withdraw:not-withdrawable',
+              outcome: 'failure',
+              reference: exemptionId,
+              reason:
+                'Activity period has ended or the exemption is already withdrawn'
+            }
+          },
+          `Exemption ${exemptionId} cannot be withdrawn: status ${savedExemption.status}`
         )
         return h.redirect(routes.DASHBOARD)
       }
@@ -85,10 +93,15 @@ export const withdrawExemptionSubmitController = {
       if (!exemptionId || exemptionId !== cachedExemptionId) {
         request.logger.error(
           {
-            formExemptionId: exemptionId,
-            cachedExemptionId
+            event: {
+              action: 'exemption-withdraw:id-mismatch',
+              outcome: 'failure',
+              reference: cachedExemptionId,
+              reason:
+                'The exemption ID submitted with the withdrawal form did not match the cached exemption ID'
+            }
           },
-          'Exemption ID mismatch or missing'
+          `Exemption withdrawal rejected: form ID ${exemptionId} does not match cached ID ${cachedExemptionId}`
         )
         return h.redirect(routes.DASHBOARD)
       }
@@ -99,7 +112,7 @@ export const withdrawExemptionSubmitController = {
         {}
       )
 
-      request.logger.info({ exemptionId }, `Withdrawn exemption ${exemptionId}`)
+      request.logger.info(`Withdrawn exemption ${exemptionId}`)
 
       await clearExemptionCache(request, h)
 
