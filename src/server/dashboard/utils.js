@@ -6,7 +6,8 @@ import {
 import { EXEMPTION_TYPE } from '#src/server/common/constants/exemptions.js'
 import {
   PROJECT_STATUS,
-  UNABLE_TO_PROGRESS
+  UNABLE_TO_PROGRESS,
+  WITHDRAWABLE_EXEMPTION_STATUSES
 } from '#src/server/common/constants/projects.js'
 import { getTagStyle } from '#src/server/common/helpers/ui/get-tag-style.js'
 import escapeHtml from 'lodash/escape.js'
@@ -108,8 +109,7 @@ export const getActionButtons = (project) => {
   }
 
   const canWithdraw =
-    (status === PROJECT_STATUS.SCHEDULED || status === PROJECT_STATUS.ACTIVE) &&
-    isOwnProject
+    WITHDRAWABLE_EXEMPTION_STATUSES.includes(status) && isOwnProject
   const withdrawRoute = canWithdraw ? routes.WITHDRAW_EXEMPTION : null
 
   if (isOwnProject) {

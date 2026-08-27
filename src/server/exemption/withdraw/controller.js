@@ -7,11 +7,18 @@ import {
 } from '#src/server/common/helpers/exemptions/session-cache/utils.js'
 import Boom from '@hapi/boom'
 import { EXEMPTION_TYPE } from '#src/server/common/constants/exemptions.js'
+import { WITHDRAWABLE_EXEMPTION_STATUSES } from '#src/server/common/constants/projects.js'
+import { statusCodes } from '#src/server/common/constants/status-codes.js'
 import { getExemptionService } from '#src/services/exemption-service/index.js'
 
 export const WITHDRAW_EXEMPTION_VIEW_ROUTE = 'exemption/withdraw/index'
 const WITHDRAW_EXEMPTION_PAGE_TITLE =
   'Are you sure you want to withdraw this project?'
+
+// The activity period can end between the confirmation page being rendered and
+// the user confirming, so the backend is the final authority on withdrawability.
+const WITHDRAW_CONFLICT_MESSAGE =
+  'This project can no longer be withdrawn because its activity period has ended'
 
 export const withdrawExemptionController = {
   handler: async (request, h) => {
@@ -28,6 +35,14 @@ export const withdrawExemptionController = {
         await exemptionService.getExemptionById(exemptionId)
 
       if (!savedExemption) {
+        return h.redirect(routes.DASHBOARD)
+      }
+
+      if (!WITHDRAWABLE_EXEMPTION_STATUSES.includes(savedExemption.status)) {
+        request.logger.warn(
+          { exemptionId, status: savedExemption.status },
+          'Exemption cannot be withdrawn'
+        )
         return h.redirect(routes.DASHBOARD)
       }
 
@@ -90,6 +105,14 @@ export const withdrawExemptionSubmitController = {
 
       return h.redirect(routes.DASHBOARD)
     } catch (error) {
+      if (error.output?.statusCode === statusCodes.conflict) {
+        request.logger.warn(
+          { err: error },
+          'Exemption can no longer be withdrawn'
+        )
+        throw Boom.conflict(WITHDRAW_CONFLICT_MESSAGE)
+      }
+
       request.logger.error({ err: error }, 'Error withdrawing exemption')
       return h.redirect(routes.DASHBOARD)
     }
