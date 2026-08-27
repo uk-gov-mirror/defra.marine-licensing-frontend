@@ -107,7 +107,9 @@ export const getActionButtons = (project) => {
     })
   }
 
-  const canWithdraw = status === PROJECT_STATUS.ACTIVE && isOwnProject
+  const canWithdraw =
+    (status === PROJECT_STATUS.SCHEDULED || status === PROJECT_STATUS.ACTIVE) &&
+    isOwnProject
   const withdrawRoute = canWithdraw ? routes.WITHDRAW_EXEMPTION : null
 
   if (isOwnProject) {
