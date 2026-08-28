@@ -1,12 +1,7 @@
 export const NONE_OF_THESE = 'none'
 
-const MINIMUM_RESULTS_FOR_PICKER = 2
-
 export const getSearchResults = (invoicing) =>
   invoicing?.invoiceAddressSearchResults ?? []
-
-export const hasPickableResults = (results) =>
-  results.length >= MINIMUM_RESULTS_FOR_PICKER
 
 export const buildAddressItems = (results) => [
   ...results.map((result, index) => ({
