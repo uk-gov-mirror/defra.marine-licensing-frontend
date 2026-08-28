@@ -6,6 +6,7 @@ import {
   getFilterCategories,
   fetchProjects
 } from './utils.js'
+import { statusCodes } from '../common/constants/status-codes.js'
 
 export const DASHBOARD_VIEW_ROUTE = 'dashboard/index.njk'
 export const DASHBOARD_RESULTS_VIEW_ROUTE =
@@ -14,6 +15,8 @@ export const DASHBOARD_RESULTS_VIEW_ROUTE =
 const DASHBOARD_PAGE_TITLE = 'Projects'
 
 export const FILTER_SEARCH_FLASH_KEY = 'dashboardFilterSearch'
+
+const FETCH_ERROR = 'Error fetching projects'
 
 const isClientSideFetchRequest = (request) =>
   request.headers['x-requested-with'] === 'XMLHttpRequest'
@@ -34,7 +37,7 @@ const buildDashboardViewModel = async (
     projects: formatProjectsForDisplay(sortedProjects, isEmployee),
     isEmployee,
     organisationName,
-    filterCategories: getFilterCategories({ organisationName }),
+    filterCategories: getFilterCategories(),
     searchParams
   }
 }
@@ -62,7 +65,7 @@ export const dashboardController = {
         ...viewModel
       })
     } catch (error) {
-      request.logger.error({ err: error }, 'Error fetching projects')
+      request.logger.error({ err: error }, FETCH_ERROR)
 
       return h.view(DASHBOARD_VIEW_ROUTE, {
         pageTitle: DASHBOARD_PAGE_TITLE,
@@ -94,8 +97,8 @@ export const dashboardPostController = {
           ...viewModel
         })
       } catch (error) {
-        request.logger.error({ err: error }, 'Error fetching projects')
-        return h.response().code(500)
+        request.logger.error({ err: error }, FETCH_ERROR)
+        return h.response().code(statusCodes.internalServerError)
       }
     }
 
@@ -103,7 +106,7 @@ export const dashboardPostController = {
       request.yar.flash(FILTER_SEARCH_FLASH_KEY, request.payload, true)
       await request.yar.commit(h)
     } catch (error) {
-      request.logger.error({ err: error }, 'Error fetching projects')
+      request.logger.error({ err: error }, FETCH_ERROR)
     }
 
     return h.redirect(routes.DASHBOARD)

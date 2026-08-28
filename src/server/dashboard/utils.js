@@ -173,22 +173,6 @@ export const formatProjectsForDisplay = (projects, isEmployee = false) =>
     }
   })
 
-export const getFilterCategories = ({ organisationName }) => {
-  return [
-    // {
-    //   heading: {
-    //     text: 'Show'
-    //   },
-    //   items: [
-    //     {
-    //       href: routes.DASHBOARD,
-    //       text: 'All ' + organisationName + ' submissions'
-    //     },
-    //     {
-    //       href: routes.DASHBOARD,
-    //       text: 'Marine licence application'
-    //     }
-    //   ]
-    // },
-  ]
+export const getFilterCategories = () => {
+  return []
 }
