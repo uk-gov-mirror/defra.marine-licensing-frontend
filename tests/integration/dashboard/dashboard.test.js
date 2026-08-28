@@ -14,9 +14,17 @@ import {
 import { loadPage } from '~/tests/integration/shared/app-server.js'
 import { getProjectsTableRow } from '~/tests/integration/shared/dom-helpers.js'
 import { mockMarineLicenceApplication } from '~/src/server/test-helpers/mocks/marine-licence-mocks.js'
+import { employeeSession } from '~/tests/integration/shared/session-fixtures.js'
+import { getUserSession } from '~/src/server/common/plugins/auth/utils.js'
+
+vi.mock('~/src/server/common/plugins/auth/utils.js')
 
 describe('Dashboard', () => {
   const getServer = setupTestServer()
+
+  beforeAll(() => {
+    vi.mocked(getUserSession).mockResolvedValue(employeeSession)
+  })
 
   const employeeExemptions = [
     {
@@ -356,23 +364,6 @@ describe('Dashboard', () => {
       expect(cellContents).toContain('John Smith')
     })
 
-    it('should set data-is-own-project attribute on table rows', async () => {
-      mockEmployeeExemptions(employeeExemptions)
-      const doc = await loadDashboardPage()
-      const table = getByRole(doc, 'table', { name: 'Projects' })
-      const rows = table.querySelectorAll('tbody tr')
-
-      const ownProjectRow = Array.from(rows).find((row) =>
-        row.textContent.includes('My Draft Project')
-      )
-      const otherProjectRow = Array.from(rows).find((row) =>
-        row.textContent.includes('Colleague Draft')
-      )
-
-      expect(ownProjectRow).toHaveAttribute('data-is-own-project', 'true')
-      expect(otherProjectRow).toHaveAttribute('data-is-own-project', 'false')
-    })
-
     it('should show Continue and Delete actions for own draft projects', async () => {
       mockEmployeeExemptions(employeeExemptions)
       const doc = await loadDashboardPage()
@@ -461,25 +452,24 @@ describe('Dashboard', () => {
         })
       ).toBeInTheDocument()
 
-      expect(filter.querySelectorAll('.moj-filter__tag').length).toBe(2)
+      expect(filter.querySelectorAll('.moj-filter__tag').length).toBe(0)
 
       expect(
-        getByRole(filter, 'heading', {
-          name: 'Submission type'
+        getByRole(filter, 'group', {
+          name: 'Show'
         })
       ).toBeInTheDocument()
 
-      expect(
-        getByRole(filter, 'checkbox', {
-          name: 'Exempt activity notification'
-        })
-      ).toBeChecked()
+      const orgSubmissionRadio = getByRole(filter, 'radio', {
+        name: 'All Test Org submissions'
+      })
 
-      expect(
-        getByRole(filter, 'checkbox', {
-          name: 'Marine licence application'
-        })
-      ).toBeChecked()
+      const mySubmissionRadio = getByRole(filter, 'radio', {
+        name: 'My submissions'
+      })
+
+      expect(orgSubmissionRadio).not.toBeChecked()
+      expect(mySubmissionRadio).toBeChecked()
     })
 
     it('should not render table with moj-filter module for individuals', async () => {

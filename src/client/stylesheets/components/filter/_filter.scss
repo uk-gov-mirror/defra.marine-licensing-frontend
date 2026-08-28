@@ -8,3 +8,13 @@
 .js-enabled [data-module='moj-filter']:not(.moj-js-hidden) {
   display: block;
 }
+
+.moj-filter__selected {
+  display: none;
+}
+
+.js-enabled {
+  .moj-filter__selected {
+    display: block;
+  }
+}
