@@ -17,7 +17,6 @@ import { AddAnotherPoint } from './add-another-point/index.js'
 import { BackLinkHistory } from './back-link-history/index.js'
 import { MojFilter } from './moj-filter/index.js'
 import { IatAnswerPrint } from './iat-answer-print/index.js'
-import { ProjectFilter } from './project-filter/index.js'
 import { SiteDetailsMap } from './site-details-map/index.js'
 
 createAll(Button)
@@ -72,15 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
   )
   for (const element of backLinkHistoryElements) {
     new BackLinkHistory(element) // eslint-disable-line no-new
-  }
-
-  const projectFilterElements = document.querySelectorAll(
-    '[data-module~="app-project-filter"]'
-  )
-
-  for (const element of projectFilterElements) {
-    // eslint-disable-next-line no-new
-    new ProjectFilter(element) // nosonar
   }
 
   const printElements = document.querySelectorAll(
