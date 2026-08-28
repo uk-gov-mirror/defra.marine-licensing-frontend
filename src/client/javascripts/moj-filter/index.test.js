@@ -143,5 +143,21 @@ describe('MojFilter', () => {
       const $status = document.getElementById('app-project-results-status')
       expect($status.textContent).toBe('2 results')
     })
+
+    it('should use the singular wording when there is exactly one result', () => {
+      document.body.innerHTML = `
+        <div data-module="moj-filter"></div>
+        <div id="app-project-results">
+          <div class="app-project-row"></div>
+        </div>
+        <div id="app-project-results-status"></div>
+      `
+
+      const mojFilter = new MojFilter()
+      mojFilter.announceResultCount()
+
+      const $status = document.getElementById('app-project-results-status')
+      expect($status.textContent).toBe('1 result')
+    })
   })
 })

@@ -113,9 +113,7 @@ export class MojFilter {
     const $myProjectsRadio = this.$form.querySelector(
       'input[value="my-projects"]'
     )
-    if ($myProjectsRadio) {
-      $myProjectsRadio.checked = true
-    }
+    $myProjectsRadio.checked = true
   }
 
   announceResultCount() {

@@ -83,7 +83,7 @@ const getMarineLicenceActions = ({
 }
 
 export const fetchProjects = async (request, payload = {}) =>
-  await authenticatedPostRequest(request, '/projects', payload)
+  authenticatedPostRequest(request, '/projects', payload)
 
 export const sortProjectsByStatus = (projects) => {
   return [...projects].sort((a, b) => {
