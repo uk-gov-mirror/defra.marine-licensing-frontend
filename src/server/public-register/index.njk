@@ -30,16 +30,16 @@
         <h2 class="govuk-heading-m">Unable to load the public register</h2>
         <p class="govuk-body">Try again later.</p>
       {% elif resultCount == 0 %}
-        <h2 class="govuk-heading-m">No published exemptions</h2>
-        <p class="govuk-body">There are no published exemptions to show.</p>
+        <h2 class="govuk-heading-m">No published applications</h2>
+        <p class="govuk-body">There are no published applications to show.</p>
       {% else %}
         <h2 class="govuk-heading-m">
-          {{ resultCount }} published {% if resultCount == 1 %}exemption{% else %}exemptions{% endif %}
+          {{ resultCount }} published {% if resultCount == 1 %}application{% else %}applications{% endif %}
         </h2>
         <p class="govuk-body">Results are sorted by reference number, newest first.</p>
 
         {{ govukTable({
-          caption: "Published exempt activity notifications",
+          caption: "Published applications",
           captionClasses: "govuk-visually-hidden",
           head: [
             { text: "Reference number" },
