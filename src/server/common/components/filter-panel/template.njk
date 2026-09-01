@@ -1,4 +1,17 @@
 {% from "moj/components/filter/macro.njk" import mojFilter %}
+{%- from "govuk/components/button/macro.njk" import govukButton -%}
+
+{%- set filterHtml %}
+
+  {{ govukButton({
+    text: "Clear filters",
+    href: '/projects',
+    classes: "govuk-button--secondary govuk-!-margin-left-3 moj-filter__clear"
+  }) }}
+
+  {{params.optionsHtml | safe}}
+{% endset -%}
+
 
 <div class="moj-filter-layout__filter">
   {{ mojFilter({
@@ -11,6 +24,6 @@
       }
     },
     selectedFilters: params.selectedFilters,
-    optionsHtml: params.optionsHtml
+    optionsHtml: filterHtml
   }) }}
 </div>

@@ -2,7 +2,8 @@ import {
   getByRole,
   queryByRole,
   getByText,
-  getAllByRole
+  getAllByRole,
+  queryAllByRole
 } from '@testing-library/dom'
 import { routes } from '~/src/server/common/constants/routes.js'
 import {
@@ -439,11 +440,11 @@ describe('Dashboard', () => {
       expect(filter).toHaveAttribute('data-module', 'moj-filter')
 
       expect(
-        getByRole(filter, 'button', { text: 'Apply filters' })
-      ).toBeInTheDocument()
+        queryAllByRole(filter, 'button', { name: 'Clear filters' })
+      ).toHaveLength(1)
 
       expect(
-        getByRole(filter, 'button', { text: 'Clear filters' })
+        getByRole(filter, 'button', { name: 'Apply filters' })
       ).toBeInTheDocument()
 
       expect(
