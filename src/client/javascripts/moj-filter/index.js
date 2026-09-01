@@ -71,9 +71,7 @@ export class MojFilter {
       template.innerHTML = await response.text()
 
       const $newResults = template.content.getElementById('app-project-results')
-      if ($newResults) {
-        this.$results.innerHTML = $newResults.innerHTML
-      }
+      this.$results.innerHTML = $newResults.innerHTML
 
       createAll(SortableTable, undefined, this.$results)
 

@@ -1,14 +1,10 @@
 // @vitest-environment jsdom
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, expect, vi, beforeEach, afterEach } from 'vitest'
 import { FilterToggleButton } from '@ministryofjustice/frontend'
 import { MojFilter } from './index.js'
 
 vi.mock('@ministryofjustice/frontend', () => ({
   FilterToggleButton: vi.fn()
-}))
-
-vi.mock('govuk-frontend', () => ({
-  createAll: vi.fn()
 }))
 
 describe('MojFilter', () => {
@@ -30,6 +26,7 @@ describe('MojFilter', () => {
         </div>
         <div id="app-project-results"></div>
       </form>
+      <div id="app-project-results-status"></div>
     `
 
   beforeEach(() => {
@@ -56,7 +53,7 @@ describe('MojFilter', () => {
   })
 
   describe('when the root element is missing or not a div', () => {
-    it('should not throw when no element matches the moj-filter selector', () => {
+    test('should not throw when no element matches the moj-filter selector', () => {
       document.body.innerHTML = ''
 
       expect(() => new MojFilter()).not.toThrow()
@@ -65,7 +62,7 @@ describe('MojFilter', () => {
   })
 
   describe('when the root element is present', () => {
-    it('should create a FilterToggleButton with the root element', () => {
+    test('should create a FilterToggleButton with the root element', () => {
       document.body.innerHTML = '<div data-module="moj-filter"></div>'
       const $root = document.querySelector('[data-module="moj-filter"]')
       const init = () => new MojFilter()
@@ -76,7 +73,7 @@ describe('MojFilter', () => {
   })
 
   describe('onSubmit behaviour', () => {
-    it('should not send submit request twice when already submitting', async () => {
+    test('should not send submit request twice when already submitting', async () => {
       document.body.innerHTML = buildFilterMarkup()
 
       fetchMock.mockResolvedValue({
@@ -101,7 +98,7 @@ describe('MojFilter', () => {
   })
 
   describe('Clear filters link', () => {
-    it('should not navigate and should reset the form when clicked', async () => {
+    test('should not navigate and should reset the form when clicked', async () => {
       document.body.innerHTML = buildFilterMarkup()
 
       fetchMock.mockResolvedValue({
@@ -131,7 +128,7 @@ describe('MojFilter', () => {
       expect(assignSpy).not.toHaveBeenCalled()
     })
 
-    it('should not navigate when the clear filters link is not present in the DOM', () => {
+    test('should not navigate when the clear filters link is not present in the DOM', () => {
       document.body.innerHTML = buildFilterMarkup({ withClearLink: false })
 
       const submitSpy = vi
@@ -146,7 +143,7 @@ describe('MojFilter', () => {
   })
 
   describe('announceResultCount', () => {
-    it('should set the status text to the number of rendered result rows', () => {
+    test('should set the status text to the number of rendered result rows', () => {
       document.body.innerHTML = `
         <div data-module="moj-filter"></div>
         <div id="app-project-results">
@@ -163,7 +160,7 @@ describe('MojFilter', () => {
       expect($status.textContent).toBe('2 results')
     })
 
-    it('should use the singular wording when there is exactly one result', () => {
+    test('should use the singular wording when there is exactly one result', () => {
       document.body.innerHTML = `
         <div data-module="moj-filter"></div>
         <div id="app-project-results">
