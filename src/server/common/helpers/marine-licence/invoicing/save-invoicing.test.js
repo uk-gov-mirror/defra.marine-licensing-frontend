@@ -35,6 +35,35 @@ describe('saveInvoicingToBackend', () => {
     )
   })
 
+  test('should send the address source when one has been recorded', async () => {
+    isIndividualUser.mockReturnValue(false)
+    vi.mocked(getMarineLicenceCache).mockReturnValue({
+      ...mockMarineLicenceApplication,
+      invoicing: {
+        ...mockMarineLicenceApplication.invoicing,
+        invoiceAddressSource: 'lookup'
+      }
+    })
+
+    await saveInvoicingToBackend(mockRequest)
+
+    expect(authenticatedPatchRequest).toHaveBeenCalledWith(
+      mockRequest,
+      apiRoutes.UPDATE_INVOICING,
+      expect.objectContaining({ invoiceAddressSource: 'lookup' })
+    )
+  })
+
+  test('should omit the address source when none has been recorded', async () => {
+    isIndividualUser.mockReturnValue(false)
+
+    await saveInvoicingToBackend(mockRequest)
+
+    expect(authenticatedPatchRequest.mock.calls[0][2]).not.toHaveProperty(
+      'invoiceAddressSource'
+    )
+  })
+
   test('should save invoicing for individual user', async () => {
     isIndividualUser.mockReturnValue(true)
 

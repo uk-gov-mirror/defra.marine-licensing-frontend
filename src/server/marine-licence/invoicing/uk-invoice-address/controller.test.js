@@ -14,6 +14,8 @@ import {
   createMockRequest
 } from '#src/server/test-helpers/mocks/helpers.js'
 
+import { ADDRESS_SOURCE } from '#src/server/common/validation/invoicing/constants.js'
+
 vi.mock('#/src/server/common/helpers/marine-licence/session-cache/utils.js')
 
 describe('#ukInvoiceAddress', () => {
@@ -225,7 +227,8 @@ describe('#ukInvoiceAddress', () => {
             ...mockMarineLicenceApplication.invoicing,
             invoiceAddress: {
               ...payload
-            }
+            },
+            invoiceAddressSource: ADDRESS_SOURCE.MANUAL
           }
         }
       )
