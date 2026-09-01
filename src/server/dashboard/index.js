@@ -10,6 +10,6 @@ export const dashboardRoutes = [
   {
     method: 'POST',
     path: routes.DASHBOARD,
-    handler: dashboardPostController.handler
+    ...dashboardPostController
   }
 ]
