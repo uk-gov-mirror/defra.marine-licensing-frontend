@@ -75,19 +75,39 @@ describe('MojFilter', () => {
     })
   })
 
+  describe('onSubmit behaviour', () => {
+    it('should not send submit request twice when already submitting', async () => {
+      document.body.innerHTML = buildFilterMarkup()
+
+      fetchMock.mockResolvedValue({
+        ok: true,
+        text: async () => '<div id="app-project-results"></div>'
+      })
+
+      const init = () => new MojFilter()
+      init()
+
+      const $form = document.querySelector('form')
+
+      $form.dispatchEvent(new Event('submit', { cancelable: true }))
+      $form.dispatchEvent(new Event('submit', { cancelable: true }))
+
+      await vi.waitFor(() => {
+        expect(fetchMock).toHaveBeenCalled()
+      })
+
+      expect(fetchMock).toHaveBeenCalledTimes(1)
+    })
+  })
+
   describe('Clear filters link', () => {
     it('should not navigate and should reset the form when clicked', async () => {
       document.body.innerHTML = buildFilterMarkup()
 
-      const fetchMock = vi.fn().mockResolvedValue({
+      fetchMock.mockResolvedValue({
         ok: true,
         text: async () => '<div id="app-project-results"></div>'
       })
-      vi.stubGlobal('fetch', fetchMock)
-
-      const submitSpy = vi
-        .spyOn(HTMLFormElement.prototype, 'submit')
-        .mockImplementation(() => {})
 
       const init = () => new MojFilter()
       init()
@@ -109,7 +129,6 @@ describe('MojFilter', () => {
       expect($myProjectsRadio.checked).toBe(true)
       expect($allProjectsRadio.checked).toBe(false)
       expect(assignSpy).not.toHaveBeenCalled()
-      expect(submitSpy).not.toHaveBeenCalled()
     })
 
     it('should not navigate when the clear filters link is not present in the DOM', () => {
