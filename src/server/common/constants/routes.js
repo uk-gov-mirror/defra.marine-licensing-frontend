@@ -22,6 +22,7 @@ export const exemptionRoutes = {
   VIEW_DETAILS: '/exemption/view-details',
   VIEW_DETAILS_INTERNAL_USER: '/view-details',
   VIEW_DETAILS_PUBLIC: '/exemption/view-public-details',
+  PUBLIC_REGISTER_BROWSE: '/exemption/public-register',
   CONFIRMATION: '/exemption/confirmation',
   SITE_DETAILS: '/exemption/site-details',
   SITE_NAME: '/exemption/site-name',

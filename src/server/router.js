@@ -9,6 +9,7 @@ import { exemption } from '#src/server/exemption/index.js'
 import { marineLicence } from '#src/server/marine-licence/index.js'
 import { declaration } from '#src/server/declaration/index.js'
 import { serviceHome } from '#src/server/service-home/index.js'
+import { publicRegisterBrowse } from '#src/server/public-register/index.js'
 import { auth } from '#src/server/auth/index.js'
 import { help } from '#src/server/help/index.js'
 import { browserLogs } from '#src/server/browser-logs/index.js'
@@ -44,6 +45,7 @@ export const router = {
         postLogin,
         defraIdGuidance,
         internalUserAdmin,
+        publicRegisterBrowse,
         marineLicence,
         declaration,
         serviceHome
