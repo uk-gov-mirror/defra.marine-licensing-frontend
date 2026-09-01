@@ -1,5 +1,6 @@
 import { getUserSession } from '#src/server/common/plugins/auth/utils.js'
 import { routes } from '#src/server/common/constants/routes.js'
+import { dashboardFilterSchema } from '#src/server/common/validation/dashboard/schema.js'
 import {
   sortProjectsByStatus,
   formatProjectsForDisplay,
@@ -20,6 +21,16 @@ const FETCH_ERROR = 'Error fetching projects'
 
 const isClientSideFetchRequest = (request) =>
   request.headers['x-requested-with'] === 'XMLHttpRequest'
+
+const dashboardPayloadFailAction = (request, h, error) => {
+  request.logger.error({ err: error }, 'Invalid dashboard filter payload')
+
+  if (isClientSideFetchRequest(request)) {
+    return h.response().code(statusCodes.badRequest).takeover()
+  }
+
+  return h.redirect(routes.DASHBOARD).takeover()
+}
 
 const buildDashboardViewModel = async (
   request,
@@ -79,6 +90,12 @@ export const dashboardController = {
 }
 
 export const dashboardPostController = {
+  options: {
+    validate: {
+      payload: dashboardFilterSchema,
+      failAction: dashboardPayloadFailAction
+    }
+  },
   handler: async (request, h) => {
     if (isClientSideFetchRequest(request)) {
       try {

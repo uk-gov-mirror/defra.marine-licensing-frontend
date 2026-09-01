@@ -14,6 +14,7 @@ import {
 } from '~/tests/integration/shared/test-setup-helpers.js'
 import { loadPage } from '~/tests/integration/shared/app-server.js'
 import { getProjectsTableRow } from '~/tests/integration/shared/dom-helpers.js'
+import { makePostRequest } from '~/src/server/test-helpers/server-requests.js'
 import { mockMarineLicenceApplication } from '~/src/server/test-helpers/mocks/marine-licence-mocks.js'
 import { employeeSession } from '~/tests/integration/shared/session-fixtures.js'
 import { getUserSession } from '~/src/server/common/plugins/auth/utils.js'
@@ -478,6 +479,30 @@ describe('Dashboard', () => {
       const doc = await loadDashboardPage()
       const filter = doc.querySelector('.moj-filter')
       expect(filter).toBeFalsy()
+    })
+
+    describe('Invalid filter payload', () => {
+      it('should redirect to the dashboard when the no-JS payload fails validation', async () => {
+        const response = await makePostRequest({
+          url: routes.DASHBOARD,
+          server: getServer(),
+          formData: { show: 'not-a-value' }
+        })
+
+        expect(response.statusCode).toBe(302)
+        expect(response.headers.location).toBe(routes.DASHBOARD)
+      })
+
+      it('should return a 400 when the JS-fetch payload fails validation', async () => {
+        const response = await makePostRequest({
+          url: routes.DASHBOARD,
+          server: getServer(),
+          formData: { show: 'not-a-value' },
+          headers: { 'x-requested-with': 'XMLHttpRequest' }
+        })
+
+        expect(response.statusCode).toBe(400)
+      })
     })
   })
 })
