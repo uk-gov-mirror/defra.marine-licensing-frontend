@@ -3,7 +3,8 @@ import {
   sortProjectsByStatus,
   formatProjectsForDisplay,
   getActionButtons,
-  getStatusLabelText
+  getStatusLabelText,
+  getStatusOptions
 } from './utils.js'
 import {
   routes,
@@ -463,5 +464,29 @@ describe('#getStatusLabelText', () => {
     expect(getStatusLabelText('<script>alert(1)</script>')).toBe(
       '&lt;script&gt;alert(1)&lt;/script&gt;'
     )
+  })
+})
+
+describe('#getStatusOptions', () => {
+  test('returns one option per PROJECT_STATUS, sorted alphabetically by text, with only the given status checked', () => {
+    expect(getStatusOptions('SUBMITTED')).toEqual([
+      { value: 'ACTIVE', text: 'Active', checked: false },
+      { value: 'DRAFT', text: 'Draft', checked: false },
+      { value: 'SUBMITTED', text: 'Submitted', checked: true },
+      { value: 'TRANSFERRED', text: 'Transferred', checked: false },
+      { value: 'REJECTED', text: UNABLE_TO_PROGRESS, checked: false },
+      { value: 'WITHDRAWN', text: 'Withdrawn', checked: false }
+    ])
+  })
+
+  test('correctly checks options when multiple checkboxes are checked', () => {
+    expect(getStatusOptions(['DRAFT', 'ACTIVE'])).toEqual([
+      { value: 'ACTIVE', text: 'Active', checked: true },
+      { value: 'DRAFT', text: 'Draft', checked: true },
+      { value: 'SUBMITTED', text: 'Submitted', checked: false },
+      { value: 'TRANSFERRED', text: 'Transferred', checked: false },
+      { value: 'REJECTED', text: UNABLE_TO_PROGRESS, checked: false },
+      { value: 'WITHDRAWN', text: 'Withdrawn', checked: false }
+    ])
   })
 })

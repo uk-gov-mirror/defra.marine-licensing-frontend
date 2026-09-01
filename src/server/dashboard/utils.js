@@ -173,6 +173,45 @@ export const formatProjectsForDisplay = (projects, isEmployee = false) =>
     }
   })
 
-export const getFilterCategories = () => {
-  return []
+export const getFilterCategories = (searchParams) => {
+  const categories = []
+
+  if (!searchParams) {
+    return categories
+  }
+  if (searchParams.status) {
+    const { status } = searchParams
+
+    const isMultipleSelected = Array.isArray(status)
+    const transformedStatus = isMultipleSelected ? status : [status]
+
+    categories.push({
+      heading: {
+        text: 'Status'
+      },
+      items: transformedStatus.map((status) => ({
+        href: '#',
+        field: 'status',
+        value: status,
+        text:
+          status === PROJECT_STATUS.REJECTED
+            ? UNABLE_TO_PROGRESS
+            : PROJECT_STATUS[status]
+      }))
+    })
+  }
+
+  return categories
+}
+
+export const getStatusOptions = (status) => {
+  const isMultipleSelected = Array.isArray(status)
+
+  return Object.entries(PROJECT_STATUS)
+    .map(([key, val]) => ({
+      value: key,
+      text: val === PROJECT_STATUS.REJECTED ? UNABLE_TO_PROGRESS : val,
+      checked: isMultipleSelected ? status.includes(key) : status === key
+    }))
+    .sort((a, b) => a.text.localeCompare(b.text))
 }

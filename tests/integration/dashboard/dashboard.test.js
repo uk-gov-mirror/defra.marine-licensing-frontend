@@ -235,9 +235,12 @@ describe('Dashboard', () => {
     mockExemptions([])
     const doc = await loadDashboardPage()
     const table = queryByRole(doc, 'table', { name: 'Projects' })
-    expect(table).not.toBeInTheDocument()
+
+    const row = table.querySelectorAll('tbody tr')
+    expect(row.length).toBe(0)
+
     expect(
-      getByText(doc, 'There are no projects to display.')
+      getByText(doc, 'There are no submissions to display.')
     ).toBeInTheDocument()
   })
 
@@ -471,6 +474,25 @@ describe('Dashboard', () => {
 
       expect(orgSubmissionRadio).not.toBeChecked()
       expect(mySubmissionRadio).toBeChecked()
+
+      const statusGroup = getByRole(filter, 'group', {
+        name: 'Status'
+      })
+      expect(statusGroup).toBeInTheDocument()
+
+      const statuses = [
+        'Active',
+        'Draft',
+        'Submitted',
+        'Transferred',
+        'Unable to progress',
+        'Withdrawn'
+      ]
+
+      statuses.forEach((status) => {
+        const checkbox = getByRole(statusGroup, 'checkbox', { name: status })
+        expect(checkbox).not.toBeChecked()
+      })
     })
 
     it('should not render table with moj-filter module for individuals', async () => {

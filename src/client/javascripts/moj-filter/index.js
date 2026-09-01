@@ -3,6 +3,10 @@ import { createAll } from 'govuk-frontend'
 
 const FETCH_TIMEOUT_MS = 8000
 const CLEAR_LINK_SELECTOR = '.moj-filter__heading-action a'
+
+const SELECTED_FILTERS_SELECTOR = '.moj-filter__selected'
+const TAG_SELECTOR = '.moj-filter__tag'
+
 export class MojFilter {
   constructor() {
     this.$root = document.querySelector('[data-module="moj-filter"]')
@@ -73,10 +77,23 @@ export class MojFilter {
       const $newResults = template.content.getElementById('app-project-results')
       this.$results.innerHTML = $newResults.innerHTML
 
+      const $newSelectedFilters = template.content.querySelector(
+        SELECTED_FILTERS_SELECTOR
+      )
+
+      const $selectedFilters = this.$root.querySelector(
+        SELECTED_FILTERS_SELECTOR
+      )
+
+      if ($newSelectedFilters && $selectedFilters) {
+        $selectedFilters.innerHTML = $newSelectedFilters.innerHTML
+      }
+
       createAll(SortableTable, undefined, this.$results)
 
       this.initClearFiltersLink()
       this.announceResultCount()
+      this.initSelectedFilterTags()
     } catch {
       // On failure, reset page or submit form without JS as a fallback
       if (clear) {
@@ -88,6 +105,36 @@ export class MojFilter {
       clearTimeout(timeout)
       this.isSubmitting = false
       this.$submitButton?.removeAttribute('disabled')
+    }
+  }
+
+  initSelectedFilterTags() {
+    const $selectedFilters = this.$root.querySelector(SELECTED_FILTERS_SELECTOR)
+    if (!$selectedFilters) {
+      return
+    }
+
+    for (const $tag of $selectedFilters.querySelectorAll(TAG_SELECTOR)) {
+      $tag.addEventListener('click', (event) => this.onTagRemove(event))
+    }
+  }
+
+  onTagRemove(event) {
+    event.preventDefault()
+
+    // data-value and data-field will contain remove details
+    const { field, value } = event.currentTarget.dataset
+    if (!field || !value) {
+      return
+    }
+
+    const $checkbox = this.$form.querySelector(
+      `input[name="${field}"][value="${value}"]`
+    )
+
+    if ($checkbox) {
+      $checkbox.checked = false
+      this.$form.requestSubmit()
     }
   }
 

@@ -8,7 +8,7 @@
   {% endif %}
 {% endset %}
 
-{% if projects and projects.length > 0 %}
+{% if projects %}
   {% if isEmployee %}<div class="moj-scrollable-pane">{% endif %}
   
   {% if isEmployee %}
@@ -50,5 +50,5 @@
 {% endif %}
 
 <p class="govuk-body app-empty-message{% if showTable %} govuk-!-display-none{% endif %}">
-  There are no projects to display.
+  There are no submissions to display.
 </p>

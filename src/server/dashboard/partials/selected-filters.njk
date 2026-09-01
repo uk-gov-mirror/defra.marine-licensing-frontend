@@ -7,7 +7,7 @@
     </div>
 
     <div class="moj-filter__heading-action">
-      <p><a class="govuk-link govuk-link--no-visited-state" href="">Clear filters</a></p>
+      <p><a class="govuk-link govuk-link--no-visited-state" href="/projects">Clear filters</a></p>
     </div>
 
   </div>
@@ -17,7 +17,13 @@
 
     <ul class="moj-filter-tags">
       {% for item in category.items %}
-        <li><a class="moj-filter__tag" href="#"{% if item.field %} data-field="{{ item.field }}"{% endif %}{% if item.value is defined %} data-value="{{ item.value }}"{% endif %}><span class="govuk-visually-hidden">Remove this filter</span> {{ item.text }}</a></li>
+            <li>
+              <a class="moj-filter__tag" href="#"
+                  {% if item.field %} data-field="{{ item.field }}"{% endif %}
+                  {% if item.value is defined %} data-value="{{ item.value }}"{% endif %}>
+            <span class="govuk-visually-hidden">Remove this filter</span>
+              {{ item.text }}</a>
+            </li>
       {% endfor %}
     </ul>
   {% endfor %}

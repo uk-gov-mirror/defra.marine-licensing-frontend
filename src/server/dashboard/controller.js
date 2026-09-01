@@ -4,9 +4,10 @@ import {
   sortProjectsByStatus,
   formatProjectsForDisplay,
   getFilterCategories,
-  fetchProjects
+  fetchProjects,
+  getStatusOptions
 } from './utils.js'
-import { statusCodes } from '../common/constants/status-codes.js'
+import { statusCodes } from '#src/server/common/constants/status-codes.js'
 
 export const DASHBOARD_VIEW_ROUTE = 'dashboard/index.njk'
 export const DASHBOARD_RESULTS_VIEW_ROUTE =
@@ -33,12 +34,16 @@ const buildDashboardViewModel = async (
   const userSession = await getUserSession(request, request.state?.userSession)
   const organisationName = userSession?.organisationName || ''
 
+  const statusOptions = getStatusOptions(searchParams.status)
+  const filterCategories = getFilterCategories(searchParams)
+
   return {
     projects: formatProjectsForDisplay(sortedProjects, isEmployee),
     isEmployee,
     organisationName,
-    filterCategories: getFilterCategories(),
-    searchParams
+    filterCategories,
+    searchParams,
+    statusOptions
   }
 }
 
