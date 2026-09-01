@@ -61,7 +61,8 @@ describe('#dashboard', () => {
         organisationName: '',
         filterCategories: expect.any(Object),
         searchParams: [],
-        statusOptions: expect.any(Array)
+        statusOptions: expect.any(Array),
+        typeOptions: expect.any(Array)
       })
     })
 
@@ -95,7 +96,8 @@ describe('#dashboard', () => {
         organisationName: '',
         filterCategories: expect.any(Object),
         searchParams: flashedsearchParams,
-        statusOptions: expect.any(Array)
+        statusOptions: expect.any(Array),
+        typeOptions: expect.any(Array)
       })
     })
 
@@ -155,7 +157,8 @@ describe('#dashboard', () => {
         organisationName: '',
         filterCategories: expect.any(Object),
         searchParams: [],
-        statusOptions: expect.any(Array)
+        statusOptions: expect.any(Array),
+        typeOptions: expect.any(Array)
       })
     })
 
@@ -207,7 +210,8 @@ describe('#dashboard', () => {
         organisationName: '',
         filterCategories: expect.any(Object),
         searchParams: [],
-        statusOptions: expect.any(Array)
+        statusOptions: expect.any(Array),
+        typeOptions: expect.any(Array)
       })
     })
   })
@@ -302,7 +306,8 @@ describe('#dashboard', () => {
           organisationName: '',
           filterCategories: expect.any(Object),
           searchParams: request.payload,
-          statusOptions: expect.any(Array)
+          statusOptions: expect.any(Array),
+          typeOptions: expect.any(Array)
         })
       })
 

@@ -4,7 +4,8 @@ import {
   formatProjectsForDisplay,
   getActionButtons,
   getStatusLabelText,
-  getStatusOptions
+  getStatusOptions,
+  getTypeOptions
 } from './utils.js'
 import {
   routes,
@@ -487,6 +488,38 @@ describe('#getStatusOptions', () => {
       { value: 'TRANSFERRED', text: 'Transferred', checked: false },
       { value: 'REJECTED', text: UNABLE_TO_PROGRESS, checked: false },
       { value: 'WITHDRAWN', text: 'Withdrawn', checked: false }
+    ])
+  })
+})
+
+describe('#getTypeOptions', () => {
+  test('returns correct options by default', () => {
+    expect(getTypeOptions()).toEqual([
+      {
+        value: 'exemption',
+        text: 'Exempt activity notification',
+        checked: false
+      },
+      {
+        value: 'marine-licence',
+        text: 'Marine licence application',
+        checked: false
+      }
+    ])
+  })
+
+  test('returns correct options when selected', () => {
+    expect(getTypeOptions(['exemption', 'marine-licence'])).toEqual([
+      {
+        value: 'exemption',
+        text: 'Exempt activity notification',
+        checked: true
+      },
+      {
+        value: 'marine-licence',
+        text: 'Marine licence application',
+        checked: true
+      }
     ])
   })
 })

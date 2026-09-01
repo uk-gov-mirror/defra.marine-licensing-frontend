@@ -17,6 +17,8 @@ import { getProjectsTableRow } from '~/tests/integration/shared/dom-helpers.js'
 import { mockMarineLicenceApplication } from '~/src/server/test-helpers/mocks/marine-licence-mocks.js'
 import { employeeSession } from '~/tests/integration/shared/session-fixtures.js'
 import { getUserSession } from '~/src/server/common/plugins/auth/utils.js'
+import { EXEMPTION_TYPE } from '#src/server/common/constants/exemptions.js'
+import { MARINE_LICENCE_TYPE } from '#src/server/common/constants/marine-licence.js'
 
 vi.mock('~/src/server/common/plugins/auth/utils.js')
 
@@ -491,6 +493,18 @@ describe('Dashboard', () => {
 
       statuses.forEach((status) => {
         const checkbox = getByRole(statusGroup, 'checkbox', { name: status })
+        expect(checkbox).not.toBeChecked()
+      })
+
+      const typeGroup = getByRole(filter, 'group', {
+        name: 'Submission type'
+      })
+      expect(typeGroup).toBeInTheDocument()
+
+      const typeValues = [EXEMPTION_TYPE, MARINE_LICENCE_TYPE]
+
+      typeValues.forEach((type) => {
+        const checkbox = getByRole(typeGroup, 'checkbox', { name: type })
         expect(checkbox).not.toBeChecked()
       })
     })

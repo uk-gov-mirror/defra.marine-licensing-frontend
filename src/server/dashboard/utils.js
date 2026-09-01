@@ -7,6 +7,7 @@ import {
 import { EXEMPTION_TYPE } from '#src/server/common/constants/exemptions.js'
 import {
   PROJECT_STATUS,
+  PROJECT_TYPE,
   UNABLE_TO_PROGRESS
 } from '#src/server/common/constants/projects.js'
 import { getTagStyle } from '#src/server/common/helpers/ui/get-tag-style.js'
@@ -201,6 +202,26 @@ export const getFilterCategories = (searchParams) => {
     })
   }
 
+  if (searchParams.type) {
+    const { type } = searchParams
+
+    const isMultipleSelected = Array.isArray(type)
+    const transformedType = isMultipleSelected ? type : [type]
+
+    categories.push({
+      heading: {
+        text: 'Submission type'
+      },
+      items: transformedType.map((type) => ({
+        href: '#',
+        field: 'type',
+        value: type,
+        text:
+          type === PROJECT_TYPE.EXEMPTION ? EXEMPTION_TYPE : MARINE_LICENCE_TYPE
+      }))
+    })
+  }
+
   return categories
 }
 
@@ -214,4 +235,25 @@ export const getStatusOptions = (status) => {
       checked: isMultipleSelected ? status.includes(key) : status === key
     }))
     .sort((a, b) => a.text.localeCompare(b.text))
+}
+
+export const getTypeOptions = (type) => {
+  const isMultipleSelected = Array.isArray(type)
+
+  return [
+    {
+      value: 'exemption',
+      text: EXEMPTION_TYPE,
+      checked: isMultipleSelected
+        ? type.includes(PROJECT_TYPE.EXEMPTION)
+        : type === PROJECT_TYPE.EXEMPTION
+    },
+    {
+      value: 'marine-licence',
+      text: MARINE_LICENCE_TYPE,
+      checked: isMultipleSelected
+        ? type.includes(PROJECT_TYPE.MARINE_LICENCE)
+        : type === PROJECT_TYPE.MARINE_LICENCE
+    }
+  ]
 }

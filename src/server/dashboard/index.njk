@@ -34,6 +34,19 @@
         }
       ]
     }) }}
+    
+    {{ govukCheckboxes({
+      idPrefix: "type",
+      name: "type",
+      classes: "govuk-checkboxes--small",
+      fieldset: {
+        legend: {
+          text: "Submission type",
+          classes: "govuk-fieldset__legend--s"
+        }
+      },
+      items: typeOptions
+    }) }}
 
   {{ govukCheckboxes({
     idPrefix: "status",
@@ -70,7 +83,7 @@
 
       {% set showTable = projects and projects.length > 0 and (not isEmployee or filterValue == filterAllProjects or hasOwnProjects) %}
 
-    {% if isEmployee and showTable %}  
+    {% if isEmployee %}  
       <div class="moj-filter-layout">
           <form method="post" class="app-filter-form" novalidate>
 
