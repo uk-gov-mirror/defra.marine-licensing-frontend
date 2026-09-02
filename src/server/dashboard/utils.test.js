@@ -101,7 +101,6 @@ describe('#formatProjectsForDisplay', () => {
 
     expect(result).toEqual([
       {
-        attributes: { 'data-is-own-project': 'true' },
         cells: [
           { text: 'Test Project' },
           { text: 'Exempt activity notification' },
@@ -138,7 +137,6 @@ describe('#formatProjectsForDisplay', () => {
 
     expect(result).toEqual([
       {
-        attributes: { 'data-is-own-project': 'true' },
         cells: [
           { text: 'Test Project' },
           { text: 'Exempt activity notification' },
@@ -183,7 +181,6 @@ describe('#formatProjectsForDisplay', () => {
 
     expect(result).toHaveLength(2)
     expect(result[0]).toEqual({
-      attributes: { 'data-is-own-project': 'true' },
       cells: [
         { text: 'Project 1' },
         { text: 'Exempt activity notification' },
@@ -202,7 +199,6 @@ describe('#formatProjectsForDisplay', () => {
       ]
     })
     expect(result[1]).toEqual({
-      attributes: { 'data-is-own-project': 'true' },
       cells: [
         { text: 'Project 2' },
         { text: 'Exempt activity notification' },

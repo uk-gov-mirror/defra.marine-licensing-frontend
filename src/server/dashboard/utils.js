@@ -1,4 +1,5 @@
 import { formatDate } from '#src/config/nunjucks/filters/format-date.js'
+import { authenticatedPostRequest } from '#src/server/common/helpers/authenticated-requests.js'
 import {
   routes,
   marineLicenceRoutes
@@ -81,6 +82,9 @@ const getMarineLicenceActions = ({
   )
 }
 
+export const fetchProjects = async (request, payload = {}) =>
+  authenticatedPostRequest(request, '/projects', payload)
+
 export const sortProjectsByStatus = (projects) => {
   return [...projects].sort((a, b) => {
     const statusA = a.status ?? ''
@@ -133,8 +137,6 @@ export const formatProjectsForDisplay = (projects, isEmployee = false) =>
   projects.map((project) => {
     const { status, projectType } = project
 
-    const isOwnProject = project.isOwnProject ?? true
-
     const baseRow = [
       { text: project.projectName },
       {
@@ -167,9 +169,10 @@ export const formatProjectsForDisplay = (projects, isEmployee = false) =>
     baseRow.push({ html: getActionButtons(project) })
 
     return {
-      cells: baseRow,
-      attributes: {
-        'data-is-own-project': isOwnProject ? 'true' : 'false'
-      }
+      cells: baseRow
     }
   })
+
+export const getFilterCategories = () => {
+  return []
+}
