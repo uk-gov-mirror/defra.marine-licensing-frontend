@@ -89,9 +89,12 @@ describe('getAddressChangeRoute', () => {
     )
   })
 
-  test('returns the international address page when there is no invoicing data', () => {
+  test('returns the UK or international question when no address type has been chosen', () => {
     expect(getAddressChangeRoute(undefined)).toBe(
-      marineLicenceInvoicingRoutes.MARINE_LICENCE_INTERNATIONAL_INVOICE_ADDRESS
+      marineLicenceInvoicingRoutes.MARINE_LICENCE_IS_INVOICE_ADDRESS_UK_OR_INTERNATIONAL
+    )
+    expect(getAddressChangeRoute({})).toBe(
+      marineLicenceInvoicingRoutes.MARINE_LICENCE_IS_INVOICE_ADDRESS_UK_OR_INTERNATIONAL
     )
   })
 })

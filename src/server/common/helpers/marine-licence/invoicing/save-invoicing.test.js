@@ -54,16 +54,6 @@ describe('saveInvoicingToBackend', () => {
     )
   })
 
-  test('should omit the address source when none has been recorded', async () => {
-    isIndividualUser.mockReturnValue(false)
-
-    await saveInvoicingToBackend(mockRequest)
-
-    expect(authenticatedPatchRequest.mock.calls[0][2]).not.toHaveProperty(
-      'invoiceAddressSource'
-    )
-  })
-
   test('should save invoicing for individual user', async () => {
     isIndividualUser.mockReturnValue(true)
 

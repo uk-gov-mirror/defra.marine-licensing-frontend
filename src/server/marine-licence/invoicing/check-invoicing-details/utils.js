@@ -10,9 +10,14 @@ import {
 
 // A looked-up address is changed by searching again rather than by typing over it.
 // An address saved before the source was recorded has none, so it keeps the manual
-// entry page it has always used.
+// entry page it has always used. With no address type chosen there is nothing to
+// change yet, so the question that decides the type comes first.
 export const getAddressChangeRoute = (invoicing) => {
-  if (invoicing?.invoiceAddressType !== INVOICE_TYPE_OPTIONS.UK) {
+  if (!invoicing?.invoiceAddressType) {
+    return marineLicenceInvoicingRoutes.MARINE_LICENCE_IS_INVOICE_ADDRESS_UK_OR_INTERNATIONAL
+  }
+
+  if (invoicing.invoiceAddressType !== INVOICE_TYPE_OPTIONS.UK) {
     return marineLicenceInvoicingRoutes.MARINE_LICENCE_INTERNATIONAL_INVOICE_ADDRESS
   }
 

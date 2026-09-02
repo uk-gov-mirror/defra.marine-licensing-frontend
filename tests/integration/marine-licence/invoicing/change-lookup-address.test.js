@@ -15,7 +15,7 @@ import * as addressLookup from '~/src/server/common/helpers/marine-licence/invoi
 import { authenticatedPatchRequest } from '~/src/server/common/helpers/authenticated-requests.js'
 import { mockMarineLicenceApplication } from '~/src/server/test-helpers/mocks/marine-licence-mocks.js'
 import { getRowByKey } from '~/tests/integration/marine-licence/invoicing/check-invoicing-details/check-invoicing-details.utils.js'
-import { ADDRESS_HEADING } from '#src/server/common/helpers/marine-licence/invoicing/invoicing-review-data.js'
+import { ADDRESS_HEADING } from '~/src/server/common/helpers/marine-licence/invoicing/invoicing-review-data.js'
 import { agentSession } from '~/tests/integration/shared/session-fixtures.js'
 import { getUserSession } from '~/src/server/common/plugins/auth/utils.js'
 import { ADDRESS_SOURCE } from '~/src/server/common/validation/invoicing/constants.js'
@@ -98,7 +98,7 @@ describe('Changing an invoice address provided by postcode lookup', () => {
   })
 
   test('the postcode search has no Cancel link and goes back to check invoicing details', async () => {
-    mockInvoicing({ invoiceAddressSource: ADDRESS_SOURCE.LOOKUP })
+    mockInvoicing()
 
     const document = await loadPage({
       requestUrl: `${marineLicenceRoutes.MARINE_LICENCE_INVOICE_ADDRESS_POSTCODE_SEARCH}${CHANGE}`,
@@ -115,7 +115,7 @@ describe('Changing an invoice address provided by postcode lookup', () => {
   })
 
   test('searching again with several results goes to the address picker, still in the change flow', async () => {
-    mockInvoicing({ invoiceAddressSource: ADDRESS_SOURCE.LOOKUP })
+    mockInvoicing()
     vi.spyOn(addressLookup, 'lookupAddresses').mockResolvedValue({
       results: [anAddress, anotherAddress]
     })
@@ -132,7 +132,7 @@ describe('Changing an invoice address provided by postcode lookup', () => {
   })
 
   test('searching again with a single result goes straight to confirm address, still in the change flow', async () => {
-    mockInvoicing({ invoiceAddressSource: ADDRESS_SOURCE.LOOKUP })
+    mockInvoicing()
     vi.spyOn(addressLookup, 'lookupAddresses').mockResolvedValue({
       results: [anAddress]
     })
@@ -150,7 +150,6 @@ describe('Changing an invoice address provided by postcode lookup', () => {
 
   test('the address picker has no Cancel link', async () => {
     mockInvoicing({
-      invoiceAddressSource: ADDRESS_SOURCE.LOOKUP,
       invoiceAddressSearch: { postcode: 'NE4 7AR' },
       invoiceAddressSearchResults: [anAddress, anotherAddress]
     })
@@ -168,7 +167,6 @@ describe('Changing an invoice address provided by postcode lookup', () => {
 
   test('picking an address goes to confirm address, still in the change flow', async () => {
     mockInvoicing({
-      invoiceAddressSource: ADDRESS_SOURCE.LOOKUP,
       invoiceAddressSearch: { postcode: 'NE4 7AR' },
       invoiceAddressSearchResults: [anAddress, anotherAddress]
     })
