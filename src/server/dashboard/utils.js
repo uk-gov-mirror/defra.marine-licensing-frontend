@@ -271,3 +271,15 @@ export const getTypeOptions = (type) => {
     }
   ]
 }
+
+export const getUserOptions = (userSession) => {
+  const { contactId, displayName } = userSession
+
+  return [
+    {
+      value: contactId,
+      text: `Mine (${displayName})`,
+      checked: false
+    }
+  ]
+}

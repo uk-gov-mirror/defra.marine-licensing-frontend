@@ -1,3 +1,4 @@
+import { JSDOM } from 'jsdom'
 import {
   getByRole,
   queryByRole,
@@ -15,7 +16,10 @@ import {
 } from '~/tests/integration/shared/test-setup-helpers.js'
 import { loadPage } from '~/tests/integration/shared/app-server.js'
 import { getProjectsTableRow } from '~/tests/integration/shared/dom-helpers.js'
-import { makePostRequest } from '~/src/server/test-helpers/server-requests.js'
+import {
+  makeGetRequest,
+  makePostRequest
+} from '~/src/server/test-helpers/server-requests.js'
 import { mockMarineLicenceApplication } from '~/src/server/test-helpers/mocks/marine-licence-mocks.js'
 import { employeeSession } from '~/tests/integration/shared/session-fixtures.js'
 import { getUserSession } from '~/src/server/common/plugins/auth/utils.js'
@@ -485,8 +489,17 @@ describe('Dashboard', () => {
           name: 'My submissions'
         })
 
+        const userSubmissionRadio = getByRole(filter, 'radio', {
+          name: 'Submissions by owner'
+        })
+
         expect(orgSubmissionRadio).not.toBeChecked()
         expect(mySubmissionRadio).toBeChecked()
+        expect(userSubmissionRadio).not.toBeChecked()
+
+        expect(
+          getByRole(filter, 'checkbox', { name: 'Mine (Test User)' })
+        ).toBeInTheDocument()
 
         const statusGroup = getByRole(filter, 'group', {
           name: 'Status'
@@ -520,6 +533,44 @@ describe('Dashboard', () => {
           const checkbox = getByRole(typeGroup, 'checkbox', { name: type })
           expect(checkbox).not.toBeChecked()
         })
+      })
+
+      it('should check the "Submissions by owner" radio after filtering', async () => {
+        mockEmployeeExemptions(employeeExemptions)
+
+        const postResponse = await makePostRequest({
+          url: routes.DASHBOARD,
+          server: getServer(),
+          formData: { show: 'specific-user' }
+        })
+
+        expect(postResponse.statusCode).toBe(302)
+        expect(postResponse.headers.location).toBe(routes.DASHBOARD)
+
+        const sessionCookie = Array.isArray(postResponse.headers['set-cookie'])
+          ? postResponse.headers['set-cookie'].join('; ')
+          : postResponse.headers['set-cookie']
+
+        const getResponse = await makeGetRequest({
+          url: routes.DASHBOARD,
+          server: getServer(),
+          headers: { cookie: sessionCookie }
+        })
+
+        const { document } = new JSDOM(getResponse.result).window
+        const filter = document.querySelector('.moj-filter')
+
+        const userSubmissionRadio = getByRole(filter, 'radio', {
+          name: 'Submissions by owner'
+        })
+
+        expect(userSubmissionRadio).toBeChecked()
+
+        const myProjectsOption = getByRole(filter, 'checkbox', {
+          name: 'Mine (Test User)'
+        })
+
+        expect(myProjectsOption).not.toBeChecked()
       })
     })
 

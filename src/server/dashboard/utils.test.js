@@ -6,7 +6,8 @@ import {
   getStatusLabelText,
   getFilterCategories,
   getStatusOptions,
-  getTypeOptions
+  getTypeOptions,
+  getUserOptions
 } from './utils.js'
 import {
   routes,
@@ -645,6 +646,16 @@ describe('#getTypeOptions', () => {
         text: 'Marine licence application',
         checked: true
       }
+    ])
+  })
+})
+
+describe('#getUserOptions', () => {
+  test('returns an unchecked "Mine" option built from the user session', () => {
+    expect(
+      getUserOptions({ contactId: 'contact-123', displayName: 'Sam Evans' })
+    ).toEqual([
+      { value: 'contact-123', text: 'Mine (Sam Evans)', checked: false }
     ])
   })
 })

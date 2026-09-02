@@ -8,7 +8,8 @@ import {
   getFilterCategories,
   fetchProjects,
   getStatusOptions,
-  getTypeOptions
+  getTypeOptions,
+  getUserOptions
 } from '#src/server/dashboard/utils.js'
 import { statusCodes } from '#src/server/common/constants/status-codes.js'
 
@@ -53,8 +54,10 @@ const buildDashboardViewModel = async (
     searchParams.status,
     marineLicenceEnabled
   )
+
   const filterCategories = getFilterCategories(searchParams)
   const typeOptions = getTypeOptions(searchParams.type)
+  const userOptions = getUserOptions(userSession)
 
   return {
     projects: formatProjectsForDisplay(sortedProjects, isEmployee),
@@ -64,7 +67,8 @@ const buildDashboardViewModel = async (
     searchParams,
     statusOptions,
     typeOptions,
-    marineLicenceEnabled
+    marineLicenceEnabled,
+    userOptions
   }
 }
 
