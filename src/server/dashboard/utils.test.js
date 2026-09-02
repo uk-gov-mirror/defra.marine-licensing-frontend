@@ -4,6 +4,7 @@ import {
   formatProjectsForDisplay,
   getActionButtons,
   getStatusLabelText,
+  getFilterCategories,
   getStatusOptions,
   getTypeOptions
 } from './utils.js'
@@ -465,6 +466,123 @@ describe('#getStatusLabelText', () => {
     expect(getStatusLabelText('<script>alert(1)</script>')).toBe(
       '&lt;script&gt;alert(1)&lt;/script&gt;'
     )
+  })
+})
+
+describe('#getFilterCategories', () => {
+  it('returns an empty array when there is nothing to filter by', () => {
+    expect(getFilterCategories()).toEqual([])
+    expect(getFilterCategories(null)).toEqual([])
+    expect(getFilterCategories({ show: 'my-projects' })).toEqual([])
+  })
+
+  it('builds a Status category from a single selected status, mapping Rejected to Unable to progress', () => {
+    expect(getFilterCategories({ status: 'REJECTED' })).toEqual([
+      {
+        heading: { text: 'Status' },
+        items: [
+          {
+            href: '#',
+            field: 'status',
+            value: 'REJECTED',
+            text: UNABLE_TO_PROGRESS
+          }
+        ]
+      }
+    ])
+  })
+
+  it('builds a Status category from multiple selected statuses, mapping each to its display text', () => {
+    const result = getFilterCategories({
+      status: [
+        'DRAFT',
+        'ACTIVE',
+        'SUBMITTED',
+        'TRANSFERRED',
+        'REJECTED',
+        'WITHDRAWN'
+      ]
+    })
+
+    expect(result).toEqual([
+      {
+        heading: { text: 'Status' },
+        items: [
+          { href: '#', field: 'status', value: 'DRAFT', text: 'Draft' },
+          { href: '#', field: 'status', value: 'ACTIVE', text: 'Active' },
+          {
+            href: '#',
+            field: 'status',
+            value: 'SUBMITTED',
+            text: 'Submitted'
+          },
+          {
+            href: '#',
+            field: 'status',
+            value: 'TRANSFERRED',
+            text: 'Transferred'
+          },
+          {
+            href: '#',
+            field: 'status',
+            value: 'REJECTED',
+            text: UNABLE_TO_PROGRESS
+          },
+          {
+            href: '#',
+            field: 'status',
+            value: 'WITHDRAWN',
+            text: 'Withdrawn'
+          }
+        ]
+      }
+    ])
+  })
+
+  it('builds a Submission type category, single or multi-selected', () => {
+    expect(getFilterCategories({ type: 'exemption' })).toEqual([
+      {
+        heading: { text: 'Submission type' },
+        items: [
+          {
+            href: '#',
+            field: 'type',
+            value: 'exemption',
+            text: 'Exempt activity notification'
+          }
+        ]
+      }
+    ])
+
+    expect(
+      getFilterCategories({ type: ['exemption', 'marine-licence'] })
+    ).toEqual([
+      {
+        heading: { text: 'Submission type' },
+        items: [
+          {
+            href: '#',
+            field: 'type',
+            value: 'exemption',
+            text: 'Exempt activity notification'
+          },
+          {
+            href: '#',
+            field: 'type',
+            value: 'marine-licence',
+            text: 'Marine licence application'
+          }
+        ]
+      }
+    ])
+  })
+
+  it('returns both categories, Status before Submission type, when both are selected', () => {
+    const result = getFilterCategories({ status: 'DRAFT', type: 'exemption' })
+
+    expect(result).toHaveLength(2)
+    expect(result[0].heading.text).toBe('Status')
+    expect(result[1].heading.text).toBe('Submission type')
   })
 })
 

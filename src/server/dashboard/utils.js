@@ -180,6 +180,7 @@ export const getFilterCategories = (searchParams) => {
   if (!searchParams) {
     return categories
   }
+
   if (searchParams.status) {
     const { status } = searchParams
 
@@ -195,9 +196,9 @@ export const getFilterCategories = (searchParams) => {
         field: 'status',
         value: categoryStatus,
         text:
-          categoryStatus === PROJECT_STATUS.REJECTED
+          categoryStatus === 'REJECTED'
             ? UNABLE_TO_PROGRESS
-            : PROJECT_STATUS[status]
+            : PROJECT_STATUS[categoryStatus]
       }))
     })
   }
