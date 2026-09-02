@@ -290,6 +290,22 @@ describe('MojFilter', () => {
 
       expect(requestSubmitSpy).not.toHaveBeenCalled()
     })
+
+    test('should not resubmit the form when selected filters is not in the dom', () => {
+      document.body.innerHTML = `
+        <div data-module="moj-filter"></div>
+        <div id="app-project-results"></div>
+        <div id="app-project-results-status"></div>`
+
+      const requestSubmitSpy = vi
+        .spyOn(HTMLFormElement.prototype, 'requestSubmit')
+        .mockImplementation(() => {})
+
+      const mojFilter = new MojFilter()
+      mojFilter.initSelectedFilterTags()
+
+      expect(requestSubmitSpy).not.toHaveBeenCalled()
+    })
   })
 
   describe('announceResultCount', () => {
