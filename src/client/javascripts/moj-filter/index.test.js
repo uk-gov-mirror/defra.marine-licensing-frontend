@@ -8,7 +8,10 @@ vi.mock('@ministryofjustice/frontend', () => ({
   SortableTable: vi.fn()
 }))
 
-const buildSelectedFiltersMarkup = ({ withClearLink = true, tags = [] } = {}) => `
+const buildSelectedFiltersMarkup = ({
+  withClearLink = true,
+  tags = []
+} = {}) => `
     <div class="moj-filter__selected">
       <div class="moj-filter__selected-heading">
         <div class="moj-filter__heading-title">
@@ -196,9 +199,9 @@ describe('MojFilter', () => {
         expect(mojFilter.isSubmitting).toBe(false)
       })
 
-      expect(
-        document.querySelector('.moj-filter__selected').innerHTML
-      ).toBe($selectedFiltersBefore)
+      expect(document.querySelector('.moj-filter__selected').innerHTML).toBe(
+        $selectedFiltersBefore
+      )
     })
   })
 
