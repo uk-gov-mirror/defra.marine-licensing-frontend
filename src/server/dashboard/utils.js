@@ -190,12 +190,12 @@ export const getFilterCategories = (searchParams) => {
       heading: {
         text: 'Status'
       },
-      items: transformedStatus.map((status) => ({
+      items: transformedStatus.map((categoryStatus) => ({
         href: '#',
         field: 'status',
-        value: status,
+        value: categoryStatus,
         text:
-          status === PROJECT_STATUS.REJECTED
+          categoryStatus === PROJECT_STATUS.REJECTED
             ? UNABLE_TO_PROGRESS
             : PROJECT_STATUS[status]
       }))
@@ -212,12 +212,14 @@ export const getFilterCategories = (searchParams) => {
       heading: {
         text: 'Submission type'
       },
-      items: transformedType.map((type) => ({
+      items: transformedType.map((categoryType) => ({
         href: '#',
         field: 'type',
-        value: type,
+        value: categoryType,
         text:
-          type === PROJECT_TYPE.EXEMPTION ? EXEMPTION_TYPE : MARINE_LICENCE_TYPE
+          categoryType === PROJECT_TYPE.EXEMPTION
+            ? EXEMPTION_TYPE
+            : MARINE_LICENCE_TYPE
       }))
     })
   }
@@ -225,12 +227,12 @@ export const getFilterCategories = (searchParams) => {
   return categories
 }
 
-const MARINE_LICENCE_ONLY_STATUS_KEYS = [
+const MARINE_LICENCE_ONLY_STATUS_KEYS = new Set([
   'SUBMITTED',
   'TRANSFERRED',
   'REJECTED',
   'WITHDRAWN'
-]
+])
 
 export const getStatusOptions = (status, marineLicenceEnabled = true) => {
   const isMultipleSelected = Array.isArray(status)
@@ -238,7 +240,7 @@ export const getStatusOptions = (status, marineLicenceEnabled = true) => {
   return Object.entries(PROJECT_STATUS)
     .filter(
       ([key]) =>
-        marineLicenceEnabled || !MARINE_LICENCE_ONLY_STATUS_KEYS.includes(key)
+        marineLicenceEnabled || !MARINE_LICENCE_ONLY_STATUS_KEYS.has(key)
     )
     .map(([key, val]) => ({
       value: key,
