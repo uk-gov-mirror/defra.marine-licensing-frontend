@@ -159,6 +159,12 @@ export class MojFilter {
       'input[value="my-projects"]'
     )
     $myProjectsRadio.checked = true
+
+    for (const $checkbox of this.$form.querySelectorAll(
+      'input[type="checkbox"]'
+    )) {
+      $checkbox.checked = false
+    }
   }
 
   announceResultCount() {

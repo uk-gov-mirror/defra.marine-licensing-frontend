@@ -1,4 +1,3 @@
-{%- from "govuk/components/table/macro.njk" import govukTable -%}
 {%- from "govuk/components/tag/macro.njk" import govukTag -%}
 {%- from "govuk/components/radios/macro.njk" import govukRadios -%}
 {% from "govuk/components/checkboxes/macro.njk" import govukCheckboxes %}
@@ -76,16 +75,7 @@
         }
       }) }}
 
-      {% set hasOwnProjects = false %}
-      {% for project in projects %}
-        {% if project.attributes['data-is-own-project'] == 'true' %}
-          {% set hasOwnProjects = true %}
-        {% endif %}
-      {% endfor %}
-
-      {% set showTable = projects and projects.length > 0 and (not isEmployee or filterValue == filterAllProjects or hasOwnProjects) %}
-
-    {% if isEmployee %}  
+    {% if isEmployee %}
       <div class="moj-filter-layout">
           <form method="post" class="app-filter-form" novalidate>
 
@@ -123,7 +113,7 @@
       {% include "dashboard/partials/results.njk" %}
     </div>
 
-    {% if isEmployee and showTable %}
+    {% if isEmployee %}
       </div>
    </div>
    {% endif %}

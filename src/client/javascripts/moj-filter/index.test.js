@@ -55,6 +55,7 @@ describe('MojFilter', () => {
           ${buildSelectedFiltersMarkup({ withClearLink })}
           <input type="radio" name="show" value="all-projects" checked />
           <input type="radio" name="show" value="my-projects" />
+          <input type="checkbox" name="status" value="ACTIVE" checked />
         </div>
         <div id="app-project-results"></div>
       </form>
@@ -154,9 +155,13 @@ describe('MojFilter', () => {
       const $allProjectsRadio = document.querySelector(
         'input[value="all-projects"]'
       )
+      const $statusCheckbox = document.querySelector(
+        'input[type="checkbox"][name="status"]'
+      )
 
       expect($myProjectsRadio.checked).toBe(true)
       expect($allProjectsRadio.checked).toBe(false)
+      expect($statusCheckbox.checked).toBe(false)
       expect(assignSpy).not.toHaveBeenCalled()
 
       expect($tag.dataset.field).toBe('status')
