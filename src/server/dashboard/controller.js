@@ -1,3 +1,4 @@
+import { config } from '#src/config/config.js'
 import { getUserSession } from '#src/server/common/plugins/auth/utils.js'
 import { routes } from '#src/server/common/constants/routes.js'
 import { dashboardFilterSchema } from '#src/server/common/validation/dashboard/schema.js'
@@ -46,7 +47,12 @@ const buildDashboardViewModel = async (
   const userSession = await getUserSession(request, request.state?.userSession)
   const organisationName = userSession?.organisationName || ''
 
-  const statusOptions = getStatusOptions(searchParams.status)
+  const marineLicenceEnabled = config.get('marineLicence').enabled
+
+  const statusOptions = getStatusOptions(
+    searchParams.status,
+    marineLicenceEnabled
+  )
   const filterCategories = getFilterCategories(searchParams)
   const typeOptions = getTypeOptions(searchParams.type)
 
@@ -57,7 +63,8 @@ const buildDashboardViewModel = async (
     filterCategories,
     searchParams,
     statusOptions,
-    typeOptions
+    typeOptions,
+    marineLicenceEnabled
   }
 }
 

@@ -225,10 +225,21 @@ export const getFilterCategories = (searchParams) => {
   return categories
 }
 
-export const getStatusOptions = (status) => {
+const MARINE_LICENCE_ONLY_STATUS_KEYS = [
+  'SUBMITTED',
+  'TRANSFERRED',
+  'REJECTED',
+  'WITHDRAWN'
+]
+
+export const getStatusOptions = (status, marineLicenceEnabled = true) => {
   const isMultipleSelected = Array.isArray(status)
 
   return Object.entries(PROJECT_STATUS)
+    .filter(
+      ([key]) =>
+        marineLicenceEnabled || !MARINE_LICENCE_ONLY_STATUS_KEYS.includes(key)
+    )
     .map(([key, val]) => ({
       value: key,
       text: val === PROJECT_STATUS.REJECTED ? UNABLE_TO_PROGRESS : val,

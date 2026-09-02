@@ -490,6 +490,13 @@ describe('#getStatusOptions', () => {
       { value: 'WITHDRAWN', text: 'Withdrawn', checked: false }
     ])
   })
+
+  test('only returns Active and Draft when the marine licence flag is off', () => {
+    expect(getStatusOptions(undefined, false)).toEqual([
+      { value: 'ACTIVE', text: 'Active', checked: false },
+      { value: 'DRAFT', text: 'Draft', checked: false }
+    ])
+  })
 })
 
 describe('#getTypeOptions', () => {
