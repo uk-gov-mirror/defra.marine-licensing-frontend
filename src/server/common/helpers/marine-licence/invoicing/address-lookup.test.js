@@ -392,6 +392,23 @@ describe('#addressLookup', () => {
       )
     })
 
+    test('should report no response body when the response body is empty', async () => {
+      Wreck.get.mockRejectedValue(
+        createWreckResponseError(400, Buffer.from(''))
+      )
+
+      await lookupAddresses(request, { postcode: 'NE99 1NC' })
+
+      expect(request.logger.error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tenant: {
+            message: `statusCode=400 apiUrl=${apiUrl} responseBody=none`
+          }
+        }),
+        'Postcode lookup request failed'
+      )
+    })
+
     test('should report no response body when the error carries none', async () => {
       const error = new Error('network down')
       Wreck.get.mockRejectedValue(error)
