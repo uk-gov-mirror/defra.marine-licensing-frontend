@@ -23,7 +23,7 @@ export const saveInvoicingToBackend = async (request) => {
     invoiceContactDetails,
     invoiceAddressType,
     invoiceAddress,
-    ...(invoiceAddressSource ? { invoiceAddressSource } : {}),
+    invoiceAddressSource,
     ...(individualUser ? {} : { purchaseOrderDetails })
   }
 

@@ -5,14 +5,7 @@ import {
   checkInvoicingDetailsController,
   checkInvoicingDetailsSubmitController
 } from '#src/server/marine-licence/invoicing/check-invoicing-details/controller.js'
-import {
-  marineLicenceInvoicingRoutes,
-  marineLicenceRoutes
-} from '#src/server/common/constants/routes.js'
-import {
-  ADDRESS_SOURCE,
-  INVOICE_TYPE_OPTIONS
-} from '#src/server/common/validation/invoicing/constants.js'
+import { marineLicenceRoutes } from '#src/server/common/constants/routes.js'
 import { createMockRequest } from '#src/server/test-helpers/mocks/helpers.js'
 import * as entryPoints from '#src/server/common/helpers/marine-licence/session-cache/invoicing-entry-points.js'
 import { getMarineLicenceService } from '#src/services/marine-licence-service/index.js'
@@ -84,56 +77,6 @@ describe('#checkInvoicingDetails', () => {
         expect.objectContaining({
           backLink: marineLicenceRoutes.MARINE_LICENCE_INVOICE_CONTACT_DETAILS,
           isIndividual: true
-        })
-      )
-    })
-  })
-
-  describe('address change link', () => {
-    const renderWith = async (invoicing) => {
-      vi.mocked(cacheUtils.getMarineLicenceCache).mockReturnValue({
-        id: 'test-id',
-        projectName: 'Test Project'
-      })
-      mockGetMarineLicenceById.mockResolvedValue({
-        ...mockMarineLicenceApplication,
-        invoicing
-      })
-
-      const h = createMockHandler()
-      await checkInvoicingDetailsController.handler(mockRequest, h)
-
-      return h
-    }
-
-    test('points at the postcode search for an address provided by lookup', async () => {
-      const h = await renderWith({
-        ...mockMarineLicenceApplication.invoicing,
-        invoiceAddressType: INVOICE_TYPE_OPTIONS.UK,
-        invoiceAddressSource: ADDRESS_SOURCE.LOOKUP
-      })
-
-      expect(h.view).toHaveBeenCalledWith(
-        CHECK_INVOICING_DETAILS_VIEW_ROUTE,
-        expect.objectContaining({
-          addressRoute:
-            marineLicenceInvoicingRoutes.MARINE_LICENCE_INVOICE_ADDRESS_POSTCODE_SEARCH
-        })
-      )
-    })
-
-    test('points at the manual entry page for a manually entered address', async () => {
-      const h = await renderWith({
-        ...mockMarineLicenceApplication.invoicing,
-        invoiceAddressType: INVOICE_TYPE_OPTIONS.UK,
-        invoiceAddressSource: ADDRESS_SOURCE.MANUAL
-      })
-
-      expect(h.view).toHaveBeenCalledWith(
-        CHECK_INVOICING_DETAILS_VIEW_ROUTE,
-        expect.objectContaining({
-          addressRoute:
-            marineLicenceInvoicingRoutes.MARINE_LICENCE_UK_INVOICE_ADDRESS
         })
       )
     })

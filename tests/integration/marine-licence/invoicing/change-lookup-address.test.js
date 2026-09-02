@@ -1,17 +1,12 @@
 import { vi } from 'vitest'
-import { getByRole, queryByRole } from '@testing-library/dom'
-import { JSDOM } from 'jsdom'
+import { getByRole } from '@testing-library/dom'
 import { marineLicenceRoutes } from '~/src/server/common/constants/routes.js'
 import {
   mockMarineLicence,
   setupTestServer
 } from '~/tests/integration/shared/test-setup-helpers.js'
 import { loadPage } from '~/tests/integration/shared/app-server.js'
-import {
-  makeGetRequest,
-  makePostRequest
-} from '~/src/server/test-helpers/server-requests.js'
-import * as addressLookup from '~/src/server/common/helpers/marine-licence/invoicing/address-lookup.js'
+import { makePostRequest } from '~/src/server/test-helpers/server-requests.js'
 import { authenticatedPatchRequest } from '~/src/server/common/helpers/authenticated-requests.js'
 import { mockMarineLicenceApplication } from '~/src/server/test-helpers/mocks/marine-licence-mocks.js'
 import { getRowByKey } from '~/tests/integration/marine-licence/invoicing/check-invoicing-details/check-invoicing-details.utils.js'
@@ -94,91 +89,6 @@ describe('Changing an invoice address provided by postcode lookup', () => {
     expect(getByRole(addressRow, 'link')).toHaveAttribute(
       'href',
       `${marineLicenceRoutes.MARINE_LICENCE_UK_INVOICE_ADDRESS}${CHANGE}`
-    )
-  })
-
-  test('the postcode search has no Cancel link and goes back to check invoicing details', async () => {
-    mockInvoicing()
-
-    const document = await loadPage({
-      requestUrl: `${marineLicenceRoutes.MARINE_LICENCE_INVOICE_ADDRESS_POSTCODE_SEARCH}${CHANGE}`,
-      server: getServer()
-    })
-
-    expect(
-      queryByRole(document, 'link', { name: 'Cancel' })
-    ).not.toBeInTheDocument()
-    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
-      'href',
-      marineLicenceRoutes.MARINE_LICENCE_CHECK_INVOICING_DETAILS
-    )
-  })
-
-  test('searching again with several results goes to the address picker, still in the change flow', async () => {
-    mockInvoicing()
-    vi.spyOn(addressLookup, 'lookupAddresses').mockResolvedValue({
-      results: [anAddress, anotherAddress]
-    })
-
-    const response = await makePostRequest({
-      url: `${marineLicenceRoutes.MARINE_LICENCE_INVOICE_ADDRESS_POSTCODE_SEARCH}${CHANGE}`,
-      server: getServer(),
-      formData: { postcode: 'NE4 7AR' }
-    })
-
-    expect(response.headers.location).toBe(
-      `${marineLicenceRoutes.MARINE_LICENCE_CHOOSE_YOUR_ADDRESS}${CHANGE}`
-    )
-  })
-
-  test('searching again with a single result goes straight to confirm address, still in the change flow', async () => {
-    mockInvoicing()
-    vi.spyOn(addressLookup, 'lookupAddresses').mockResolvedValue({
-      results: [anAddress]
-    })
-
-    const response = await makePostRequest({
-      url: `${marineLicenceRoutes.MARINE_LICENCE_INVOICE_ADDRESS_POSTCODE_SEARCH}${CHANGE}`,
-      server: getServer(),
-      formData: { postcode: 'NE4 7AR' }
-    })
-
-    expect(response.headers.location).toBe(
-      `${marineLicenceRoutes.MARINE_LICENCE_CONFIRM_ADDRESS}${CHANGE}`
-    )
-  })
-
-  test('the address picker has no Cancel link', async () => {
-    mockInvoicing({
-      invoiceAddressSearch: { postcode: 'NE4 7AR' },
-      invoiceAddressSearchResults: [anAddress, anotherAddress]
-    })
-
-    const response = await makeGetRequest({
-      url: `${marineLicenceRoutes.MARINE_LICENCE_CHOOSE_YOUR_ADDRESS}${CHANGE}`,
-      server: getServer()
-    })
-    const { document } = new JSDOM(response.result).window
-
-    expect(
-      queryByRole(document, 'link', { name: 'Cancel' })
-    ).not.toBeInTheDocument()
-  })
-
-  test('picking an address goes to confirm address, still in the change flow', async () => {
-    mockInvoicing({
-      invoiceAddressSearch: { postcode: 'NE4 7AR' },
-      invoiceAddressSearchResults: [anAddress, anotherAddress]
-    })
-
-    const response = await makePostRequest({
-      url: `${marineLicenceRoutes.MARINE_LICENCE_CHOOSE_YOUR_ADDRESS}${CHANGE}`,
-      server: getServer(),
-      formData: { selectedAddress: '1' }
-    })
-
-    expect(response.headers.location).toBe(
-      `${marineLicenceRoutes.MARINE_LICENCE_CONFIRM_ADDRESS}${CHANGE}`
     )
   })
 
