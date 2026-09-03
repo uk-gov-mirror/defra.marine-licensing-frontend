@@ -8,15 +8,19 @@ import * as cacheUtils from '#src/server/common/helpers/marine-licence/session-c
 import * as addressLookup from '#src/server/common/helpers/marine-licence/invoicing/address-lookup.js'
 import * as authRequests from '#src/server/common/helpers/authenticated-requests.js'
 import { marineLicenceRoutes } from '#src/server/common/constants/routes.js'
+import * as entryPoints from '#src/server/common/helpers/marine-licence/session-cache/invoicing-entry-points.js'
 import { mockMarineLicenceApplication } from '#src/server/test-helpers/mocks/marine-licence-mocks.js'
-import { createMockH } from '#src/server/test-helpers/mocks/helpers.js'
+import {
+  createMockH,
+  createMockRequest
+} from '#src/server/test-helpers/mocks/helpers.js'
 import {
   buildNoAddressesFoundError,
   buildLookupUnavailableError,
   buildTooManyAddressesError
 } from '#src/server/marine-licence/invoicing/invoice-address-postcode-search/utils.js'
 
-vi.mock('#/src/server/common/helpers/marine-licence/session-cache/utils.js')
+vi.mock('#src/server/common/helpers/marine-licence/session-cache/utils.js')
 
 const anAddress = {
   addressLine: 'TYNESIDE HOUSE, SKINNERBURN ROAD, NEWCASTLE UPON TYNE, NE4 7AR',
@@ -38,6 +42,7 @@ describe('#invoiceAddressPostcodeSearch', () => {
       mockMarineLicenceApplication
     )
     vi.spyOn(cacheUtils, 'setMarineLicenceCache').mockResolvedValue()
+    vi.spyOn(entryPoints, 'setInvoicingPageEntryPoint').mockResolvedValue()
     vi.spyOn(authRequests, 'authenticatedPatchRequest')
     vi.spyOn(addressLookup, 'lookupAddresses').mockResolvedValue({
       results: []
@@ -50,7 +55,10 @@ describe('#invoiceAddressPostcodeSearch', () => {
 
   describe('#invoiceAddressPostcodeSearchController', () => {
     test('Should render the page with the project name caption and the correct links', async () => {
-      await invoiceAddressPostcodeSearchController.handler({ query: {} }, h)
+      await invoiceAddressPostcodeSearchController.handler(
+        createMockRequest({ query: {} }),
+        h
+      )
 
       expect(h.view).toHaveBeenCalledWith(
         INVOICE_ADDRESS_POSTCODE_SEARCH_VIEW_ROUTE,
@@ -67,6 +75,33 @@ describe('#invoiceAddressPostcodeSearch', () => {
       )
     })
 
+    test('Should keep the change flow in the manual entry link', async () => {
+      await invoiceAddressPostcodeSearchController.handler(
+        createMockRequest({ query: { action: 'change' } }),
+        h
+      )
+
+      expect(h.view).toHaveBeenCalledWith(
+        INVOICE_ADDRESS_POSTCODE_SEARCH_VIEW_ROUTE,
+        expect.objectContaining({
+          manualEntryLink: `${marineLicenceRoutes.MARINE_LICENCE_UK_INVOICE_ADDRESS}?action=change`
+        })
+      )
+    })
+
+    test('Should record itself as the page behind the UK address page, for the manual entry link', async () => {
+      const request = createMockRequest({ query: {} })
+
+      await invoiceAddressPostcodeSearchController.handler(request, h)
+
+      expect(entryPoints.setInvoicingPageEntryPoint).toHaveBeenCalledWith(
+        request,
+        h,
+        entryPoints.INVOICING_ENTRY_POINT_PAGES.UK_INVOICE_ADDRESS,
+        marineLicenceRoutes.MARINE_LICENCE_INVOICE_ADDRESS_POSTCODE_SEARCH
+      )
+    })
+
     // Prefill from the cache, the change-flow links and the non-UK redirect are asserted
     // through the rendered page in
     // tests/integration/marine-licence/invoicing/invoice-address-postcode-search.test.js
@@ -79,7 +114,7 @@ describe('#invoiceAddressPostcodeSearch', () => {
       logger = { error: vi.fn(), info: vi.fn() }
 
       return invoiceAddressPostcodeSearchSubmitController.handler(
-        { payload, query, logger },
+        createMockRequest({ payload, query, logger }),
         h
       )
     }
@@ -178,21 +213,32 @@ describe('#invoiceAddressPostcodeSearch', () => {
       )
     })
 
-    test('Should stay on the page without an error when there is one result', async () => {
+    test('Should redirect to the confirm address page when there is one result', async () => {
       vi.spyOn(addressLookup, 'lookupAddresses').mockResolvedValue({
         results: [anAddress]
       })
 
       await submit({ postcode: 'NE4 7AR' })
 
-      expect(h.view).toHaveBeenCalledWith(
-        INVOICE_ADDRESS_POSTCODE_SEARCH_VIEW_ROUTE,
-        expect.not.objectContaining({ errorSummary: expect.anything() })
+      expect(h.redirect).toHaveBeenCalledWith(
+        marineLicenceRoutes.MARINE_LICENCE_CONFIRM_ADDRESS
       )
-      expect(h.redirect).not.toHaveBeenCalled()
+      expect(h.view).not.toHaveBeenCalled()
     })
 
-    test('Should not show the truncation error when the filter still matched something', async () => {
+    test('Should keep the change flow when redirecting to the confirm address page', async () => {
+      vi.spyOn(addressLookup, 'lookupAddresses').mockResolvedValue({
+        results: [anAddress]
+      })
+
+      await submit({ postcode: 'NE4 7AR' }, { action: 'change' })
+
+      expect(h.redirect).toHaveBeenCalledWith(
+        `${marineLicenceRoutes.MARINE_LICENCE_CONFIRM_ADDRESS}?action=change`
+      )
+    })
+
+    test('Should go to the confirm address page rather than warn about truncation when the filter matched a single address', async () => {
       vi.spyOn(addressLookup, 'lookupAddresses').mockResolvedValue({
         results: [anAddress],
         truncated: true
@@ -200,11 +246,77 @@ describe('#invoiceAddressPostcodeSearch', () => {
 
       await submit({ postcode: 'NE4 7AR', propertyNameOrNumber: 'Tyneside' })
 
-      expect(h.view).toHaveBeenCalledWith(
-        INVOICE_ADDRESS_POSTCODE_SEARCH_VIEW_ROUTE,
-        expect.not.objectContaining({ errorSummary: expect.anything() })
+      expect(h.redirect).toHaveBeenCalledWith(
+        marineLicenceRoutes.MARINE_LICENCE_CONFIRM_ADDRESS
       )
+      expect(h.view).not.toHaveBeenCalled()
     })
+
+    // A selection left over from an earlier postcode would still be confirmable on the
+    // confirm-address page, showing an address the current search never returned.
+    test.each([
+      ['returns nothing', []],
+      ['returns more than one address', [anAddress, anotherAddress]]
+    ])(
+      'Should clear a previous selection when a new search %s',
+      async (_name, results) => {
+        vi.spyOn(cacheUtils, 'getMarineLicenceCache').mockReturnValue({
+          ...mockMarineLicenceApplication,
+          invoicing: {
+            ...mockMarineLicenceApplication.invoicing,
+            selectedInvoiceAddress: anAddress
+          }
+        })
+        vi.spyOn(addressLookup, 'lookupAddresses').mockResolvedValue({
+          results
+        })
+
+        await submit({ postcode: 'NE1 1EE' })
+
+        expect(cacheUtils.setMarineLicenceCache).toHaveBeenCalledWith(
+          expect.anything(),
+          h,
+          expect.objectContaining({
+            invoicing: expect.objectContaining({
+              selectedInvoiceAddress: null
+            })
+          })
+        )
+      }
+    )
+
+    // A failed lookup must not disturb the selection either way: it neither invents one
+    // nor discards the one a good earlier search produced.
+    test.each([
+      ['there was no previous selection', undefined],
+      ['a previous selection exists', anAddress]
+    ])(
+      'Should leave the selection untouched when the lookup fails and %s',
+      async (_name, selectedInvoiceAddress) => {
+        vi.spyOn(cacheUtils, 'getMarineLicenceCache').mockReturnValue({
+          ...mockMarineLicenceApplication,
+          invoicing: {
+            ...mockMarineLicenceApplication.invoicing,
+            selectedInvoiceAddress
+          }
+        })
+        vi.spyOn(addressLookup, 'lookupAddresses').mockResolvedValue({
+          results: [anAddress],
+          error: true
+        })
+
+        await submit({ postcode: 'NE1 1EE' })
+
+        expect(cacheUtils.setMarineLicenceCache).toHaveBeenCalledWith(
+          expect.anything(),
+          h,
+          expect.objectContaining({
+            invoicing: expect.objectContaining({ selectedInvoiceAddress })
+          })
+        )
+        expect(h.redirect).not.toHaveBeenCalled()
+      }
+    )
 
     test('Should redirect to the choose your address page when there are many results', async () => {
       vi.spyOn(addressLookup, 'lookupAddresses').mockResolvedValue({
@@ -272,7 +384,8 @@ describe('#invoiceAddressPostcodeSearch', () => {
               postcode: 'NE4 7AR',
               propertyNameOrNumber: 'Tyneside House'
             },
-            invoiceAddressSearchResults: [anAddress]
+            invoiceAddressSearchResults: [anAddress],
+            selectedInvoiceAddress: anAddress
           })
         })
       )
@@ -289,7 +402,11 @@ describe('#invoiceAddressPostcodeSearch', () => {
         details: [{ path: ['postcode'], message: 'POSTCODE_REQUIRED' }]
       }
 
-      failAction({ query: {}, payload: { postcode: '' } }, h, err)
+      failAction(
+        createMockRequest({ query: {}, payload: { postcode: '' } }),
+        h,
+        err
+      )
 
       expect(h.view).toHaveBeenCalledWith(
         INVOICE_ADDRESS_POSTCODE_SEARCH_VIEW_ROUTE,
