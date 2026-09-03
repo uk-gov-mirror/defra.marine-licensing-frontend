@@ -14,10 +14,15 @@ import {
   getInvoiceAddressBackLink,
   getInvoiceCancelLink,
   getInvoiceAddressButtonText,
-  withAction
+  withAction,
+  hasPickableResults,
+  hasSingleResult
 } from '#src/server/marine-licence/invoicing/utils.js'
-import { hasPickableResults } from '#src/server/marine-licence/invoicing/choose-your-address/utils.js'
 import { lookupAddresses } from '#src/server/common/helpers/marine-licence/invoicing/address-lookup.js'
+import {
+  INVOICING_ENTRY_POINT_PAGES,
+  setInvoicingPageEntryPoint
+} from '#src/server/common/helpers/marine-licence/session-cache/invoicing-entry-points.js'
 import {
   buildNoAddressesFoundError,
   buildLookupUnavailableError,
@@ -32,7 +37,10 @@ const getPageParams = (action, invoicing) => ({
   backLink: getInvoiceAddressBackLink(action),
   cancelLink: getInvoiceCancelLink(action, invoicing),
   buttonText: getInvoiceAddressButtonText(action, invoicing),
-  manualEntryLink: marineLicenceRoutes.MARINE_LICENCE_UK_INVOICE_ADDRESS
+  manualEntryLink: withAction(
+    marineLicenceRoutes.MARINE_LICENCE_UK_INVOICE_ADDRESS,
+    action
+  )
 })
 
 const getLookupErrorViewParams = ({ results, error, truncated }) => {
@@ -65,6 +73,14 @@ export const invoiceAddressPostcodeSearchController = {
     }
 
     const action = request.query.action
+
+    // "Enter the address manually" leads to the UK address page from here.
+    await setInvoicingPageEntryPoint(
+      request,
+      h,
+      INVOICING_ENTRY_POINT_PAGES.UK_INVOICE_ADDRESS,
+      marineLicenceRoutes.MARINE_LICENCE_INVOICE_ADDRESS_POSTCODE_SEARCH
+    )
 
     return h.view(INVOICE_ADDRESS_POSTCODE_SEARCH_VIEW_ROUTE, {
       ...getPageParams(action, invoicing),
@@ -109,26 +125,41 @@ export const invoiceAddressPostcodeSearchSubmitController = {
     const lookup = await lookupAddresses(request, invoiceAddressSearch)
     const { results, error } = lookup
 
-    // Results are cached for the choose-your-address page to read.
-    // On a lookup failure the previous results are kept rather than overwritten
-    // with an empty list, so a transient outage doesn't discard a good search.
+    const onlyResult = !error && hasSingleResult(results) ? results[0] : null
+
+    // Results are cached for the choose-your-address page to read, and a lone result
+    // is cached as the selection for the confirm-address page, which is where the
+    // user goes next in both cases. The selection is always rewritten on a successful
+    // search - left in place, a selection from an earlier postcode would outlive the
+    // results it came from and still be confirmable.
+    // On a lookup failure the previous results and selection are kept rather than
+    // discarded, so a transient outage doesn't throw away a good search.
     await setMarineLicenceCache(request, h, {
       ...marineLicence,
       invoicing: {
         ...invoicing,
         invoiceAddressSearch,
-        ...(error ? {} : { invoiceAddressSearchResults: results })
+        ...(error
+          ? {}
+          : {
+              invoiceAddressSearchResults: results,
+              selectedInvoiceAddress: onlyResult
+            })
       }
     })
 
-    // A single result goes to the confirm-address page (ML-1501), which does not
-    // exist yet, so for now it keeps ML-1413's behaviour of staying on this page.
     if (!error && hasPickableResults(results)) {
       return h.redirect(
         withAction(
           marineLicenceRoutes.MARINE_LICENCE_CHOOSE_YOUR_ADDRESS,
           action
         )
+      )
+    }
+
+    if (onlyResult) {
+      return h.redirect(
+        withAction(marineLicenceRoutes.MARINE_LICENCE_CONFIRM_ADDRESS, action)
       )
     }
 
