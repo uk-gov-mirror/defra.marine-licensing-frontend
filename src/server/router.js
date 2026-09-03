@@ -45,11 +45,14 @@ export const router = {
         postLogin,
         defraIdGuidance,
         internalUserAdmin,
-        publicRegisterBrowse,
         marineLicence,
         declaration,
         serviceHome
       ]
+
+      if (config.get('publicRegister.enabled')) {
+        plugins.push(publicRegisterBrowse)
+      }
 
       if (config.get('selfService.enabled')) {
         plugins.push(
