@@ -63,7 +63,9 @@ const buildDashboardViewModel = async (
 
   const filterCategories = getFilterCategories(searchParams)
   const typeOptions = getTypeOptions(searchParams.type)
-  const userOptions = getUserOptions(userSession, users)
+  const userOptions = getUserOptions(userSession, users, searchParams)
+
+  const showSpecificUser = Object.keys(users).length > 0
 
   return {
     projects: formatProjectsForDisplay(sortedProjects, isEmployee),
@@ -74,7 +76,8 @@ const buildDashboardViewModel = async (
     statusOptions,
     typeOptions,
     marineLicenceEnabled,
-    userOptions
+    userOptions,
+    showSpecificUser
   }
 }
 

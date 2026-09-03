@@ -340,10 +340,12 @@ export const getTypeOptions = (type) => {
   ]
 }
 
-export const getUserOptions = (userSession, users) => {
+export const getUserOptions = (userSession, users, searchParams = {}) => {
   if (!userSession) {
     return []
   }
+
+  const { show, user: userSearchParam = [] } = searchParams
 
   const { contactId, displayName } = userSession
 
@@ -351,7 +353,7 @@ export const getUserOptions = (userSession, users) => {
     {
       value: contactId,
       text: `Mine (${displayName})`,
-      checked: false
+      checked: show === 'specific-user' && userSearchParam.includes(contactId)
     }
   ]
 
@@ -363,7 +365,8 @@ export const getUserOptions = (userSession, users) => {
         .map(([userContactId, userDisplayName]) => ({
           value: userContactId,
           text: userDisplayName,
-          checked: false
+          checked:
+            show === 'specific-user' && userSearchParam.includes(userContactId)
         }))
     : []
 

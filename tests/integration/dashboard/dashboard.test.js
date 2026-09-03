@@ -584,6 +584,38 @@ describe('Dashboard', () => {
 
         expect(myProjectsOption).not.toBeChecked()
       })
+
+      it('should not show "Submissions by owner" when no others exist', async () => {
+        mockEmployeeExemptions(
+          mockDashboardServerResponse(employeeExemptions, {})
+        )
+
+        const postResponse = await makePostRequest({
+          url: routes.DASHBOARD,
+          server: getServer(),
+          formData: { show: 'specific-user' }
+        })
+
+        expect(postResponse.statusCode).toBe(302)
+        expect(postResponse.headers.location).toBe(routes.DASHBOARD)
+
+        const sessionCookie = Array.isArray(postResponse.headers['set-cookie'])
+
+        const getResponse = await makeGetRequest({
+          url: routes.DASHBOARD,
+          server: getServer(),
+          headers: { cookie: sessionCookie }
+        })
+
+        const { document } = new JSDOM(getResponse.result).window
+        const filter = document.querySelector('.moj-filter')
+
+        const userSubmissionRadio = queryByRole(filter, 'radio', {
+          name: 'Submissions by owner'
+        })
+
+        expect(userSubmissionRadio).not.toBeInTheDocument()
+      })
     })
 
     describe('when marine licence is disabled', () => {
