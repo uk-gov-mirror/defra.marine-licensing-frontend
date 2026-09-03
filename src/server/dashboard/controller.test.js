@@ -148,7 +148,7 @@ describe('#dashboard', () => {
       ])
 
       authenticatedPostRequestMock.mockResolvedValueOnce({
-        payload: { value: projects }
+        payload: { value: { projects } }
       })
 
       await dashboardController.handler(request, h)
@@ -277,17 +277,19 @@ describe('#dashboard', () => {
 
     describe('client side request)', () => {
       test('Should fetch with the submitted payload and render the results partial', async () => {
-        const projects = [
-          {
-            projectName: 'Test Project',
-            reference: 'ML-2024-001',
-            status: 'Draft',
-            submittedAt: null
-          }
-        ]
+        const serverResponse = {
+          projects: [
+            {
+              projectName: 'Test Project',
+              reference: 'ML-2024-001',
+              status: 'Draft',
+              submittedAt: null
+            }
+          ]
+        }
 
         authenticatedPostRequestMock.mockResolvedValueOnce({
-          payload: { value: projects, isEmployee: true }
+          payload: { value: serverResponse, isEmployee: true }
         })
 
         const h = { view: vi.fn() }
@@ -309,7 +311,7 @@ describe('#dashboard', () => {
         expect(request.yar.flash).not.toHaveBeenCalled()
         expect(h.view).toHaveBeenCalledWith(DASHBOARD_RESULTS_VIEW_ROUTE, {
           heading: 'Projects',
-          projects: formatProjectsForDisplay(projects, true),
+          projects: formatProjectsForDisplay(serverResponse.projects, true),
           isEmployee: true,
           organisationName: '',
           filterCategories: expect.any(Object),

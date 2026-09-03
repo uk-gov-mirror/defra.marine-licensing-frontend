@@ -25,6 +25,7 @@ import { employeeSession } from '~/tests/integration/shared/session-fixtures.js'
 import { getUserSession } from '~/src/server/common/plugins/auth/utils.js'
 import { EXEMPTION_TYPE } from '#src/server/common/constants/exemptions.js'
 import { MARINE_LICENCE_TYPE } from '#src/server/common/constants/marine-licence.js'
+import { mockDashboardServerResponse } from '#src/server/test-helpers/mocks/dashboard.js'
 
 vi.mock('~/src/server/common/plugins/auth/utils.js')
 
@@ -42,7 +43,7 @@ describe('Dashboard', () => {
       status: 'Draft',
       submittedAt: null,
       isOwnProject: true,
-      ownerName: 'John Smith'
+      contactId: 'johnSmithId'
     },
     {
       id: '456',
@@ -50,7 +51,7 @@ describe('Dashboard', () => {
       status: 'Active',
       submittedAt: '2025-10-23T12:00:00.000Z',
       isOwnProject: true,
-      ownerName: 'John Smith'
+      johnSmithId: 'johnSmithId'
     },
     {
       id: '789',
@@ -58,7 +59,7 @@ describe('Dashboard', () => {
       status: 'Draft',
       submittedAt: null,
       isOwnProject: false,
-      ownerName: 'Jane Doe'
+      contactId: 'janeDoeId'
     },
     {
       id: '101',
@@ -66,7 +67,7 @@ describe('Dashboard', () => {
       status: 'Active',
       submittedAt: '2025-10-20T12:00:00.000Z',
       isOwnProject: false,
-      ownerName: 'Jane Doe'
+      contactId: 'janeDoeId'
     }
   ]
 
@@ -102,7 +103,7 @@ describe('Dashboard', () => {
   ]
 
   it('should render the dashboard page title, heading and Create button', async () => {
-    mockExemptions(exemptions)
+    mockExemptions(mockDashboardServerResponse(exemptions))
     const doc = await loadDashboardPage()
     expect(getByRole(doc, 'heading', { level: 1 })).toHaveTextContent(
       'Projects'
@@ -110,7 +111,7 @@ describe('Dashboard', () => {
   })
 
   it('should render a draft exemption', async () => {
-    mockExemptions(exemptions)
+    mockExemptions(mockDashboardServerResponse(exemptions))
     const doc = await loadDashboardPage()
     const cells = getProjectsTableRow({
       document: doc,
@@ -134,7 +135,7 @@ describe('Dashboard', () => {
   })
 
   it('should render an active exemption', async () => {
-    mockExemptions(exemptions)
+    mockExemptions(mockDashboardServerResponse(exemptions))
     const doc = await loadDashboardPage()
     const cells = getProjectsTableRow({
       document: doc,
@@ -155,7 +156,7 @@ describe('Dashboard', () => {
   })
 
   it('should render a submitted marine licence', async () => {
-    mockMarineLicence(marineLicences)
+    mockMarineLicence({ projects: marineLicences, users: [] })
     const doc = await loadDashboardPage()
 
     const cells = getProjectsTableRow({
@@ -187,7 +188,11 @@ describe('Dashboard', () => {
   })
 
   it('should not offer Withdraw for a submitted marine licence owned by another user', async () => {
-    mockMarineLicence([{ ...marineLicences[0], isOwnProject: false }])
+    mockMarineLicence(
+      mockDashboardServerResponse([
+        { ...marineLicences[0], isOwnProject: false }
+      ])
+    )
     const doc = await loadDashboardPage()
 
     const cells = getProjectsTableRow({
@@ -205,13 +210,16 @@ describe('Dashboard', () => {
   })
 
   it('should render a withdrawn marine licence with View details only', async () => {
-    mockMarineLicence([
-      {
-        ...marineLicences[0],
-        status: 'Withdrawn',
-        applicationReference: 'MLA/2025/10018'
-      }
-    ])
+    mockMarineLicence({
+      projects: [
+        {
+          ...marineLicences[0],
+          status: 'Withdrawn',
+          applicationReference: 'MLA/2025/10018'
+        }
+      ],
+      users: []
+    })
     const doc = await loadDashboardPage()
 
     const cells = getProjectsTableRow({
@@ -240,7 +248,7 @@ describe('Dashboard', () => {
   })
 
   it('should render a message if there are no projects', async () => {
-    mockExemptions([])
+    mockExemptions({ projects: [], users: [] })
     const doc = await loadDashboardPage()
     const table = queryByRole(doc, 'table', { name: 'Projects' })
 
@@ -254,14 +262,14 @@ describe('Dashboard', () => {
 
   describe('Sortable table integration', () => {
     it('should render table with moj-sortable-table data-module', async () => {
-      mockExemptions(exemptions)
+      mockExemptions(mockDashboardServerResponse(exemptions))
       const doc = await loadDashboardPage()
       const table = getByRole(doc, 'table', { name: 'Projects' })
       expect(table).toHaveAttribute('data-module', 'moj-sortable-table')
     })
 
     it('should set aria-sort on sortable column headers', async () => {
-      mockExemptions(exemptions)
+      mockExemptions(mockDashboardServerResponse(exemptions))
       const doc = await loadDashboardPage()
       const table = getByRole(doc, 'table', { name: 'Projects' })
 
@@ -285,7 +293,7 @@ describe('Dashboard', () => {
     })
 
     it('should not set aria-sort on Actions column', async () => {
-      mockExemptions(exemptions)
+      mockExemptions(mockDashboardServerResponse(exemptions))
       const doc = await loadDashboardPage()
       const table = getByRole(doc, 'table', { name: 'Projects' })
 
@@ -296,7 +304,7 @@ describe('Dashboard', () => {
     })
 
     it('should set data-sort-value on date cells for proper sorting', async () => {
-      mockExemptions(exemptions)
+      mockExemptions(mockDashboardServerResponse(exemptions))
       const doc = await loadDashboardPage()
 
       const draftRow = getProjectsTableRow({
@@ -334,7 +342,7 @@ describe('Dashboard', () => {
           submittedAt: null
         }
       ]
-      mockExemptions(unsortedExemptions)
+      mockExemptions({ projects: unsortedExemptions, users: [] })
       const doc = await loadDashboardPage()
       const table = getByRole(doc, 'table', { name: 'Projects' })
       const rows = table.querySelectorAll('tbody tr')
@@ -346,7 +354,7 @@ describe('Dashboard', () => {
 
   describe('Employee user dashboard (ML-928)', () => {
     it('should render Owner column header for employee users', async () => {
-      mockEmployeeExemptions(employeeExemptions)
+      mockEmployeeExemptions(mockDashboardServerResponse(employeeExemptions))
       const doc = await loadDashboardPage()
       const table = getByRole(doc, 'table', { name: 'Projects' })
 
@@ -355,7 +363,7 @@ describe('Dashboard', () => {
     })
 
     it('should not render Owner column header for non-employee users', async () => {
-      mockExemptions(exemptions)
+      mockExemptions(mockDashboardServerResponse(exemptions))
       const doc = await loadDashboardPage()
       const table = getByRole(doc, 'table', { name: 'Projects' })
 
@@ -365,7 +373,7 @@ describe('Dashboard', () => {
     })
 
     it('should render owner name in Owner column for employee view', async () => {
-      mockEmployeeExemptions(employeeExemptions)
+      mockEmployeeExemptions(mockDashboardServerResponse(employeeExemptions))
       const doc = await loadDashboardPage()
 
       const cells = getProjectsTableRow({
@@ -377,7 +385,7 @@ describe('Dashboard', () => {
     })
 
     it('should show Continue and Delete actions for own draft projects', async () => {
-      mockEmployeeExemptions(employeeExemptions)
+      mockEmployeeExemptions(mockDashboardServerResponse(employeeExemptions))
       const doc = await loadDashboardPage()
 
       const cells = getProjectsTableRow({
@@ -395,7 +403,7 @@ describe('Dashboard', () => {
     })
 
     it('should show View details action for own active projects', async () => {
-      mockEmployeeExemptions(employeeExemptions)
+      mockEmployeeExemptions(mockDashboardServerResponse(employeeExemptions))
       const doc = await loadDashboardPage()
 
       const cells = getProjectsTableRow({
@@ -412,7 +420,7 @@ describe('Dashboard', () => {
     })
 
     it('should show no actions for other users draft projects', async () => {
-      mockEmployeeExemptions(employeeExemptions)
+      mockEmployeeExemptions(mockDashboardServerResponse(employeeExemptions))
       const doc = await loadDashboardPage()
 
       const cells = getProjectsTableRow({
@@ -426,7 +434,7 @@ describe('Dashboard', () => {
     })
 
     it('should show View details action for other users active projects', async () => {
-      mockEmployeeExemptions(employeeExemptions)
+      mockEmployeeExemptions(mockDashboardServerResponse(employeeExemptions))
       const doc = await loadDashboardPage()
 
       const cells = getProjectsTableRow({
@@ -454,7 +462,7 @@ describe('Dashboard', () => {
       })
 
       it('should render table with moj-filter module for employees', async () => {
-        mockEmployeeExemptions(employeeExemptions)
+        mockEmployeeExemptions(mockDashboardServerResponse(employeeExemptions))
         const doc = await loadDashboardPage()
         const filter = doc.querySelector('.moj-filter')
         expect(filter).toHaveAttribute('data-module', 'moj-filter')
@@ -501,6 +509,10 @@ describe('Dashboard', () => {
           getByRole(filter, 'checkbox', { name: 'Mine (Test User)' })
         ).toBeInTheDocument()
 
+        expect(
+          getByRole(filter, 'checkbox', { name: 'John Smith' })
+        ).toBeInTheDocument()
+
         const statusGroup = getByRole(filter, 'group', {
           name: 'Status'
         })
@@ -536,7 +548,7 @@ describe('Dashboard', () => {
       })
 
       it('should check the "Submissions by owner" radio after filtering', async () => {
-        mockEmployeeExemptions(employeeExemptions)
+        mockEmployeeExemptions(mockDashboardServerResponse(employeeExemptions))
 
         const postResponse = await makePostRequest({
           url: routes.DASHBOARD,
@@ -580,7 +592,7 @@ describe('Dashboard', () => {
       })
 
       it('should only show Active and Draft statuses and hide the Submission type filter', async () => {
-        mockEmployeeExemptions(employeeExemptions)
+        mockEmployeeExemptions(mockDashboardServerResponse(employeeExemptions))
         const doc = await loadDashboardPage()
         const filter = doc.querySelector('.moj-filter')
 
@@ -611,7 +623,7 @@ describe('Dashboard', () => {
     })
 
     it('should not render table with moj-filter module for individuals', async () => {
-      mockExemptions(exemptions)
+      mockExemptions(mockDashboardServerResponse(exemptions))
       const doc = await loadDashboardPage()
       const filter = doc.querySelector('.moj-filter')
       expect(filter).toBeFalsy()

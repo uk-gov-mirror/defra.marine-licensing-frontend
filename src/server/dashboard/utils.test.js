@@ -7,7 +7,8 @@ import {
   getFilterCategories,
   getStatusOptions,
   getTypeOptions,
-  getUserOptions
+  getUserOptions,
+  addUsersToProjects
 } from './utils.js'
 import {
   routes,
@@ -17,6 +18,11 @@ import {
   PROJECT_STATUS,
   UNABLE_TO_PROGRESS
 } from '#src/server/common/constants/projects.js'
+import {
+  mockDashboardServerResponse,
+  mockUsers
+} from '#src/server/test-helpers/mocks/dashboard.js'
+import { mockMarineLicenceApplication } from '#src/server/test-helpers/mocks/marine-licence-mocks.js'
 
 vi.mock('~/src/config/nunjucks/filters/format-date.js', () => ({
   formatDate: vi.fn((date) => {
@@ -651,11 +657,43 @@ describe('#getTypeOptions', () => {
 })
 
 describe('#getUserOptions', () => {
-  test('returns an unchecked "Mine" option built from the user session', () => {
-    expect(
-      getUserOptions({ contactId: 'contact-123', displayName: 'Sam Evans' })
-    ).toEqual([
-      { value: 'contact-123', text: 'Mine (Sam Evans)', checked: false }
+  test('correctly formats own user and others', () => {
+    const results = getUserOptions(
+      {
+        contactId: 'contact-123',
+        displayName: 'Sam Evans'
+      },
+      mockUsers
+    )
+
+    expect(results[0]).toEqual({
+      value: 'contact-123',
+      text: 'Mine (Sam Evans)',
+      checked: false
+    })
+
+    expect(results[1]).toEqual({
+      value: 'testContactId',
+      text: 'Test User',
+      checked: false
+    })
+
+    expect(results.length).toBe(5)
+  })
+
+  test('can handle missing data', () => {
+    expect(getUserOptions()).toEqual([])
+  })
+})
+
+describe('#addUsersToProjects', () => {
+  test('adds user correctly to project', () => {
+    const { projects, users } = mockDashboardServerResponse([
+      { ...mockMarineLicenceApplication, contactId: 'testContactId' }
     ])
+
+    const result = addUsersToProjects(projects, users)
+
+    expect(result[0].ownerName).toEqual('Test User')
   })
 })

@@ -272,14 +272,38 @@ export const getTypeOptions = (type) => {
   ]
 }
 
-export const getUserOptions = (userSession) => {
+export const getUserOptions = (userSession, users) => {
+  if (!userSession) {
+    return []
+  }
+
   const { contactId, displayName } = userSession
 
-  return [
+  const ownOption = [
     {
       value: contactId,
       text: `Mine (${displayName})`,
       checked: false
     }
   ]
+
+  const hasUsers = users && Object.keys(users).length > 0
+
+  const userOptions = hasUsers
+    ? Object.entries(users)
+        .filter(([userContactId]) => userContactId !== contactId)
+        .map(([userContactId, userDisplayName]) => ({
+          value: userContactId,
+          text: userDisplayName,
+          checked: false
+        }))
+    : []
+
+  return [...ownOption, ...userOptions]
 }
+
+export const addUsersToProjects = (projects, users) =>
+  projects.map((project) => ({
+    ...project,
+    ownerName: users[project.contactId] || '-'
+  }))
