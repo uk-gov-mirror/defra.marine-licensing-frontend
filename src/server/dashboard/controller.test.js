@@ -8,7 +8,7 @@ import {
 } from './controller.js'
 import { authenticatedPostRequest } from '#src/server/common/helpers/authenticated-requests.js'
 import { getUserSession } from '#src/server/common/plugins/auth/utils.js'
-import { formatProjectsForDisplay } from './utils.js'
+import { formatProjectsForDisplay } from '#src/server/dashboard/utils.js'
 import { formatDate } from '#src/config/nunjucks/filters/format-date.js'
 import { routes } from '#src/server/common/constants/routes.js'
 
@@ -60,7 +60,10 @@ describe('#dashboard', () => {
         isEmployee: false,
         organisationName: '',
         filterCategories: expect.any(Object),
-        searchParams: []
+        searchParams: [],
+        statusOptions: expect.any(Array),
+        typeOptions: expect.any(Array),
+        marineLicenceEnabled: expect.any(Boolean)
       })
     })
 
@@ -93,7 +96,10 @@ describe('#dashboard', () => {
         isEmployee: true,
         organisationName: '',
         filterCategories: expect.any(Object),
-        searchParams: flashedsearchParams
+        searchParams: flashedsearchParams,
+        statusOptions: expect.any(Array),
+        typeOptions: expect.any(Array),
+        marineLicenceEnabled: expect.any(Boolean)
       })
     })
 
@@ -152,7 +158,10 @@ describe('#dashboard', () => {
         isEmployee: false,
         organisationName: '',
         filterCategories: expect.any(Object),
-        searchParams: []
+        searchParams: [],
+        statusOptions: expect.any(Array),
+        typeOptions: expect.any(Array),
+        marineLicenceEnabled: expect.any(Boolean)
       })
     })
 
@@ -203,7 +212,10 @@ describe('#dashboard', () => {
         isEmployee: false,
         organisationName: '',
         filterCategories: expect.any(Object),
-        searchParams: []
+        searchParams: [],
+        statusOptions: expect.any(Array),
+        typeOptions: expect.any(Array),
+        marineLicenceEnabled: expect.any(Boolean)
       })
     })
   })
@@ -297,7 +309,10 @@ describe('#dashboard', () => {
           isEmployee: true,
           organisationName: '',
           filterCategories: expect.any(Object),
-          searchParams: request.payload
+          searchParams: request.payload,
+          statusOptions: expect.any(Array),
+          typeOptions: expect.any(Array),
+          marineLicenceEnabled: expect.any(Boolean)
         })
       })
 

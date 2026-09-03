@@ -1,3 +1,4 @@
+import { config } from '#src/config/config.js'
 import { getUserSession } from '#src/server/common/plugins/auth/utils.js'
 import { routes } from '#src/server/common/constants/routes.js'
 import { dashboardFilterSchema } from '#src/server/common/validation/dashboard/schema.js'
@@ -5,9 +6,11 @@ import {
   sortProjectsByStatus,
   formatProjectsForDisplay,
   getFilterCategories,
-  fetchProjects
-} from './utils.js'
-import { statusCodes } from '../common/constants/status-codes.js'
+  fetchProjects,
+  getStatusOptions,
+  getTypeOptions
+} from '#src/server/dashboard/utils.js'
+import { statusCodes } from '#src/server/common/constants/status-codes.js'
 
 export const DASHBOARD_VIEW_ROUTE = 'dashboard/index.njk'
 export const DASHBOARD_RESULTS_VIEW_ROUTE =
@@ -44,12 +47,24 @@ const buildDashboardViewModel = async (
   const userSession = await getUserSession(request, request.state?.userSession)
   const organisationName = userSession?.organisationName || ''
 
+  const marineLicenceEnabled = config.get('marineLicence').enabled
+
+  const statusOptions = getStatusOptions(
+    searchParams.status,
+    marineLicenceEnabled
+  )
+  const filterCategories = getFilterCategories(searchParams)
+  const typeOptions = getTypeOptions(searchParams.type)
+
   return {
     projects: formatProjectsForDisplay(sortedProjects, isEmployee),
     isEmployee,
     organisationName,
-    filterCategories: getFilterCategories(),
-    searchParams
+    filterCategories,
+    searchParams,
+    statusOptions,
+    typeOptions,
+    marineLicenceEnabled
   }
 }
 

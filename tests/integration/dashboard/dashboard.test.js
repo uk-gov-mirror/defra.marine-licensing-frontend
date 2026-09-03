@@ -5,6 +5,7 @@ import {
   getAllByRole,
   queryAllByRole
 } from '@testing-library/dom'
+import { config } from '~/src/config/config.js'
 import { routes } from '~/src/server/common/constants/routes.js'
 import {
   setupTestServer,
@@ -18,6 +19,8 @@ import { makePostRequest } from '~/src/server/test-helpers/server-requests.js'
 import { mockMarineLicenceApplication } from '~/src/server/test-helpers/mocks/marine-licence-mocks.js'
 import { employeeSession } from '~/tests/integration/shared/session-fixtures.js'
 import { getUserSession } from '~/src/server/common/plugins/auth/utils.js'
+import { EXEMPTION_TYPE } from '#src/server/common/constants/exemptions.js'
+import { MARINE_LICENCE_TYPE } from '#src/server/common/constants/marine-licence.js'
 
 vi.mock('~/src/server/common/plugins/auth/utils.js')
 
@@ -236,9 +239,12 @@ describe('Dashboard', () => {
     mockExemptions([])
     const doc = await loadDashboardPage()
     const table = queryByRole(doc, 'table', { name: 'Projects' })
-    expect(table).not.toBeInTheDocument()
+
+    const row = table.querySelectorAll('tbody tr')
+    expect(row.length).toBe(0)
+
     expect(
-      getByText(doc, 'There are no projects to display.')
+      getByText(doc, 'There are no submissions to display.')
     ).toBeInTheDocument()
   })
 
@@ -434,44 +440,123 @@ describe('Dashboard', () => {
   })
 
   describe('Filter', () => {
-    it('should render table with moj-filter module for employees', async () => {
-      mockEmployeeExemptions(employeeExemptions)
-      const doc = await loadDashboardPage()
-      const filter = doc.querySelector('.moj-filter')
-      expect(filter).toHaveAttribute('data-module', 'moj-filter')
-
-      expect(
-        queryAllByRole(filter, 'button', { name: 'Clear filters' })
-      ).toHaveLength(1)
-
-      expect(
-        getByRole(filter, 'button', { name: 'Apply filters' })
-      ).toBeInTheDocument()
-
-      expect(
-        getByRole(filter, 'heading', {
-          name: 'Selected filters'
-        })
-      ).toBeInTheDocument()
-
-      expect(filter.querySelectorAll('.moj-filter__tag').length).toBe(0)
-
-      expect(
-        getByRole(filter, 'group', {
-          name: 'Show'
-        })
-      ).toBeInTheDocument()
-
-      const orgSubmissionRadio = getByRole(filter, 'radio', {
-        name: 'All Test Org submissions'
+    describe('when marine licence is enabled', () => {
+      beforeAll(() => {
+        config.set('marineLicence.enabled', true)
       })
 
-      const mySubmissionRadio = getByRole(filter, 'radio', {
-        name: 'My submissions'
+      afterAll(() => {
+        config.set('marineLicence.enabled', false)
       })
 
-      expect(orgSubmissionRadio).not.toBeChecked()
-      expect(mySubmissionRadio).toBeChecked()
+      it('should render table with moj-filter module for employees', async () => {
+        mockEmployeeExemptions(employeeExemptions)
+        const doc = await loadDashboardPage()
+        const filter = doc.querySelector('.moj-filter')
+        expect(filter).toHaveAttribute('data-module', 'moj-filter')
+
+        expect(
+          queryAllByRole(filter, 'button', { name: 'Clear filters' })
+        ).toHaveLength(1)
+
+        expect(
+          getByRole(filter, 'button', { name: 'Apply filters' })
+        ).toBeInTheDocument()
+
+        expect(
+          getByRole(filter, 'heading', {
+            name: 'Selected filters'
+          })
+        ).toBeInTheDocument()
+
+        expect(filter.querySelectorAll('.moj-filter__tag').length).toBe(0)
+
+        expect(
+          getByRole(filter, 'group', {
+            name: 'Show'
+          })
+        ).toBeInTheDocument()
+
+        const orgSubmissionRadio = getByRole(filter, 'radio', {
+          name: 'All Test Org submissions'
+        })
+
+        const mySubmissionRadio = getByRole(filter, 'radio', {
+          name: 'My submissions'
+        })
+
+        expect(orgSubmissionRadio).not.toBeChecked()
+        expect(mySubmissionRadio).toBeChecked()
+
+        const statusGroup = getByRole(filter, 'group', {
+          name: 'Status'
+        })
+        expect(statusGroup).toBeInTheDocument()
+
+        const statuses = [
+          'Active',
+          'Draft',
+          'Submitted',
+          'Transferred',
+          'Unable to progress',
+          'Withdrawn'
+        ]
+
+        statuses.forEach((status) => {
+          const checkbox = getByRole(statusGroup, 'checkbox', {
+            name: status
+          })
+          expect(checkbox).not.toBeChecked()
+        })
+
+        const typeGroup = getByRole(filter, 'group', {
+          name: 'Submission type'
+        })
+        expect(typeGroup).toBeInTheDocument()
+
+        const typeValues = [EXEMPTION_TYPE, MARINE_LICENCE_TYPE]
+
+        typeValues.forEach((type) => {
+          const checkbox = getByRole(typeGroup, 'checkbox', { name: type })
+          expect(checkbox).not.toBeChecked()
+        })
+      })
+    })
+
+    describe('when marine licence is disabled', () => {
+      beforeAll(() => {
+        config.set('marineLicence.enabled', false)
+      })
+
+      it('should only show Active and Draft statuses and hide the Submission type filter', async () => {
+        mockEmployeeExemptions(employeeExemptions)
+        const doc = await loadDashboardPage()
+        const filter = doc.querySelector('.moj-filter')
+
+        const statusGroup = getByRole(filter, 'group', {
+          name: 'Status'
+        })
+
+        ;['Active', 'Draft'].forEach((status) => {
+          expect(
+            getByRole(statusGroup, 'checkbox', { name: status })
+          ).not.toBeChecked()
+        })
+        ;[
+          'Submitted',
+          'Transferred',
+          'Unable to progress',
+          'Withdrawn'
+        ].forEach((status) => {
+          expect(
+            queryByRole(statusGroup, 'checkbox', { name: status })
+          ).not.toBeInTheDocument()
+        })
+
+        expect(
+          queryByRole(filter, 'group', { name: 'Submission type' })
+        ).not.toBeInTheDocument()
+      })
     })
 
     it('should not render table with moj-filter module for individuals', async () => {

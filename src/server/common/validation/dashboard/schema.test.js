@@ -19,6 +19,45 @@ describe('#dashboardFilterSchema', () => {
     expect(error).toBeDefined()
   })
 
+  test('should validate a single status value and modify it to an array', () => {
+    const { error, value } = dashboardFilterSchema.validate({
+      status: 'ACTIVE'
+    })
+
+    expect(error).toBeUndefined()
+    expect(value.status).toEqual(['ACTIVE'])
+  })
+
+  test('should validate multiple status values', () => {
+    const { error } = dashboardFilterSchema.validate({
+      status: ['ACTIVE', 'DRAFT']
+    })
+
+    expect(error).toBeUndefined()
+  })
+
+  test('should fail on an invalid status value', () => {
+    const { error } = dashboardFilterSchema.validate({
+      status: 'NOT_A_STATUS'
+    })
+
+    expect(error).toBeDefined()
+  })
+
+  test('should validate a valid type value', () => {
+    const { error } = dashboardFilterSchema.validate({
+      type: 'marine-licence'
+    })
+
+    expect(error).toBeUndefined()
+  })
+
+  test('should fail on an invalid type value', () => {
+    const { error } = dashboardFilterSchema.validate({ type: 'not-a-type' })
+
+    expect(error).toBeDefined()
+  })
+
   test('should fail on an unknown field', () => {
     const { error } = dashboardFilterSchema.validate({ notAField: 'value' })
 

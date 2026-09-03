@@ -4,8 +4,44 @@ import { FilterToggleButton } from '@ministryofjustice/frontend'
 import { MojFilter } from './index.js'
 
 vi.mock('@ministryofjustice/frontend', () => ({
-  FilterToggleButton: vi.fn()
+  FilterToggleButton: vi.fn(),
+  SortableTable: vi.fn()
 }))
+
+const buildSelectedFiltersMarkup = ({
+  withClearLink = true,
+  tags = []
+} = {}) => `
+    <div class="moj-filter__selected">
+      <div class="moj-filter__selected-heading">
+        <div class="moj-filter__heading-title">
+          <h2 class="govuk-heading-m">Selected filters</h2>
+        </div>
+        ${
+          withClearLink
+            ? '<div class="moj-filter__heading-action"><p><a class="govuk-link govuk-link--no-visited-state" href="/projects">Clear filters</a></p></div>'
+            : ''
+        }
+      </div>
+      ${
+        tags.length
+          ? `<h3 class="govuk-heading-s govuk-!-margin-bottom-0">Status</h3>
+      <ul class="moj-filter-tags">
+        ${tags
+          .map(
+            ({ field, value, text }) => `
+        <li>
+          <a class="moj-filter__tag" href="#" data-field="${field}" data-value="${value}">
+            <span class="govuk-visually-hidden">Remove this filter</span>
+            ${text}</a>
+        </li>`
+          )
+          .join('')}
+      </ul>`
+          : ''
+      }
+    </div>
+  `
 
 describe('MojFilter', () => {
   let assignSpy
@@ -16,13 +52,10 @@ describe('MojFilter', () => {
       <form class="app-filter-form" action="/projects">
         <input type="hidden" name="csrfToken" value="test-token" />
         <div data-module="moj-filter">
-          ${
-            withClearLink
-              ? '<div class="moj-filter__heading-action"><a href="/projects">Clear filters</a></div>'
-              : ''
-          }
+          ${buildSelectedFiltersMarkup({ withClearLink })}
           <input type="radio" name="show" value="all-projects" checked />
           <input type="radio" name="show" value="my-projects" />
+          <input type="checkbox" name="status" value="ACTIVE" checked />
         </div>
         <div id="app-project-results"></div>
       </form>
@@ -30,7 +63,13 @@ describe('MojFilter', () => {
     `
 
   beforeEach(() => {
-    fetchMock = vi.fn()
+    fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      text: async () =>
+        `<div id="app-project-results"></div>${buildSelectedFiltersMarkup({
+          tags: [{ field: 'status', value: 'ACTIVE', text: 'Active' }]
+        })}`
+    })
     vi.stubGlobal('fetch', fetchMock)
 
     originalLocation = window.location
@@ -76,11 +115,6 @@ describe('MojFilter', () => {
     test('should not send submit request twice when already submitting', async () => {
       document.body.innerHTML = buildFilterMarkup()
 
-      fetchMock.mockResolvedValue({
-        ok: true,
-        text: async () => '<div id="app-project-results"></div>'
-      })
-
       const init = () => new MojFilter()
       init()
 
@@ -101,19 +135,18 @@ describe('MojFilter', () => {
     test('should not navigate and should reset the form when clicked', async () => {
       document.body.innerHTML = buildFilterMarkup()
 
-      fetchMock.mockResolvedValue({
-        ok: true,
-        text: async () => '<div id="app-project-results"></div>'
-      })
-
       const init = () => new MojFilter()
       init()
 
       const $clearLink = document.querySelector('.moj-filter__heading-action a')
       $clearLink.click()
 
-      await vi.waitFor(() => {
-        expect(fetchMock).toHaveBeenCalled()
+      const $tag = await vi.waitFor(() => {
+        const tag = document.querySelector(
+          '.moj-filter__selected .moj-filter__tag'
+        )
+        expect(tag).not.toBeNull()
+        return tag
       })
 
       const $myProjectsRadio = document.querySelector(
@@ -122,10 +155,17 @@ describe('MojFilter', () => {
       const $allProjectsRadio = document.querySelector(
         'input[value="all-projects"]'
       )
+      const $statusCheckbox = document.querySelector(
+        'input[type="checkbox"][name="status"]'
+      )
 
       expect($myProjectsRadio.checked).toBe(true)
       expect($allProjectsRadio.checked).toBe(false)
+      expect($statusCheckbox.checked).toBe(false)
       expect(assignSpy).not.toHaveBeenCalled()
+
+      expect($tag.dataset.field).toBe('status')
+      expect($tag.dataset.value).toBe('ACTIVE')
     })
 
     test('should not navigate when the clear filters link is not present in the DOM', () => {
@@ -139,6 +179,137 @@ describe('MojFilter', () => {
       expect(fetchMock).not.toHaveBeenCalled()
       expect(assignSpy).not.toHaveBeenCalled()
       expect(submitSpy).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('selected filters swap', () => {
+    test('should leave the existing selected filters unchanged when the response has none', async () => {
+      document.body.innerHTML = buildFilterMarkup()
+
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        text: async () => '<div id="app-project-results"></div>'
+      })
+
+      const $selectedFiltersBefore = document.querySelector(
+        '.moj-filter__selected'
+      ).innerHTML
+
+      const mojFilter = new MojFilter()
+
+      const $form = document.querySelector('form')
+      $form.dispatchEvent(new Event('submit', { cancelable: true }))
+
+      await vi.waitFor(() => {
+        expect(mojFilter.isSubmitting).toBe(false)
+      })
+
+      expect(document.querySelector('.moj-filter__selected').innerHTML).toBe(
+        $selectedFiltersBefore
+      )
+    })
+  })
+
+  describe('onTagRemove', () => {
+    const buildTagMarkup = ({
+      tagAttributes = 'data-field="status" data-value="ACTIVE"',
+      checkboxAttributes = 'name="status" value="ACTIVE" checked'
+    } = {}) => `
+      <form class="app-filter-form" action="/projects">
+        <input type="hidden" name="csrfToken" value="test-token" />
+        <div data-module="moj-filter">
+          <div class="moj-filter__selected">
+            <a class="moj-filter__tag" href="#" ${tagAttributes}>Active</a>
+          </div>
+          ${checkboxAttributes ? `<input type="checkbox" ${checkboxAttributes} />` : ''}
+        </div>
+        <div id="app-project-results"></div>
+      </form>
+      <div id="app-project-results-status"></div>
+    `
+
+    const clickTag = () => {
+      const $tag = document.querySelector('.moj-filter__tag')
+      const event = new MouseEvent('click', {
+        bubbles: true,
+        cancelable: true
+      })
+      $tag.dispatchEvent(event)
+      return event
+    }
+
+    test('should uncheck the matching checkbox and resubmit the form when a filter tag is clicked', () => {
+      document.body.innerHTML = buildTagMarkup()
+
+      const requestSubmitSpy = vi
+        .spyOn(HTMLFormElement.prototype, 'requestSubmit')
+        .mockImplementation(() => {})
+
+      const mojFilter = new MojFilter()
+      mojFilter.initSelectedFilterTags()
+
+      const $checkbox = document.querySelector(
+        'input[name="status"][value="ACTIVE"]'
+      )
+
+      const event = clickTag()
+
+      expect(event.defaultPrevented).toBe(true)
+      expect($checkbox.checked).toBe(false)
+      expect(requestSubmitSpy).toHaveBeenCalledTimes(1)
+    })
+
+    test('should not resubmit the form when the tag is missing data-field or data-value', () => {
+      document.body.innerHTML = buildTagMarkup({
+        tagAttributes: 'data-field="status"'
+      })
+
+      const requestSubmitSpy = vi
+        .spyOn(HTMLFormElement.prototype, 'requestSubmit')
+        .mockImplementation(() => {})
+
+      const mojFilter = new MojFilter()
+      mojFilter.initSelectedFilterTags()
+
+      const $checkbox = document.querySelector(
+        'input[name="status"][value="ACTIVE"]'
+      )
+
+      clickTag()
+
+      expect($checkbox.checked).toBe(true)
+      expect(requestSubmitSpy).not.toHaveBeenCalled()
+    })
+
+    test('should not resubmit the form when no checkbox matches the tag', () => {
+      document.body.innerHTML = buildTagMarkup({ checkboxAttributes: null })
+
+      const requestSubmitSpy = vi
+        .spyOn(HTMLFormElement.prototype, 'requestSubmit')
+        .mockImplementation(() => {})
+
+      const mojFilter = new MojFilter()
+      mojFilter.initSelectedFilterTags()
+
+      clickTag()
+
+      expect(requestSubmitSpy).not.toHaveBeenCalled()
+    })
+
+    test('should not resubmit the form when selected filters is not in the dom', () => {
+      document.body.innerHTML = `
+        <div data-module="moj-filter"></div>
+        <div id="app-project-results"></div>
+        <div id="app-project-results-status"></div>`
+
+      const requestSubmitSpy = vi
+        .spyOn(HTMLFormElement.prototype, 'requestSubmit')
+        .mockImplementation(() => {})
+
+      const mojFilter = new MojFilter()
+      mojFilter.initSelectedFilterTags()
+
+      expect(requestSubmitSpy).not.toHaveBeenCalled()
     })
   })
 

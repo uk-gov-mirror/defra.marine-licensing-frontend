@@ -1,4 +1,4 @@
-{% set showTable = projects and projects.length > 0 and (not isEmployee or filterValue == filterAllProjects) %}
+{% set showTable = projects and projects.length > 0 %}
 
 {% set subTitle %}
   {% if searchParams.show == "all-projects" %}
@@ -8,7 +8,7 @@
   {% endif %}
 {% endset %}
 
-{% if projects and projects.length > 0 %}
+{% if projects %}
   {% if isEmployee %}<div class="moj-scrollable-pane">{% endif %}
   
   {% if isEmployee %}
@@ -46,9 +46,9 @@
       {% endfor %}
     </tbody>
   </table>
-  </div>
+  {% if isEmployee %}</div>{% endif %}
 {% endif %}
 
 <p class="govuk-body app-empty-message{% if showTable %} govuk-!-display-none{% endif %}">
-  There are no projects to display.
+  There are no submissions to display.
 </p>
