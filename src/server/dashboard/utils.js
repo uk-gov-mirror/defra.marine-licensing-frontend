@@ -1,8 +1,10 @@
 import { formatDate } from '#src/config/nunjucks/filters/format-date.js'
 import { authenticatedPostRequest } from '#src/server/common/helpers/authenticated-requests.js'
+import { getUserSession } from '#src/server/common/plugins/auth/utils.js'
 import {
   routes,
-  marineLicenceRoutes
+  marineLicenceRoutes,
+  apiRoutes
 } from '#src/server/common/constants/routes.js'
 import { EXEMPTION_TYPE } from '#src/server/common/constants/exemptions.js'
 import {
@@ -83,8 +85,74 @@ const getMarineLicenceActions = ({
   )
 }
 
-export const fetchProjects = async (request, payload = {}) =>
-  authenticatedPostRequest(request, '/projects', payload)
+const findMissingContactIds = (projects, users) => [
+  ...new Set(
+    projects
+      .map((project) => project.contactId)
+      .filter((contactId) => contactId && !(contactId in users))
+  )
+]
+
+const resolveMissingUsers = async (request, missingContactIds) => {
+  try {
+    const { payload } = await authenticatedPostRequest(
+      request,
+      apiRoutes.GET_USER_NAMES,
+      { contactIds: missingContactIds }
+    )
+    return payload?.value ?? {}
+  } catch (error) {
+    request.logger.error(
+      { err: error },
+      'Failed to resolve missing dashboard user names'
+    )
+    return {}
+  }
+}
+
+export const fetchProjects = async (request, payload = {}) => {
+  const userSession = await getUserSession(request, request.state?.userSession)
+  const organisationId = userSession?.organisationId
+  const cache = request.server?.app.dashboardUsersCache
+
+  const cachedUsers = organisationId ? await cache.get(organisationId) : null
+  const requestPayload = cachedUsers ? { ...payload, skipUsers: true } : payload
+
+  const result = await authenticatedPostRequest(
+    request,
+    '/projects',
+    requestPayload
+  )
+
+  const setCachedUsers = (usersToCache) =>
+    organisationId ? cache.set(organisationId, usersToCache) : null
+
+  let users = cachedUsers ?? result.payload?.value?.users ?? {}
+
+  if (!cachedUsers) {
+    await setCachedUsers(users)
+    return result
+  }
+
+  const projects = result.payload?.value?.projects ?? []
+  const missingContactIds = findMissingContactIds(projects, users)
+
+  if (missingContactIds.length) {
+    const resolvedUsers = await resolveMissingUsers(request, missingContactIds)
+
+    if (Object.keys(resolvedUsers).length) {
+      users = { ...users, ...resolvedUsers }
+      await setCachedUsers(users)
+    }
+  }
+
+  result.payload.value = {
+    ...result.payload?.value,
+    users
+  }
+
+  return result
+}
 
 export const sortProjectsByStatus = (projects) => {
   return [...projects].sort((a, b) => {

@@ -1,5 +1,6 @@
 import { vi } from 'vitest'
 import {
+  fetchProjects,
   sortProjectsByStatus,
   formatProjectsForDisplay,
   getActionButtons,
@@ -12,7 +13,8 @@ import {
 } from './utils.js'
 import {
   routes,
-  marineLicenceRoutes
+  marineLicenceRoutes,
+  apiRoutes
 } from '#src/server/common/constants/routes.js'
 import {
   PROJECT_STATUS,
@@ -23,6 +25,11 @@ import {
   mockUsers
 } from '#src/server/test-helpers/mocks/dashboard.js'
 import { mockMarineLicenceApplication } from '#src/server/test-helpers/mocks/marine-licence-mocks.js'
+import { authenticatedPostRequest } from '#src/server/common/helpers/authenticated-requests.js'
+import { getUserSession } from '#src/server/common/plugins/auth/utils.js'
+
+vi.mock('~/src/server/common/helpers/authenticated-requests.js')
+vi.mock('~/src/server/common/plugins/auth/utils.js')
 
 vi.mock('~/src/config/nunjucks/filters/format-date.js', () => ({
   formatDate: vi.fn((date) => {
@@ -32,6 +39,144 @@ vi.mock('~/src/config/nunjucks/filters/format-date.js', () => ({
     return '01 Jan 2024'
   })
 }))
+
+describe('#fetchProjects', () => {
+  const authenticatedPostRequestMock = vi.mocked(authenticatedPostRequest)
+  const getUserSessionMock = vi.mocked(getUserSession)
+
+  const buildRequest = () => ({
+    state: { userSession: { sessionId: 'session-1' } },
+    logger: { error: vi.fn() },
+    server: {
+      app: {
+        dashboardUsersCache: {
+          get: vi.fn(),
+          set: vi.fn()
+        }
+      }
+    }
+  })
+
+  test('does not touch the cache when the session has no organisationId', async () => {
+    getUserSessionMock.mockResolvedValue({})
+    authenticatedPostRequestMock.mockResolvedValue({
+      payload: { value: { projects: [], users: mockUsers } }
+    })
+    const request = buildRequest()
+
+    const result = await fetchProjects(request, { show: 'all-projects' })
+
+    expect(request.server.app.dashboardUsersCache.get).not.toHaveBeenCalled()
+    expect(request.server.app.dashboardUsersCache.set).not.toHaveBeenCalled()
+    expect(authenticatedPostRequestMock).toHaveBeenCalledWith(
+      request,
+      '/projects',
+      { show: 'all-projects' }
+    )
+    expect(result.payload.value.users).toEqual(mockUsers)
+  })
+
+  test('requests users from backend and populates the cache with result from server', async () => {
+    getUserSessionMock.mockResolvedValue({ organisationId: 'org-1' })
+    authenticatedPostRequestMock.mockResolvedValue({
+      payload: { value: { projects: [], users: mockUsers } }
+    })
+    const request = buildRequest()
+    request.server.app.dashboardUsersCache.get.mockResolvedValue(null)
+
+    const result = await fetchProjects(request, { show: 'all-projects' })
+
+    expect(authenticatedPostRequestMock).toHaveBeenCalledWith(
+      request,
+      '/projects',
+      { show: 'all-projects' }
+    )
+    expect(request.server.app.dashboardUsersCache.set).toHaveBeenCalledWith(
+      'org-1',
+      mockUsers
+    )
+    expect(result.payload.value.users).toEqual(mockUsers)
+  })
+
+  test('requests with skipUsers param when we already have a cache', async () => {
+    getUserSessionMock.mockResolvedValue({ organisationId: 'org-1' })
+    authenticatedPostRequestMock.mockResolvedValue({
+      payload: { value: { projects: [], users: {} } }
+    })
+    const request = buildRequest()
+    request.server.app.dashboardUsersCache.get.mockResolvedValue(mockUsers)
+
+    const result = await fetchProjects(request, { show: 'all-projects' })
+
+    expect(authenticatedPostRequestMock).toHaveBeenCalledWith(
+      request,
+      '/projects',
+      { show: 'all-projects', skipUsers: true }
+    )
+    expect(request.server.app.dashboardUsersCache.set).not.toHaveBeenCalled()
+    expect(result.payload.value.users).toEqual(mockUsers)
+  })
+
+  test('resolves and caches names for a project owner missing from cached users', async () => {
+    getUserSessionMock.mockResolvedValue({ organisationId: 'org-1' })
+    const request = buildRequest()
+    request.server.app.dashboardUsersCache.get.mockResolvedValue(mockUsers)
+    authenticatedPostRequestMock
+      .mockResolvedValueOnce({
+        payload: {
+          value: { projects: [{ contactId: 'newContactId' }], users: {} }
+        }
+      })
+      .mockResolvedValueOnce({
+        payload: { value: { newContactId: 'New Person' } }
+      })
+
+    const result = await fetchProjects(request, { show: 'all-projects' })
+
+    expect(authenticatedPostRequestMock).toHaveBeenCalledWith(
+      request,
+      apiRoutes.GET_USER_NAMES,
+      { contactIds: ['newContactId'] }
+    )
+    expect(result.payload.value.users).toEqual({
+      ...mockUsers,
+      newContactId: 'New Person'
+    })
+    expect(request.server.app.dashboardUsersCache.set).toHaveBeenLastCalledWith(
+      'org-1',
+      { ...mockUsers, newContactId: 'New Person' }
+    )
+  })
+
+  test('does not call api when every cached project owner is already known', async () => {
+    getUserSessionMock.mockResolvedValue({ organisationId: 'org-1' })
+    const request = buildRequest()
+    request.server.app.dashboardUsersCache.get.mockResolvedValue(mockUsers)
+    authenticatedPostRequestMock.mockResolvedValue({
+      payload: { value: { projects: [{ contactId: 'testContactId' }] } }
+    })
+
+    await fetchProjects(request, { show: 'all-projects' })
+
+    expect(authenticatedPostRequestMock).toHaveBeenCalledTimes(1)
+  })
+
+  test('does not call api on a fresh fetch', async () => {
+    getUserSessionMock.mockResolvedValue({ organisationId: 'org-1' })
+    const request = buildRequest()
+    request.server.app.dashboardUsersCache.get.mockResolvedValue(null)
+    authenticatedPostRequestMock.mockResolvedValue({
+      payload: {
+        value: { projects: [{ contactId: 'newContactId' }], users: mockUsers }
+      }
+    })
+
+    const result = await fetchProjects(request, { show: 'all-projects' })
+
+    expect(authenticatedPostRequestMock).toHaveBeenCalledTimes(1)
+    expect(result.payload.value.users).toEqual(mockUsers)
+  })
+})
 
 describe('#sortProjectsByStatus', () => {
   it('sorts projects by status Z-A (Draft before Active)', () => {
