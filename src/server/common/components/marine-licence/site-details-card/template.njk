@@ -1,11 +1,27 @@
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
 {% from "site-details-map/macro.njk" import appSiteDetailsMap %}
+{% from "marine-licence/redaction-field/macro.njk" import appMarineLicenceRedactionField %}
 
 {% set summaryRows = [] %}
 
 {% set _ = summaryRows.push({
   key: { text: "Site name" },
-  value: { text: params.site.siteName }
+  value: {
+    html: appMarineLicenceRedactionField({
+      fieldId: "siteName-" + params.loopIndex0,
+      fieldKey: "siteDetails.siteName",
+      index: params.loopIndex0,
+      label: "site " + params.site.siteNumber + " name",
+      originalText: params.site.siteName,
+      redaction: params.redactions.siteDetails[params.loopIndex0].siteName,
+      isRedacted: params.redactions.siteDetails[params.loopIndex0].siteName,
+      saveUrl: params.redactionSaveUrl,
+      csrfToken: params.csrfToken
+    }),
+    classes: "govuk-summary-list__value--full-width"
+  } if params.enableRedaction else {
+    text: params.site.siteName
+  }
 }) %}
 
 {% if params.coordinatesType === "coordinates" %}
@@ -35,7 +51,22 @@
 
     {% set _ = summaryRows.push({
       key: { text: "Width of circular site" },
-      value: { text: params.site.width }
+      value: {
+        html: appMarineLicenceRedactionField({
+          fieldId: "circleWidth-" + params.loopIndex0,
+          fieldKey: "siteDetails.circleWidth",
+          index: params.loopIndex0,
+          label: "site " + params.site.siteNumber + " width",
+          originalText: params.site.width,
+          redaction: params.redactions.siteDetails[params.loopIndex0].circleWidth,
+          isRedacted: params.redactions.siteDetails[params.loopIndex0].circleWidth,
+          saveUrl: params.redactionSaveUrl,
+          csrfToken: params.csrfToken
+        }),
+        classes: "govuk-summary-list__value--full-width"
+      } if params.enableRedaction else {
+        text: params.site.width
+      }
     }) %}
   {% endif %}
 {% endif %}

@@ -62,11 +62,11 @@ export class MarineLicenceService {
     return payload.value
   }
 
-  async saveRedaction(id, fieldKey, text) {
+  async saveRedaction(id, fieldKey, text, { index } = {}) {
     const { payload } = await authenticatedPostRequest(
       this.request,
       apiRoutes.REDACT_TEXT,
-      { id, fieldKey, text }
+      { id, fieldKey, text, ...(index !== undefined && { index }) }
     )
     if (payload?.message !== 'success') {
       this.logger.error(

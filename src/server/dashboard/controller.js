@@ -18,7 +18,7 @@ import {
   errorDescriptionByFieldName,
   mapErrorsForDisplay
 } from '#src/server/common/helpers/errors.js'
-import { isClientSideFetchRequest } from '#src/server/common/helpers/is-client-side-fetch-request'
+import { isClientSideFetchRequest } from '#src/server/common/helpers/is-client-side-fetch-request.js'
 
 export const DASHBOARD_VIEW_ROUTE = 'dashboard/index.njk'
 export const DASHBOARD_RESULTS_VIEW_ROUTE =

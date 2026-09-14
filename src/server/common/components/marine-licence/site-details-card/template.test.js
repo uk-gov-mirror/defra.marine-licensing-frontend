@@ -41,6 +41,93 @@ describe('Marine Licence Site Details Card Component', () => {
   })
 })
 
+describe('Marine Licence Site Details Card - redaction', () => {
+  const redactableParams = {
+    site: { siteName: 'Test site', siteNumber: 2 },
+    loopIndex0: 1,
+    enableRedaction: true,
+    redactions: {},
+    redactionSaveUrl: '/view-marine-licence-details/test-id/redact',
+    csrfToken: 'test-crumb-token'
+  }
+
+  test('renders a redaction field for the site name', () => {
+    const $component = renderComponent(
+      'marine-licence/site-details-card',
+      redactableParams
+    )
+
+    const $field = $component('#redaction-field-siteName-1')
+    expect($field).toHaveLength(1)
+    expect($field.find('.app-redaction-field__input').attr('value')).toBe(
+      'Test site'
+    )
+  })
+
+  test('sends the field key and site index with the save', () => {
+    const $component = renderComponent(
+      'marine-licence/site-details-card',
+      redactableParams
+    )
+
+    expect($component('input[name="fieldKey"]').attr('value')).toBe(
+      'siteDetails.siteName'
+    )
+    expect($component('input[name="index"]').attr('value')).toBe('1')
+  })
+
+  test('renders a redaction field for the width of a circular site', () => {
+    const $component = renderComponent('marine-licence/site-details-card', {
+      ...redactableParams,
+      coordinatesType: 'coordinates',
+      site: { ...redactableParams.site, width: '50 metres' }
+    })
+
+    const $field = $component('#redaction-field-circleWidth-1')
+    expect($field).toHaveLength(1)
+    expect($field.find('input[name="fieldKey"]').attr('value')).toBe(
+      'siteDetails.circleWidth'
+    )
+    expect($field.find('input[name="index"]').attr('value')).toBe('1')
+    expect($field.find('.app-redaction-field__input').attr('value')).toBe(
+      '50 metres'
+    )
+  })
+
+  test('shows the redacted state for an already redacted site name', () => {
+    const $component = renderComponent('marine-licence/site-details-card', {
+      ...redactableParams,
+      redactions: {
+        siteDetails: {
+          1: {
+            siteName: {
+              redactedText: 'Redacted site',
+              redactedTextValue: 'Redacted site'
+            }
+          }
+        }
+      }
+    })
+
+    expect($component('.app-redaction-field__trigger').text()).toContain(
+      'Change redaction'
+    )
+    expect($component('.app-redaction-field__input').attr('value')).toBe(
+      'Redacted site'
+    )
+  })
+
+  test('renders plain text when redaction is not enabled', () => {
+    const $component = renderComponent('marine-licence/site-details-card', {
+      ...redactableParams,
+      enableRedaction: false
+    })
+
+    expect($component('.app-redaction-field')).toHaveLength(0)
+    expect($component.html()).toContain('Test site')
+  })
+})
+
 describe('Marine Licence Site Details Card - Change link', () => {
   const siteParams = {
     site: {

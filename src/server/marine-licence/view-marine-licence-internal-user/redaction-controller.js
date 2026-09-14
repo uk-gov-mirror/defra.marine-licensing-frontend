@@ -11,6 +11,7 @@ const REDACTION_TEXT_MAX_LENGTH = 1000
 
 const redactionPayloadSchema = joi.object({
   fieldKey: joi.string().required(),
+  index: joi.number().integer().min(0).optional(),
   text: joi.string().allow('').max(REDACTION_TEXT_MAX_LENGTH).required()
 })
 
@@ -28,7 +29,7 @@ export const saveRedactionController = {
   },
   async handler(request, h) {
     const { marineLicenceId } = request.params
-    const { fieldKey, text } = request.payload
+    const { fieldKey, index, text } = request.payload
 
     const viewUrl = `${marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS_INTERNAL_USER}/${marineLicenceId}`
     const isFetch = isClientSideFetchRequest(request)
@@ -37,7 +38,9 @@ export const saveRedactionController = {
 
     try {
       const service = getMarineLicenceService(request)
-      await service.saveRedaction(marineLicenceId, fieldKey, redactionText)
+      await service.saveRedaction(marineLicenceId, fieldKey, redactionText, {
+        index
+      })
     } catch (error) {
       request.logger.error(error, 'Error saving marine licence redaction')
 

@@ -54,7 +54,8 @@ describe('saveRedactionController', () => {
     expect(mockMarineLicenceService.saveRedaction).toHaveBeenCalledWith(
       'test-id',
       'preferredDates',
-      'Redacted text'
+      'Redacted text',
+      { index: undefined }
     )
     expect(viewDetailsInternalUserController.handler).toHaveBeenCalledWith(
       mockRequest,
@@ -76,10 +77,26 @@ describe('saveRedactionController', () => {
       expect(mockMarineLicenceService.saveRedaction).toHaveBeenCalledWith(
         'test-id',
         'preferredDates',
-        REDACTION_LABEL
+        REDACTION_LABEL,
+        { index: undefined }
       )
     }
   )
+
+  test('passes the site index through for a repeated field', async () => {
+    const mockRequest = createMockRequest({
+      payload: { fieldKey: 'siteName', index: 1, text: 'Redacted site' }
+    })
+
+    await saveRedactionController.handler(mockRequest, createMockH())
+
+    expect(mockMarineLicenceService.saveRedaction).toHaveBeenCalledWith(
+      'test-id',
+      'siteName',
+      'Redacted site',
+      { index: 1 }
+    )
+  })
 
   test('redirects back to the view page for a native form post', async () => {
     const mockRequest = createMockRequest({ headers: {} })

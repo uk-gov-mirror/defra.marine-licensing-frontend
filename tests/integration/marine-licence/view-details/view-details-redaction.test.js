@@ -59,6 +59,55 @@ describe('Marine Licence View Details Redaction', () => {
     const applicantText = 'July 2026 to August 2027'
     const redactedText = 'Redacted preferred dates'
 
+    test.each([
+      ['projectName', mockSubmittedMarineLicenceApplication.projectName],
+      [
+        'projectBackground',
+        mockSubmittedMarineLicenceApplication.projectBackground
+      ],
+      ['preferredDates', 'July 2026 to August 2027']
+    ])('renders a redaction field for %s', (fieldId, text) => {
+      const $field = document.querySelector(`#redaction-field-${fieldId}`)
+
+      expect($field).not.toBeNull()
+      expect($field.querySelector('input[name="fieldKey"]').value).toBe(fieldId)
+      expect($field.querySelector('.app-redaction-field__input').value).toBe(
+        text
+      )
+    })
+
+    test.each(['specialLegalPowers', 'harbourAuthority', 'publicConsultation'])(
+      'renders a redaction field for %s',
+      (groupName) => {
+        const $field = document.querySelector(
+          `#redaction-field-${groupName}-details`
+        )
+
+        expect($field).not.toBeNull()
+        expect($field.querySelector('input[name="fieldKey"]').value).toBe(
+          `${groupName}.details`
+        )
+      }
+    )
+
+    test('renders a redaction field for each site name', () => {
+      const siteCount = mockSubmittedMarineLicenceApplication.siteDetails.length
+
+      for (let index = 0; index < siteCount; index++) {
+        const $field = document.querySelector(
+          `#redaction-field-siteName-${index}`
+        )
+
+        expect($field).not.toBeNull()
+        expect($field.querySelector('input[name="fieldKey"]').value).toBe(
+          'siteDetails.siteName'
+        )
+        expect($field.querySelector('input[name="index"]').value).toBe(
+          String(index)
+        )
+      }
+    })
+
     describe('when the field has not been redacted', () => {
       test('offers to redact the applicant text', () => {
         expect(
@@ -171,11 +220,28 @@ describe('Marine Licence View Details Redaction', () => {
     })
 
     test('renders the water framework directive card', () => {
-      validateWaterFrameworkDirective(
-        document,
-        expectedWaterFrameworkDirectiveCard
-      )
+      validateWaterFrameworkDirective(document, {
+        waterFrameworkDirective: Object.fromEntries(
+          Object.entries(
+            expectedWaterFrameworkDirectiveCard.waterFrameworkDirective
+          ).map(([heading, value]) => [heading, [value]])
+        )
+      })
     })
+
+    test.each(['nauticalMile', 'excludedActivities'])(
+      'renders a redaction field for %s',
+      (fieldName) => {
+        const $field = document.querySelector(
+          `#redaction-field-waterFrameworkDirective-${fieldName}`
+        )
+
+        expect($field).not.toBeNull()
+        expect($field.querySelector('input[name="fieldKey"]').value).toBe(
+          `waterFrameworkDirective.${fieldName}`
+        )
+      }
+    )
 
     test('does not render a Change link', () => {
       const card = document.querySelector('#water-framework-directive-card')

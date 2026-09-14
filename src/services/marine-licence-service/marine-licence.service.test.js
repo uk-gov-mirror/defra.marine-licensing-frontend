@@ -367,6 +367,20 @@ describe('MarineLicenceService', () => {
       expect(mockLogger.error).not.toHaveBeenCalled()
     })
 
+    test('should send the index for site details', async () => {
+      vi.mocked(authenticatedPostRequest).mockResolvedValue({
+        payload: { message: 'success' }
+      })
+
+      await service.saveRedaction(validId, 'siteName', 'Redacted', { index: 1 })
+
+      expect(authenticatedPostRequest).toHaveBeenCalledWith(
+        mockRequest,
+        apiRoutes.REDACT_TEXT,
+        { id: validId, fieldKey: 'siteName', text: 'Redacted', index: 1 }
+      )
+    })
+
     test.each([
       ['message is not success', { payload: { message: 'error' } }],
       ['payload is undefined', {}]

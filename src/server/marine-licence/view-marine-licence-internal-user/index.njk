@@ -53,6 +53,7 @@
       }) }}
 
       {{ appMarineLicenceProjectDetailsCard({
+        projectName: projectName,
         projectBackground: projectBackground,
         isReadOnly: isReadOnly,
         preferredDates: preferredDates,
@@ -72,7 +73,11 @@
             site: site,
             loopIndex0: loop.index0,
             coordinatesType: coordinatesType,
-            cspNonce: cspNonce
+            cspNonce: cspNonce,
+            enableRedaction: true,
+            redactions: redactions,
+            redactionSaveUrl: redactionSaveUrl,
+            csrfToken: csrfToken
           }) }}
 
           {% for activityDetails in site.activityDetails %}
@@ -95,7 +100,11 @@
 
       {{ appMarineLicenceWaterFrameworkDirectiveCard({
         waterFrameworkDirectiveData: waterFrameworkDirectiveData,
-        isReadOnly: isReadOnly
+        isReadOnly: isReadOnly,
+        enableRedaction: true,
+        redactions: redactions,
+        redactionSaveUrl: redactionSaveUrl,
+        csrfToken: csrfToken
       }) }}
 
       {{ appMarineLicenceOtherPermissionsCard({
@@ -103,7 +112,11 @@
         harbourAuthority: harbourAuthority,
         otherAuthorities: otherAuthorities,
         publicConsultation: publicConsultation,
-        isReadOnly: isReadOnly
+        isReadOnly: isReadOnly,
+        enableRedaction: true,
+        redactions: redactions,
+        redactionSaveUrl: redactionSaveUrl,
+        csrfToken: csrfToken
       }) }}
 
     </div>

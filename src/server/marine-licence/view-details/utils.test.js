@@ -132,6 +132,30 @@ describe('#buildRedactionsForView', () => {
     expect(result.redactedText).toContain(labelHtml)
   })
 
+  test('wraps redactions nested one level by a dotted field key', () => {
+    const result = buildRedactionsForView({
+      specialLegalPowers: { details: { redactedText: '***REDACTED***' } }
+    })
+
+    expect(result.specialLegalPowers.details).toEqual({
+      redactedText: labelHtml,
+      redactedTextValue: '***REDACTED***'
+    })
+  })
+
+  test('wraps site redactions nested by index and field', () => {
+    const result = buildRedactionsForView({
+      siteDetails: {
+        0: { siteName: { redactedText: 'Berth ***REDACTED***' } }
+      }
+    })
+
+    expect(result.siteDetails[0].siteName).toEqual({
+      redactedText: `Berth ${labelHtml}`,
+      redactedTextValue: 'Berth ***REDACTED***'
+    })
+  })
+
   test('preserves the other redaction fields', () => {
     expect(build('***REDACTED***').redactedBy).toBe('Test User')
   })
