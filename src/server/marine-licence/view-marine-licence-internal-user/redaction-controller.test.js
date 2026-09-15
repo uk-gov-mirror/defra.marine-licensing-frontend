@@ -98,6 +98,25 @@ describe('saveRedactionController', () => {
     )
   })
 
+  test('includes the policy code for redacting a policy response', async () => {
+    const mockRequest = createMockRequest({
+      payload: {
+        fieldKey: 'marinePlanPolicyResponses',
+        policyCode: 'E-AGG-3',
+        text: 'Redacted by MMO'
+      }
+    })
+
+    await saveRedactionController.handler(mockRequest, createMockH())
+
+    expect(mockMarineLicenceService.saveRedaction).toHaveBeenCalledWith(
+      'test-id',
+      'marinePlanPolicyResponses',
+      'Redacted by MMO',
+      { index: undefined, policyCode: 'E-AGG-3' }
+    )
+  })
+
   test('redirects back to the view page for a native form post', async () => {
     const mockRequest = createMockRequest({ headers: {} })
     const mockH = createMockH()

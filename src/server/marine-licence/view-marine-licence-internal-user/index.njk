@@ -95,7 +95,11 @@
       {{ appMarineLicenceMarinePlanPoliciesCard({
         policies: marinePlanPolicies,
         isApplicant: false,
-        isReadOnly: true
+        isReadOnly: true,
+        enableRedaction: true,
+        redactions: redactions,
+        redactionSaveUrl: redactionSaveUrl,
+        csrfToken: csrfToken
       }) }}
 
       {{ appMarineLicenceWaterFrameworkDirectiveCard({

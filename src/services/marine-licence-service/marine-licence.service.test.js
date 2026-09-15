@@ -381,6 +381,30 @@ describe('MarineLicenceService', () => {
       )
     })
 
+    test('should send the policy code for a marine plan policy response', async () => {
+      vi.mocked(authenticatedPostRequest).mockResolvedValue({
+        payload: { message: 'success' }
+      })
+
+      await service.saveRedaction(
+        validId,
+        'marinePlanPolicyResponses',
+        'Redacted by MMO',
+        { policyCode: 'E-AGG-3' }
+      )
+
+      expect(authenticatedPostRequest).toHaveBeenCalledWith(
+        mockRequest,
+        apiRoutes.REDACT_TEXT,
+        {
+          id: validId,
+          fieldKey: 'marinePlanPolicyResponses',
+          text: 'Redacted by MMO',
+          policyCode: 'E-AGG-3'
+        }
+      )
+    })
+
     test.each([
       ['message is not success', { payload: { message: 'error' } }],
       ['payload is undefined', {}]

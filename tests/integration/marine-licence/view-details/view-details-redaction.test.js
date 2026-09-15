@@ -274,6 +274,20 @@ describe('Marine Licence View Details Redaction', () => {
       expect(card.textContent).toContain(`Applicant's consideration`)
     })
 
+    test('renders a redaction field for the policy response', () => {
+      const $field = document.querySelector(
+        '#redaction-field-marinePlanPolicyResponse-S-CC-1'
+      )
+
+      expect($field).not.toBeNull()
+      expect($field.querySelector('input[name="fieldKey"]').value).toBe(
+        'marinePlanPolicyResponses'
+      )
+      expect($field.querySelector('input[name="policyCode"]').value).toBe(
+        'S-CC-1'
+      )
+    })
+
     test('does not render a Change link for any row', () => {
       const card = document.querySelector('#marine-plan-policies-card')
       expect(
