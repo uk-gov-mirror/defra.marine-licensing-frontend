@@ -1,0 +1,65 @@
+---
+description: CDP ECS logging standards for all AI-generated application logs
+alwaysApply: true
+---
+
+# CDP Logging (ECS)
+
+All generated logging must follow CDP's streamlined Elastic Common Schema.
+Non-standard fields may end up in `broken_logs*` and will not search correctly
+in OpenSearch. Docs: CDP Portal → Documentation → Logging.
+
+## Logger
+
+- Prefer `request.logger` in handlers; otherwise `createLogger()` from
+  `#src/server/common/helpers/logging/logger.js`.
+- Use structured Pino: `logger.info({ ...fields }, 'message')`.
+- Pass errors as `err` for ECS mapping:
+  `logger.error({ err: error }, 'Failed to …')`.
+- Do not use `console.log` / `console.error` for application logs.
+
+## Allowed fields only
+
+- Set only ✅ / ✅⚠️ CDP fields. Never set ❌ reserved fields
+  (`@timestamp`, `service.name`, `service.version`, `trace.id`,
+  `container_*`, `ecs_*`, response body/bytes/mime_type/response_time, etc.).
+- Nest slash-path fields as objects:
+  `error/message` → `{ error: { message } }`,
+  `event/action` → `{ event: { action } }`.
+  Flattened keys ≠ nested maps in OpenSearch.
+- Literal flat dotted keys only: `host.hostname`, `log.level`, `span.id`,
+  `transaction.id`.
+- ✅⚠️ (`client.*`, `http.request.method`, `url.path`, …) are overridden when
+  `req`/`res` are present — do not set them to fight the pipeline.
+
+## What to put where
+
+- Domain markers: `event.action`, `event.reason`, `event.reference`, or the
+  `message` string — not invent custom top-level keys for searchable data.
+- Do not set `event.category` unless it is an ECS allowlist value
+  (`api`, `authentication`, `web`, …). Prefer `event.action`.
+- Application logs only — not SC-controlled audit logging.
+- Redact secrets / PII.
+
+## Examples
+
+```javascript
+// ✅ GOOD
+request.logger.error(
+  {
+    err: error,
+    event: { action: 'exemption_delete_failed', reason: 'api_error' }
+  },
+  'Error deleting exemption'
+)
+
+request.logger.info(
+  { event: { action: 'exemption_deleted', reference: exemptionId } },
+  `Deleted exemption ${exemptionId}`
+)
+
+// ❌ BAD
+request.logger.info({ exemptionId, foo: 'bar' }, 'deleted')
+console.log('deleted', exemptionId)
+logger.error(error) // use { err: error }
+```
