@@ -7,15 +7,13 @@ import { isClientSideFetchRequest } from '#src/server/common/helpers/is-client-s
 import { viewDetailsInternalUserController } from '#src/server/marine-licence/view-marine-licence-internal-user/controller.js'
 import { REDACTION_LABEL } from '#src/server/marine-licence/view-details/utils.js'
 
-const REDACTION_TEXT_MAX_LENGTH = 1000
-
 const redactionPayloadSchema = joi.object({
   fieldKey: joi.string().required(),
   index: joi.number().integer().min(0).optional(),
   activityIndex: joi.number().integer().min(0).optional(),
   policyCode: joi.string().optional(),
   withhold: joi.boolean().optional(),
-  text: joi.string().allow('').max(REDACTION_TEXT_MAX_LENGTH).when('withhold', {
+  text: joi.string().allow('').when('withhold', {
     is: joi.exist(),
     then: joi.optional(),
     otherwise: joi.required()

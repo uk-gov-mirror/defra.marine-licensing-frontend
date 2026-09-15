@@ -208,11 +208,15 @@ describe('marine-licence view details internal-user redaction controller', () =>
     ).rejects.toMatchObject({ isBoom: true, output: { statusCode: 403 } })
 
     expect(mockRequest.logger.error).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: mockMarineLicenceApplication.id,
-        status: 'Draft'
-      }),
-      errorMessages.MARINE_LICENCE_NOT_SUBMITTED
+      {
+        event: {
+          action: 'view-details-internal-user',
+          outcome: 'failure',
+          reference: mockMarineLicenceApplication.id,
+          reason: errorMessages.MARINE_LICENCE_NOT_SUBMITTED
+        }
+      },
+      `${errorMessages.MARINE_LICENCE_NOT_SUBMITTED} for ${mockMarineLicenceApplication.id}`
     )
   })
 

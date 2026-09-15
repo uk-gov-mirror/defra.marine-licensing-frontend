@@ -95,8 +95,14 @@ describe('MarineLicenceService', () => {
         )
 
         expect(mockLogger.error).toHaveBeenCalledWith(
-          { id: invalidId },
-          errorMessages.MARINE_LICENCE_NOT_FOUND
+          {
+            event: {
+              action: 'get-marine-licence-data',
+              outcome: 'failure',
+              reason: errorMessages.MARINE_LICENCE_NOT_FOUND
+            }
+          },
+          `${errorMessages.MARINE_LICENCE_NOT_FOUND} does not have id or applicationReference`
         )
         expect(authenticatedGetRequest).not.toHaveBeenCalled()
       })
@@ -120,8 +126,15 @@ describe('MarineLicenceService', () => {
         )
 
         expect(mockLogger.error).toHaveBeenCalledWith(
-          { id: validId },
-          errorMessages.MARINE_LICENCE_DATA_NOT_FOUND
+          {
+            event: {
+              action: 'get-marine-licence-data',
+              outcome: 'failure',
+              reference: validId,
+              reason: errorMessages.MARINE_LICENCE_DATA_NOT_FOUND
+            }
+          },
+          `${errorMessages.MARINE_LICENCE_DATA_NOT_FOUND} for ${validId}`
         )
       })
     })
@@ -217,8 +230,14 @@ describe('MarineLicenceService', () => {
         ).rejects.toThrow(errorMessages.MARINE_LICENCE_NOT_FOUND)
 
         expect(mockLogger.error).toHaveBeenCalledWith(
-          { id: undefined, applicationReference: invalidReference },
-          errorMessages.MARINE_LICENCE_NOT_FOUND
+          {
+            event: {
+              action: 'get-marine-licence-data',
+              outcome: 'failure',
+              reason: errorMessages.MARINE_LICENCE_NOT_FOUND
+            }
+          },
+          `${errorMessages.MARINE_LICENCE_NOT_FOUND} does not have id or applicationReference`
         )
         expect(authenticatedGetRequest).not.toHaveBeenCalled()
       }
@@ -234,8 +253,15 @@ describe('MarineLicenceService', () => {
       ).rejects.toThrow(errorMessages.MARINE_LICENCE_DATA_NOT_FOUND)
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        { id: undefined, applicationReference: validReference },
-        errorMessages.MARINE_LICENCE_DATA_NOT_FOUND
+        {
+          event: {
+            action: 'get-marine-licence-data',
+            outcome: 'failure',
+            reference: undefined,
+            reason: errorMessages.MARINE_LICENCE_DATA_NOT_FOUND
+          }
+        },
+        `${errorMessages.MARINE_LICENCE_DATA_NOT_FOUND} for undefined`
       )
     })
   })
@@ -284,8 +310,14 @@ describe('MarineLicenceService', () => {
         ).rejects.toThrow(errorMessages.MARINE_LICENCE_NOT_FOUND)
 
         expect(mockLogger.error).toHaveBeenCalledWith(
-          { id: invalidId },
-          errorMessages.MARINE_LICENCE_NOT_FOUND
+          {
+            event: {
+              action: 'get-marine-licence-data',
+              outcome: 'failure',
+              reason: errorMessages.MARINE_LICENCE_NOT_FOUND
+            }
+          },
+          `${errorMessages.MARINE_LICENCE_NOT_FOUND} does not have id or applicationReference`
         )
         expect(authenticatedGetRequest).not.toHaveBeenCalled()
       })
@@ -305,8 +337,15 @@ describe('MarineLicenceService', () => {
         ).rejects.toThrow(errorMessages.MARINE_LICENCE_DATA_NOT_FOUND)
 
         expect(mockLogger.error).toHaveBeenCalledWith(
-          { id: validId },
-          errorMessages.MARINE_LICENCE_DATA_NOT_FOUND
+          {
+            event: {
+              action: 'get-marine-licence-data',
+              outcome: 'failure',
+              reference: validId,
+              reason: errorMessages.MARINE_LICENCE_DATA_NOT_FOUND
+            }
+          },
+          `${errorMessages.MARINE_LICENCE_DATA_NOT_FOUND} for ${validId}`
         )
       })
 
@@ -440,8 +479,15 @@ describe('MarineLicenceService', () => {
       ).rejects.toThrow(errorMessages.MARINE_LICENCE_REDACTION_FAILED)
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        { id: validId, fieldKey: 'preferredDates' },
-        errorMessages.MARINE_LICENCE_REDACTION_FAILED
+        {
+          event: {
+            action: 'redact-marine-licence',
+            outcome: 'failure',
+            reference: validId,
+            reason: errorMessages.MARINE_LICENCE_REDACTION_FAILED
+          }
+        },
+        `${errorMessages.MARINE_LICENCE_REDACTION_FAILED} for ${validId} on field preferredDates`
       )
     })
 
