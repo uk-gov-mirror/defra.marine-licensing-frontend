@@ -34,8 +34,14 @@ export class MarineLicenceService {
   async getMarineLicenceData({ id, applicationReference, isPublic = false }) {
     if (!id && !applicationReference) {
       this.logger.error(
-        { id, applicationReference },
-        errorMessages.MARINE_LICENCE_NOT_FOUND
+        {
+          event: {
+            action: 'get-marine-licence-data',
+            outcome: 'failure',
+            reason: errorMessages.MARINE_LICENCE_NOT_FOUND
+          }
+        },
+        `${errorMessages.MARINE_LICENCE_NOT_FOUND} does not have id or applicationReference`
       )
       throw new Error(errorMessages.MARINE_LICENCE_NOT_FOUND)
     }
@@ -53,8 +59,15 @@ export class MarineLicenceService {
 
     if (payload?.message !== 'success' || !payload.value) {
       this.logger.error(
-        { id, applicationReference },
-        errorMessages.MARINE_LICENCE_DATA_NOT_FOUND
+        {
+          event: {
+            action: 'get-marine-licence-data',
+            outcome: 'failure',
+            reference: id,
+            reason: errorMessages.MARINE_LICENCE_DATA_NOT_FOUND
+          }
+        },
+        `${errorMessages.MARINE_LICENCE_DATA_NOT_FOUND} for ${id}`
       )
       throw new Error(errorMessages.MARINE_LICENCE_DATA_NOT_FOUND)
     }
@@ -70,8 +83,15 @@ export class MarineLicenceService {
     )
     if (payload?.message !== 'success') {
       this.logger.error(
-        { id, fieldKey },
-        errorMessages.MARINE_LICENCE_REDACTION_FAILED
+        {
+          event: {
+            action: 'redact-marine-licence',
+            outcome: 'failure',
+            reference: id,
+            reason: errorMessages.MARINE_LICENCE_REDACTION_FAILED
+          }
+        },
+        `${errorMessages.MARINE_LICENCE_REDACTION_FAILED} for ${id} on field ${fieldKey}`
       )
       throw new Error(errorMessages.MARINE_LICENCE_REDACTION_FAILED)
     }

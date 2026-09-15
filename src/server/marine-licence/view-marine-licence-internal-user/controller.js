@@ -33,11 +33,14 @@ export const viewDetailsInternalUserController = {
       if (!isProjectViewable(marineLicence)) {
         request.logger.error(
           {
-            id: marineLicence.id,
-            status: marineLicence.status,
-            hasApplicationReference: !!marineLicence.applicationReference
+            event: {
+              action: 'view-details-internal-user',
+              outcome: 'failure',
+              reference: marineLicenceId,
+              reason: errorMessages.MARINE_LICENCE_NOT_SUBMITTED
+            }
           },
-          errorMessages.MARINE_LICENCE_NOT_SUBMITTED
+          `${errorMessages.MARINE_LICENCE_NOT_SUBMITTED} for ${marineLicenceId}`
         )
         throw Boom.forbidden(errorMessages.MARINE_LICENCE_NOT_SUBMITTED)
       }
