@@ -90,6 +90,39 @@ describe('Marine Licence View Details Redaction', () => {
       }
     )
 
+    test.each([
+      'activitySubType',
+      'activities',
+      'activityDescription',
+      'activityDuration',
+      'completionDate',
+      'activityMonths',
+      'workingHours'
+    ])('renders a redaction field for activity %s', (field) => {
+      const $field = document.querySelector(`#redaction-field-${field}-0-0`)
+
+      expect($field).not.toBeNull()
+      expect($field.querySelector('input[name="fieldKey"]').value).toBe(
+        `siteDetails.activityDetails.${field}`
+      )
+      expect($field.querySelector('input[name="index"]').value).toBe('0')
+      expect($field.querySelector('input[name="activityIndex"]').value).toBe(
+        '0'
+      )
+    })
+
+    test('numbers activity redaction fields by site and activity', () => {
+      const $second = document.querySelector(
+        '#redaction-field-workingHours-0-1'
+      )
+
+      expect($second).not.toBeNull()
+      expect($second.querySelector('input[name="index"]').value).toBe('0')
+      expect($second.querySelector('input[name="activityIndex"]').value).toBe(
+        '1'
+      )
+    })
+
     test('renders a redaction field for each site name', () => {
       const siteCount = mockSubmittedMarineLicenceApplication.siteDetails.length
 
@@ -370,11 +403,14 @@ describe('Marine Licence View Details Redaction', () => {
             rows[0].querySelector('.govuk-summary-list__key').textContent.trim()
           ).toBe(expectedExternalActivityCards[activityIndex].rows[0].key)
 
+          // the value now also carries the redaction field's own markup
           expect(
             rows[0]
               .querySelector('.govuk-summary-list__value')
               .textContent.trim()
-          ).toBe(expectedExternalActivityCards[activityIndex].rows[0].value)
+          ).toContain(
+            expectedExternalActivityCards[activityIndex].rows[0].value
+          )
 
           expect(
             rows[1].querySelector('.govuk-summary-list__key').textContent.trim()
@@ -384,7 +420,9 @@ describe('Marine Licence View Details Redaction', () => {
             rows[1]
               .querySelector('.govuk-summary-list__value')
               .textContent.trim()
-          ).toBe(expectedExternalActivityCards[activityIndex].rows[1].value)
+          ).toContain(
+            expectedExternalActivityCards[activityIndex].rows[1].value
+          )
         }
         siteCount++
       }

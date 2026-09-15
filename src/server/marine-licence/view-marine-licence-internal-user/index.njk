@@ -69,6 +69,7 @@
         }) }}
 
         {% for site in summaryData %}
+          {% set siteIndex0 = loop.index0 %}
           {{ appMarineLicenceSiteDetailsCard({
             site: site,
             loopIndex0: loop.index0,
@@ -85,8 +86,14 @@
               activityDetails: activityDetails,
               siteNumber: site.siteNumber,
               index: loop.index,
+              siteIndex0: siteIndex0,
+              activityIndex0: loop.index0,
               isReadOnly: true,
-              isApplicant: false
+              isApplicant: false,
+              enableRedaction: true,
+              redactions: redactions,
+              redactionSaveUrl: redactionSaveUrl,
+              csrfToken: csrfToken
             }) }}
           {% endfor %}
         {% endfor %}

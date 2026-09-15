@@ -86,6 +86,9 @@
       {% if params.index is defined %}
         <input type="hidden" name="index" value="{{ params.index }}">
       {% endif %}
+      {% if params.activityIndex is defined %}
+        <input type="hidden" name="activityIndex" value="{{ params.activityIndex }}">
+      {% endif %}
       {% if params.policyCode is defined %}
         <input type="hidden" name="policyCode" value="{{ params.policyCode }}">
       {% endif %}
