@@ -12,7 +12,9 @@ const REDACTION_LABEL_HTML = `<span class="app-redaction-label">${REDACTION_LABE
 const wrapRedactionLabels = (text) =>
   escapeHtml(text ?? '').replaceAll(REDACTION_LABEL, REDACTION_LABEL_HTML)
 
-const isRedaction = (value) => 'redactedText' in (value ?? {})
+const isObject = (value) => typeof value === 'object' && value !== null
+
+const isTextRedaction = (value) => isObject(value) && 'redactedText' in value
 
 const buildRedaction = (redaction) => {
   return {
@@ -20,6 +22,18 @@ const buildRedaction = (redaction) => {
     redactedText: wrapRedactionLabels(redaction.redactedText),
     redactedTextValue: redaction.redactedText
   }
+}
+
+const buildRedactionValue = (value) => {
+  if (!isObject(value)) {
+    return value
+  }
+
+  if (isTextRedaction(value)) {
+    return buildRedaction(value)
+  }
+
+  return buildRedactionsForView(value)
 }
 
 /**
@@ -36,11 +50,7 @@ export const buildRedactionsForView = (group) => {
   const result = {}
 
   for (const [key, value] of Object.entries(group ?? {})) {
-    if (isRedaction(value)) {
-      result[key] = buildRedaction(value)
-    } else {
-      result[key] = buildRedactionsForView(value)
-    }
+    result[key] = buildRedactionValue(value)
   }
 
   return result

@@ -128,6 +128,85 @@ describe('Marine Licence Site Details Card - redaction', () => {
   })
 })
 
+describe('Marine Licence Site Details Card - withhold location', () => {
+  const circularSite = {
+    siteNumber: 2,
+    siteName: 'Test site',
+    method: 'Single set of coordinates',
+    coordinateSystem: 'WGS84',
+    coordinates: '50.9876, -1.2345',
+    width: '100m',
+    siteDetailsData: {}
+  }
+
+  const withholdParams = {
+    site: circularSite,
+    loopIndex0: 1,
+    coordinatesType: 'coordinates',
+    enableRedaction: true,
+    redactions: {},
+    redactionSaveUrl: '/view-marine-licence-details/test-id/redact',
+    csrfToken: 'test-crumb-token'
+  }
+
+  const withheld = { siteDetails: { 1: { withholdLocation: true } } }
+
+  const renderCard = (params) =>
+    renderComponent('marine-licence/site-details-card', {
+      ...withholdParams,
+      ...params
+    })
+
+  const withholdForm = ($component) =>
+    $component('input[name="withhold"]').closest('form')
+
+  test('posts the withhold field key, site index and flag to the redact url', () => {
+    const $component = renderCard()
+    const $form = withholdForm($component)
+
+    expect($form.attr('action')).toBe(
+      '/view-marine-licence-details/test-id/redact'
+    )
+    expect($form.find('input[name="fieldKey"]').attr('value')).toBe(
+      'siteDetails.withholdLocation'
+    )
+    expect($form.find('input[name="index"]').attr('value')).toBe('1')
+    expect($form.find('input[name="withhold"]').attr('value')).toBe('true')
+    expect($form.find('input[name="csrfToken"]').attr('value')).toBe(
+      'test-crumb-token'
+    )
+  })
+
+  test('renders the map and a Withhold location button when not withheld', () => {
+    const $component = renderCard()
+
+    expect($component('.app-site-details-map')).toHaveLength(1)
+    expect(withholdForm($component).find('button').text()).toContain(
+      'Withhold location'
+    )
+  })
+
+  test('hides the map and offers Display location when withheld', () => {
+    const $component = renderCard({ redactions: withheld })
+    const $button = withholdForm($component).find('button')
+
+    expect($component('.app-site-details-map')).toHaveLength(0)
+    expect($button.text()).toContain('Display location')
+    expect($button.text()).not.toContain('Withhold location')
+    expect(
+      withholdForm($component).find('input[name="withhold"]').attr('value')
+    ).toBe('false')
+  })
+
+  test('renders no withhold control when redaction is not enabled', () => {
+    const $component = renderCard({ enableRedaction: false })
+
+    expect($component('input[name="withhold"]')).toHaveLength(0)
+    expect($component('[data-module="withhold-location"]')).toHaveLength(0)
+    expect($component.html()).not.toContain('Withhold location')
+  })
+})
+
 describe('Marine Licence Site Details Card - Change link', () => {
   const siteParams = {
     site: {

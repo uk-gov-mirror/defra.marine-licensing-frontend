@@ -160,6 +160,20 @@ describe('#buildRedactionsForView', () => {
     expect(build('***REDACTED***').redactedBy).toBe('Test User')
   })
 
+  test('keeps a withhold flag alongside a text redaction on the same site', () => {
+    const result = buildRedactionsForView({
+      siteDetails: {
+        0: {
+          siteName: { redactedText: '***REDACTED***' },
+          withholdLocation: true
+        }
+      }
+    })
+
+    expect(result.siteDetails[0].siteName.redactedText).toBe(labelHtml)
+    expect(result.siteDetails[0].withholdLocation).toBe(true)
+  })
+
   test.each([[null], [undefined], [{}]])(
     'returns an empty object for %s',
     (redactions) => {

@@ -13,8 +13,22 @@ const redactionPayloadSchema = joi.object({
   fieldKey: joi.string().required(),
   index: joi.number().integer().min(0).optional(),
   policyCode: joi.string().optional(),
-  text: joi.string().allow('').max(REDACTION_TEXT_MAX_LENGTH).required()
+  withhold: joi.boolean().optional(),
+  text: joi.string().allow('').max(REDACTION_TEXT_MAX_LENGTH).when('withhold', {
+    is: joi.exist(),
+    then: joi.optional(),
+    otherwise: joi.required()
+  })
 })
+
+// no text when we are withholding
+// default to label when empty
+const resolveRedactionText = (text, withhold) => {
+  if (withhold !== undefined) {
+    return undefined
+  }
+  return text.trim() === '' ? REDACTION_LABEL : text
+}
 
 const failAction = (request, h, error) => {
   request.logger.error({ err: error }, 'Invalid redaction payload')
@@ -30,18 +44,19 @@ export const saveRedactionController = {
   },
   async handler(request, h) {
     const { marineLicenceId } = request.params
-    const { fieldKey, index, policyCode, text } = request.payload
+    const { fieldKey, index, policyCode, text, withhold } = request.payload
 
     const viewUrl = `${marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS_INTERNAL_USER}/${marineLicenceId}`
     const isFetch = isClientSideFetchRequest(request)
 
-    const redactionText = text.trim() === '' ? REDACTION_LABEL : text
+    const redactionText = resolveRedactionText(text, withhold)
 
     try {
       const service = getMarineLicenceService(request)
       await service.saveRedaction(marineLicenceId, fieldKey, redactionText, {
         index,
-        policyCode
+        policyCode,
+        withhold
       })
     } catch (error) {
       request.logger.error(error, 'Error saving marine licence redaction')

@@ -204,5 +204,70 @@ describe('saveRedactionController', () => {
 
       expect(error).toBeUndefined()
     })
+
+    test('schema allows a withhold payload with no text', () => {
+      const { error } =
+        saveRedactionController.options.validate.payload.validate({
+          fieldKey: 'siteDetails.withholdLocation',
+          index: 0,
+          withhold: true
+        })
+
+      expect(error).toBeUndefined()
+    })
+
+    test.each([
+      ['true', true],
+      ['false', false]
+    ])('schema coerces the form string %j to a boolean', (given, expected) => {
+      const { error, value } =
+        saveRedactionController.options.validate.payload.validate({
+          fieldKey: 'siteDetails.withholdLocation',
+          index: 0,
+          withhold: given
+        })
+
+      expect(error).toBeUndefined()
+      expect(value.withhold).toBe(expected)
+    })
+  })
+
+  describe('withholding a site location', () => {
+    const withholdPayload = (withhold) => ({
+      fieldKey: 'siteDetails.withholdLocation',
+      index: 0,
+      withhold
+    })
+
+    test.each([[true], [false]])(
+      'passes withhold %j through with no redaction text',
+      async (withhold) => {
+        const mockRequest = createMockRequest({
+          payload: withholdPayload(withhold)
+        })
+
+        await saveRedactionController.handler(mockRequest, createMockH())
+
+        expect(mockMarineLicenceService.saveRedaction).toHaveBeenCalledWith(
+          'test-id',
+          'siteDetails.withholdLocation',
+          undefined,
+          { index: 0, policyCode: undefined, withhold }
+        )
+      }
+    )
+
+    test('redirects back to the view page for a native form post', async () => {
+      const mockRequest = createMockRequest({
+        payload: withholdPayload(true),
+        headers: {}
+      })
+      const mockH = createMockH()
+
+      await saveRedactionController.handler(mockRequest, mockH)
+
+      expect(mockH.redirect).toHaveBeenCalledWith(VIEW_URL)
+      expect(viewDetailsInternalUserController.handler).not.toHaveBeenCalled()
+    })
   })
 })

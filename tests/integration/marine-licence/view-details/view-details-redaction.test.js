@@ -190,6 +190,47 @@ describe('Marine Licence View Details Redaction', () => {
     test('does not render the internal-user-only site-details-card', () => {
       expect(document.querySelector('#site-details-card')).toBeNull()
     })
+
+    test('offers to withhold the location of a site that is on show', () => {
+      const $button = document.querySelector(
+        '#site-details-1 .app-withhold-location__button'
+      )
+
+      expect($button.textContent).toContain('Withhold location')
+      expect(
+        document.querySelector('#site-details-1 .app-site-details-map')
+      ).not.toBeNull()
+    })
+
+    test('offers to display the location of a withheld site', async () => {
+      vi.mocked(getAuthProvider).mockReturnValue(AUTH_STRATEGIES.ENTRA_ID)
+      mockMarineLicence({
+        ...mockSubmittedMarineLicenceApplication,
+        redactions: { siteDetails: { 0: { withholdLocation: true } } }
+      })
+
+      const withheldDocument = await loadPage({
+        requestUrl: `${marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS_INTERNAL_USER}/${toApplicationReferenceUrlSegment(mockSubmittedMarineLicenceApplication.applicationReference)}`,
+        server: getServer()
+      })
+
+      const $container = withheldDocument.querySelector(
+        '#site-details-1 .app-withhold-location__form'
+      )
+
+      const $button = withheldDocument.querySelector(
+        '#site-details-1 .app-withhold-location__button'
+      )
+
+      expect($container.textContent).toContain(
+        'This location will not be published on the public register.'
+      )
+      expect($button.textContent).toContain('Display location')
+      expect($button.textContent).not.toContain('Withhold location')
+      expect(
+        withheldDocument.querySelector('#site-details-1 .app-site-details-map')
+      ).toBeNull()
+    })
   })
 
   describe('hidden cards', () => {
