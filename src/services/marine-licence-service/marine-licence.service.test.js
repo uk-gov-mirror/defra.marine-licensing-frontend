@@ -7,7 +7,6 @@ import {
   authenticatedPostRequest
 } from '#src/server/common/helpers/authenticated-requests.js'
 import { apiRoutes } from '#src/server/common/constants/routes.js'
-import { mockMarineLicenceApplication } from '#src/server/test-helpers/mocks/marine-licence-mocks.js'
 
 vi.mock('~/src/server/common/helpers/logging/logger.js')
 vi.mock('~/src/server/common/helpers/authenticated-requests.js')
