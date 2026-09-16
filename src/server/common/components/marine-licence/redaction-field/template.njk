@@ -66,25 +66,24 @@
 
     {% endif %}
 
-  <div class="govuk-button-group">
+    <div class="govuk-button-group">
 
-      <a
-      class="govuk-link govuk-link--no-visited-state app-redaction-field__trigger"
-      href="#"
-      aria-expanded="false"
-      aria-controls="redaction-panel-{{ params.fieldId }}"
-      hidden
-    >
-    {% if params.isRedacted %}
-      Change redaction
-    {% else %}
-      Redact{% endif %}
-      <span class="govuk-visually-hidden"> {{ params.label }}</span>
-    </a>
-  </div>
+        <a
+        class="govuk-link govuk-link--no-visited-state app-redaction-field__trigger"
+        href="#"
+        aria-expanded="false"
+        aria-controls="redaction-panel-{{ params.fieldId }}"
+        hidden
+      >
+      {% if params.isRedacted %}
+        Change redaction
+      {% else %}
+        Redact{% endif %}
+        <span class="govuk-visually-hidden"> {{ params.label }}</span>
+      </a>
 
-    {% if params.isRedacted %}
-      <form class="app-redaction-field__remove-form" method="post" action="{{ params.saveUrl }}">
+      {% if params.isRedacted %}
+        <form class="app-redaction-field__remove-form" method="post" action="{{ params.saveUrl }}">
 
           {{ formFields | safe }}
 
@@ -97,6 +96,7 @@
           }) }}
       </form>
     {% endif %}
+    </div>
 
   </div>
 
