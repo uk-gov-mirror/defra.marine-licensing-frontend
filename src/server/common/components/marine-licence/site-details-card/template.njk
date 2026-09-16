@@ -106,7 +106,7 @@
       <input type="hidden" name="withhold" value="{{ "false" if isLocationWithheld else "true" }}">
       <input type="hidden" name="csrfToken" value="{{ params.csrfToken }}">
 
-     <div  {%if isLocationWithheld %}class="app-redaction-field__panel"{% endif %}>
+     <div {%if isLocationWithheld %}class="app-redaction-inset"{% endif %}>
       {% if isLocationWithheld %}
           <span class="app-redaction-label">***REDACTED***</span>
           <p class="govuk-body govuk-!-margin-top-1">This location will not be published on the public register.</p>

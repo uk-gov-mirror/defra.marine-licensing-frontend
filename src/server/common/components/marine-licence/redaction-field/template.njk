@@ -25,9 +25,9 @@
 {% endset %}
 
 <div class="app-redaction-field" id="redaction-field-{{ params.fieldId }}" data-module="redaction-field">
-
-    {% if params.isRedacted %}
-
+  <div {%if params.isRedacted %}class="app-redaction-inset"{% endif %}>
+    
+  {% if params.isRedacted %}
         <div class="app-redaction-field__published-text" hidden>
           {{ applicantsTextHeading | safe }}
           <p class="govuk-body">{{ params.originalText }}</p>
@@ -61,8 +61,9 @@
       Redact{% endif %}
       <span class="govuk-visually-hidden"> {{ params.label }}</span>
     </a>
+  </div>
 
-  <div class="app-redaction-field__panel" id="redaction-panel-{{ params.fieldId }}">
+  <div class="app-redaction-field__panel app-redaction-inset" id="redaction-panel-{{ params.fieldId }}">
 
     {{ applicantsTextHeading | safe }}
 
