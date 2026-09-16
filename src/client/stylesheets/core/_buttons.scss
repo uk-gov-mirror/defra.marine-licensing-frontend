@@ -2,7 +2,6 @@
 
 .govuk-button--as-link {
   @include govuk-link-common;
-
   @include govuk-font-size($size: 16);
   color: govuk-functional-colour(link);
   padding: 0;

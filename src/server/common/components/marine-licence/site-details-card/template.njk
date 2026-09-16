@@ -101,24 +101,26 @@
   {% if params.enableRedaction %}
     <form class="app-withhold-location__form" method="post" action="{{ params.redactionSaveUrl }}">
       <input type="hidden" name="fieldKey" value="siteDetails.withholdLocation">
+      <input type="hidden" name="marineLicenceId" value="{{ params.marineLicenceId }}">
       <input type="hidden" name="index" value="{{ params.loopIndex0 }}">
       <input type="hidden" name="withhold" value="{{ "false" if isLocationWithheld else "true" }}">
       <input type="hidden" name="csrfToken" value="{{ params.csrfToken }}">
 
+     <div {%if isLocationWithheld %}class="app-redaction-inset"{% endif %}>
       {% if isLocationWithheld %}
-        <div class="app-redaction-field__panel">
           <span class="app-redaction-label">***REDACTED***</span>
           <p class="govuk-body govuk-!-margin-top-1">This location will not be published on the public register.</p>
-        </div>
       {% endif %}
 
-      <div class="govuk-button-group {{ withholdButtonClasses }}">
-        {{ govukButton({
-          html: withholdButtonHtml,
-          type: "submit",
-          classes: "govuk-link govuk-button--as-link govuk-!-margin-bottom-0 app-withhold-location__button"
-        }) }}
+        <div class="govuk-button-group {{ withholdButtonClasses }}">
+          {{ govukButton({
+            html: withholdButtonHtml,
+            type: "submit",
+            classes: "govuk-link govuk-button--as-link govuk-!-margin-bottom-0 app-withhold-location__button"
+          }) }}
+        </div>
       </div>
+
     </form>
   {% endif %}
 
