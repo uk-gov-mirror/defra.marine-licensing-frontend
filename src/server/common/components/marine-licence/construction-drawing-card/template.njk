@@ -1,6 +1,7 @@
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "incomplete-field/macro.njk" import appIncompleteField %}
+{% from "marine-licence/withhold-document/macro.njk" import appMarineLicenceWithholdDocument %}
 
 {% set siteRequiresConstructionDrawing = false %}
 
@@ -21,53 +22,20 @@
     {% set isDrawingWithheld = params.redactions.siteDetails[siteIndex].constructionDrawings[drawingIndex].withholdDocument %}
 
     {% if params.enableRedaction %}
-      {% set withholdButtonHtml %}
-        {% if not isDrawingWithheld %}
-           Withhold document
-           {% else %}
-           Remove redaction
-        {% endif %}
-        <span class="govuk-visually-hidden"> for site {{ params.siteNumber }} construction drawing {{ drawingNumber }}</span>
-      {% endset %}
-
-      {% set withholdButtonClasses %}
-        {{ "" if isDrawingWithheld else "govuk-!-margin-top-4" }}
-      {% endset %}
-
-      {% set drawingFileHtml %}
-        {% if not isDrawingWithheld %}
-          <p class="govuk-body">{{ drawing.filename }}</p>
-        {% endif %}
-
-        <form class="app-withhold-location__form" method="post" action="{{ params.redactionSaveUrl }}">
-          <input type="hidden" name="fieldKey" value="siteDetails.constructionDrawings.withholdDocument">
-          <input type="hidden" name="marineLicenceId" value="{{ params.marineLicenceId }}">
-          <input type="hidden" name="index" value="{{ siteIndex }}">
-          <input type="hidden" name="drawingIndex" value="{{ drawingIndex }}">
-          <input type="hidden" name="withhold" value="{{ "false" if isDrawingWithheld else "true" }}">
-          <input type="hidden" name="csrfToken" value="{{ params.csrfToken }}">
-
-          <div {%if isDrawingWithheld %}class="app-redaction-inset"{% endif %}>
-            {% if isDrawingWithheld %}
-                <span class="app-redaction-label">***REDACTED***</span>
-                <p class="govuk-body govuk-!-margin-top-1">This document will not be published on the public register.</p>
-            {% endif %}
-
-            <div class="govuk-button-group {{ withholdButtonClasses }}">
-              {{ govukButton({
-                html: withholdButtonHtml,
-                type: "submit",
-                classes: "govuk-link govuk-button--as-link govuk-!-margin-bottom-0 app-withhold-location__button"
-              }) }}
-            </div>
-          </div>
-        </form>
-      {% endset %}
-
       {% set drawingRows = [{
         key: { text: "File upload" },
         value: {
-          html: drawingFileHtml,
+          html: appMarineLicenceWithholdDocument({
+            isWithheld: isDrawingWithheld,
+            filename: drawing.filename,
+            label: "site " + params.siteNumber + " construction drawing " + drawingNumber,
+            fieldKey: "siteDetails.constructionDrawings.withholdDocument",
+            marineLicenceId: params.marineLicenceId,
+            index: siteIndex,
+            drawingIndex: drawingIndex,
+            saveUrl: params.redactionSaveUrl,
+            csrfToken: params.csrfToken
+          }),
           classes: "govuk-summary-list__value--full-width"
         }
       }] %}

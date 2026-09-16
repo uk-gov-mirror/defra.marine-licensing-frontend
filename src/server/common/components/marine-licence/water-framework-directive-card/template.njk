@@ -1,6 +1,6 @@
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
 {% from "marine-licence/redaction-field/macro.njk" import appMarineLicenceRedactionField %}
-{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "marine-licence/withhold-document/macro.njk" import appMarineLicenceWithholdDocument %}
 
 {% if params.waterFrameworkDirectiveData.nauticalMile %}
 {% set rows = [] %}
@@ -46,51 +46,18 @@
 
 {% if params.waterFrameworkDirectiveData.uploadedFile %}
   {% if params.enableRedaction %}
-    {% set withholdButtonHtml %}
-      {% if not isFileWithheld %}
-         Withhold document
-         {% else %}
-         Remove redaction
-      {% endif %}
-      <span class="govuk-visually-hidden"> for the Water Framework Directive assessment</span>
-    {% endset %}
-
-    {% set withholdButtonClasses %}
-      {{ "" if isFileWithheld else "govuk-!-margin-top-4" }}
-    {% endset %}
-
-    {% set uploadedFileHtml %}
-      {% if not isFileWithheld %}
-        <p class="govuk-body">{{ params.waterFrameworkDirectiveData.uploadedFile.value.text }}</p>
-      {% endif %}
-
-      <form class="app-withhold-location__form" method="post" action="{{ params.redactionSaveUrl }}">
-        <input type="hidden" name="fieldKey" value="waterFrameworkDirective.withholdDocument">
-        <input type="hidden" name="marineLicenceId" value="{{ params.marineLicenceId }}">
-        <input type="hidden" name="withhold" value="{{ "false" if isFileWithheld else "true" }}">
-        <input type="hidden" name="csrfToken" value="{{ params.csrfToken }}">
-
-        <div {%if isFileWithheld %}class="app-redaction-inset"{% endif %}>
-          {% if isFileWithheld %}
-              <span class="app-redaction-label">***REDACTED***</span>
-              <p class="govuk-body govuk-!-margin-top-1">This document will not be published on the public register.</p>
-          {% endif %}
-
-          <div class="govuk-button-group {{ withholdButtonClasses }}">
-            {{ govukButton({
-              html: withholdButtonHtml,
-              type: "submit",
-              classes: "govuk-link govuk-button--as-link govuk-!-margin-bottom-0 app-withhold-location__button"
-            }) }}
-          </div>
-        </div>
-      </form>
-    {% endset %}
-
     {% set rows = (rows.push({
       key: params.waterFrameworkDirectiveData.uploadedFile.key,
       value: {
-        html: uploadedFileHtml,
+        html: appMarineLicenceWithholdDocument({
+          isWithheld: isFileWithheld,
+          filename: params.waterFrameworkDirectiveData.uploadedFile.value.text,
+          label: "the Water Framework Directive assessment",
+          fieldKey: "waterFrameworkDirective.withholdDocument",
+          marineLicenceId: params.marineLicenceId,
+          saveUrl: params.redactionSaveUrl,
+          csrfToken: params.csrfToken
+        }),
         classes: "govuk-summary-list__value--full-width"
       }
     }), rows) %}
