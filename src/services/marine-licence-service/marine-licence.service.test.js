@@ -446,7 +446,7 @@ describe('MarineLicenceService', () => {
       )
     })
 
-    test('should send withhold %j with no text for a location flag', async () => {
+    test('should send withhold with no text for a location flag', async () => {
       vi.mocked(authenticatedPostRequest).mockResolvedValue({
         payload: { message: 'success' }
       })
@@ -466,6 +466,28 @@ describe('MarineLicenceService', () => {
           fieldKey: 'siteDetails.withholdLocation',
           siteIndex: 0,
           withhold: true
+        }
+      )
+    })
+
+    test('should send remove with no text for a location flag', async () => {
+      vi.mocked(authenticatedPostRequest).mockResolvedValue({
+        payload: { message: 'success' }
+      })
+
+      await service.saveRedaction(validId, 'siteDetails.siteName', undefined, {
+        siteIndex: 0,
+        remove: true
+      })
+
+      expect(authenticatedPostRequest).toHaveBeenCalledWith(
+        mockRequest,
+        apiRoutes.REDACT_TEXT,
+        {
+          id: validId,
+          fieldKey: 'siteDetails.siteName',
+          siteIndex: 0,
+          remove: true
         }
       )
     })

@@ -14,11 +14,13 @@ const redactionPayloadSchema = joi.object({
   activityIndex: joi.number().integer().min(0).optional(),
   policyCode: joi.string().optional(),
   withhold: joi.boolean().optional(),
-  text: joi.string().allow('').when('withhold', {
-    is: joi.exist(),
-    then: joi.optional(),
-    otherwise: joi.required()
-  })
+  remove: joi.boolean().optional(),
+  text: joi
+    .string()
+    .allow('')
+    .required()
+    .when('withhold', { is: joi.exist(), then: joi.optional() })
+    .when('remove', { is: joi.exist(), then: joi.optional() })
 })
 
 // no text when we are withholding
@@ -27,7 +29,7 @@ const resolveRedactionText = (text, withhold) => {
   if (withhold !== undefined) {
     return undefined
   }
-  return text.trim() === '' ? REDACTION_LABEL : text
+  return !text || text.trim() === '' ? REDACTION_LABEL : text
 }
 
 const failAction = (request, h, error) => {
@@ -51,6 +53,7 @@ export const saveRedactionController = {
       marineLicenceId,
       policyCode,
       text,
+      remove,
       withhold
     } = request.payload
 
@@ -65,6 +68,7 @@ export const saveRedactionController = {
         siteIndex: index,
         activityIndex,
         policyCode,
+        remove,
         withhold
       })
     } catch (error) {

@@ -193,6 +193,12 @@ describe('Marine Licence View Details Redaction', () => {
         ).textContent
       ).toContain('Change redaction')
 
+      expect(
+        redactedDocument.querySelector(
+          '#redaction-field-preferredDates .app-redaction-field__remove-trigger'
+        ).textContent
+      ).toContain('Remove redaction')
+
       const summary = redactedDocument.querySelector(
         '#redaction-field-preferredDates .app-redaction-field__published-text'
       ).textContent
