@@ -132,6 +132,16 @@ describe('WithholdLocation', () => {
     expect(SiteDetailsMap).not.toHaveBeenCalled()
   })
 
+  test('handles errors correctly', async () => {
+    fetchMock.mockResolvedValue({ ok: false })
+
+    submitForm(component.$form)
+
+    await vi.waitFor(() => expect(component.$button.disabled).toBe(false))
+
+    expect(cardOf()).toBe($root)
+  })
+
   test('ignores a second submit while one is already in flight', async () => {
     let resolveFetch
     fetchMock.mockReturnValue(
