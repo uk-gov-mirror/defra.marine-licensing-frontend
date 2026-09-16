@@ -14,6 +14,7 @@
     {% if params.enableRedaction %}
       {{ appMarineLicenceRedactionField({
         fieldId: "marinePlanPolicyResponse-" + policy.policyCode,
+        marineLicenceId: params.marineLicenceId,
         fieldKey: "marinePlanPolicyResponses",
         policyCode: policy.policyCode,
         label: "marine plan policy " + policy.policyCode + " consideration",

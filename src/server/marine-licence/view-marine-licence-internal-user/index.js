@@ -10,7 +10,7 @@ export const viewMarineLicenceInternalUserRoutes = [
   },
   {
     method: 'POST',
-    path: `${marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS_INTERNAL_USER}/{marineLicenceId}/redact`,
+    path: `${marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS_INTERNAL_USER}/{applicationReference}/redact`,
     ...saveRedactionController
   }
 ]

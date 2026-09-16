@@ -8,6 +8,7 @@ import { viewDetailsInternalUserController } from '#src/server/marine-licence/vi
 import { REDACTION_LABEL } from '#src/server/marine-licence/view-details/utils.js'
 
 const redactionPayloadSchema = joi.object({
+  marineLicenceId: joi.string().optional(),
   fieldKey: joi.string().required(),
   index: joi.number().integer().min(0).optional(),
   activityIndex: joi.number().integer().min(0).optional(),
@@ -42,11 +43,18 @@ export const saveRedactionController = {
     }
   },
   async handler(request, h) {
-    const { marineLicenceId } = request.params
-    const { fieldKey, index, activityIndex, policyCode, text, withhold } =
-      request.payload
+    const { applicationReference } = request.params
+    const {
+      fieldKey,
+      index,
+      activityIndex,
+      marineLicenceId,
+      policyCode,
+      text,
+      withhold
+    } = request.payload
 
-    const viewUrl = `${marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS_INTERNAL_USER}/${marineLicenceId}`
+    const viewUrl = `${marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS_INTERNAL_USER}/${applicationReference}`
     const isFetch = isClientSideFetchRequest(request)
 
     const redactionText = resolveRedactionText(text, withhold)

@@ -12,6 +12,7 @@
     {% set redaction = params.redactions.siteDetails[params.siteIndex0].activityDetails[params.activityIndex0][field] %}
     {{ appMarineLicenceRedactionField({
       fieldId: field + "-" + params.siteIndex0 + "-" + params.activityIndex0,
+      marineLicenceId: params.marineLicenceId,
       fieldKey: "siteDetails.activityDetails." + field,
       index: params.siteIndex0,
       activityIndex: params.activityIndex0,

@@ -12,6 +12,7 @@
   value: {
     html: appMarineLicenceRedactionField({
       fieldId: "siteName-" + params.loopIndex0,
+      marineLicenceId: params.marineLicenceId,
       fieldKey: "siteDetails.siteName",
       index: params.loopIndex0,
       label: "site " + params.site.siteNumber + " name",
@@ -61,6 +62,7 @@
       value: {
         html: appMarineLicenceRedactionField({
           fieldId: "circleWidth-" + params.loopIndex0,
+          marineLicenceId: params.marineLicenceId,
           fieldKey: "siteDetails.circleWidth",
           index: params.loopIndex0,
           label: "site " + params.site.siteNumber + " width",

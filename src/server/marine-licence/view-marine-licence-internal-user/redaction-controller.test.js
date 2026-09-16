@@ -10,11 +10,15 @@ vi.mock(
   '#src/server/marine-licence/view-marine-licence-internal-user/controller.js'
 )
 
-const VIEW_URL = `${marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS_INTERNAL_USER}/test-id`
+const VIEW_URL = `${marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS_INTERNAL_USER}/test-ref`
 
 const createMockRequest = (overrides = {}) => ({
-  params: { marineLicenceId: 'test-id' },
-  payload: { fieldKey: 'preferredDates', text: 'Redacted text' },
+  params: { applicationReference: 'test-ref' },
+  payload: {
+    marineLicenceId: 'test-id',
+    fieldKey: 'preferredDates',
+    text: 'Redacted text'
+  },
   headers: { 'x-requested-with': 'XMLHttpRequest' },
   logger: { error: vi.fn() },
   ...overrides
@@ -69,7 +73,11 @@ describe('saveRedactionController', () => {
     'saves the redaction label when the text is empty (%j)',
     async (text) => {
       const mockRequest = createMockRequest({
-        payload: { fieldKey: 'preferredDates', text }
+        payload: {
+          marineLicenceId: 'test-id',
+          fieldKey: 'preferredDates',
+          text
+        }
       })
 
       await saveRedactionController.handler(mockRequest, createMockH())
@@ -85,7 +93,12 @@ describe('saveRedactionController', () => {
 
   test('passes the site index through for a repeated field', async () => {
     const mockRequest = createMockRequest({
-      payload: { fieldKey: 'siteName', index: 1, text: 'Redacted site' }
+      payload: {
+        marineLicenceId: 'test-id',
+        fieldKey: 'siteName',
+        index: 1,
+        text: 'Redacted site'
+      }
     })
 
     await saveRedactionController.handler(mockRequest, createMockH())
@@ -101,6 +114,7 @@ describe('saveRedactionController', () => {
   test('includes the policy code for redacting a policy response', async () => {
     const mockRequest = createMockRequest({
       payload: {
+        marineLicenceId: 'test-id',
         fieldKey: 'marinePlanPolicyResponses',
         policyCode: 'E-AGG-3',
         text: 'Redacted by MMO'
@@ -234,6 +248,7 @@ describe('saveRedactionController', () => {
 
   describe('withholding a site location', () => {
     const withholdPayload = (withhold) => ({
+      marineLicenceId: 'test-id',
       fieldKey: 'siteDetails.withholdLocation',
       index: 0,
       withhold
@@ -252,7 +267,11 @@ describe('saveRedactionController', () => {
           'test-id',
           'siteDetails.withholdLocation',
           undefined,
-          { siteIndex: 0, policyCode: undefined, withhold }
+          {
+            siteIndex: 0,
+            policyCode: undefined,
+            withhold
+          }
         )
       }
     )

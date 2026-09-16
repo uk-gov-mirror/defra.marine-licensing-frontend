@@ -53,9 +53,11 @@ describe('Marine Licence View Details Redaction', () => {
   })
 
   describe('redaction field', () => {
-    const licenceId = mockSubmittedMarineLicenceApplication.id
-    const viewUrl = `${marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS_INTERNAL_USER}/${toApplicationReferenceUrlSegment(mockSubmittedMarineLicenceApplication.applicationReference)}`
-    const redactUrl = `${marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS_INTERNAL_USER}/${licenceId}/redact`
+    const referenceUrl = toApplicationReferenceUrlSegment(
+      mockSubmittedMarineLicenceApplication.applicationReference
+    )
+    const viewUrl = `${marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS_INTERNAL_USER}/${referenceUrl}`
+    const redactUrl = `${marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS_INTERNAL_USER}/${referenceUrl}/redact`
     const applicantText = 'July 2026 to August 2027'
     const redactedText = 'Redacted preferred dates'
 
