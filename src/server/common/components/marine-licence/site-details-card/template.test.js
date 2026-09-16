@@ -145,6 +145,7 @@ describe('Marine Licence Site Details Card - withhold location', () => {
     coordinatesType: 'coordinates',
     enableRedaction: true,
     redactions: {},
+    marineLicenceId: '123',
     redactionSaveUrl: '/view-marine-licence-details/test-id/redact',
     csrfToken: 'test-crumb-token'
   }
