@@ -79,7 +79,7 @@ export class MarineLicenceService {
     id,
     fieldKey,
     text,
-    { index, activityIndex, policyCode, withhold } = {}
+    { siteIndex, activityIndex, policyCode, withhold } = {}
   ) {
     const { payload } = await authenticatedPostRequest(
       this.request,
@@ -88,7 +88,7 @@ export class MarineLicenceService {
         id,
         fieldKey,
         ...(text !== undefined && { text }),
-        ...(index !== undefined && { index }),
+        ...(siteIndex !== undefined && { siteIndex }),
         ...(activityIndex !== undefined && { activityIndex }),
         ...(policyCode !== undefined && { policyCode }),
         ...(withhold !== undefined && { withhold })

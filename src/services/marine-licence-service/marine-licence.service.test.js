@@ -411,12 +411,14 @@ describe('MarineLicenceService', () => {
         payload: { message: 'success' }
       })
 
-      await service.saveRedaction(validId, 'siteName', 'Redacted', { index: 1 })
+      await service.saveRedaction(validId, 'siteName', 'Redacted', {
+        siteIndex: 1
+      })
 
       expect(authenticatedPostRequest).toHaveBeenCalledWith(
         mockRequest,
         apiRoutes.REDACT_TEXT,
-        { id: validId, fieldKey: 'siteName', text: 'Redacted', index: 1 }
+        { id: validId, fieldKey: 'siteName', text: 'Redacted', siteIndex: 1 }
       )
     })
 
@@ -453,7 +455,7 @@ describe('MarineLicenceService', () => {
         validId,
         'siteDetails.withholdLocation',
         undefined,
-        { index: 0, withhold: true }
+        { siteIndex: 0, withhold: true }
       )
 
       expect(authenticatedPostRequest).toHaveBeenCalledWith(
@@ -462,7 +464,7 @@ describe('MarineLicenceService', () => {
         {
           id: validId,
           fieldKey: 'siteDetails.withholdLocation',
-          index: 0,
+          siteIndex: 0,
           withhold: true
         }
       )

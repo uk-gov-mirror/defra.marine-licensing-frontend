@@ -94,7 +94,7 @@ describe('saveRedactionController', () => {
       'test-id',
       'siteName',
       'Redacted site',
-      { index: 1 }
+      { siteIndex: 1 }
     )
   })
 
@@ -252,7 +252,7 @@ describe('saveRedactionController', () => {
           'test-id',
           'siteDetails.withholdLocation',
           undefined,
-          { index: 0, policyCode: undefined, withhold }
+          { siteIndex: 0, policyCode: undefined, withhold }
         )
       }
     )

@@ -54,7 +54,7 @@ export const saveRedactionController = {
     try {
       const service = getMarineLicenceService(request)
       await service.saveRedaction(marineLicenceId, fieldKey, redactionText, {
-        index,
+        siteIndex: index,
         activityIndex,
         policyCode,
         withhold
