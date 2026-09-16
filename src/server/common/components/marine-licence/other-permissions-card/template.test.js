@@ -230,18 +230,16 @@ describe('Marine Licence Other Permissions Card Component', () => {
       })
 
     test.each([
-      ['specialLegalPowers-details', 'Statutory powers detail.'],
-      ['harbourAuthority-area', 'No'],
-      ['otherAuthorities-details', 'Other authorities detail.'],
-      ['publicConsultation-consulted', 'No']
+      ['specialLegalPowers', 'Statutory powers detail.'],
+      ['harbourAuthority', 'No'],
+      ['otherAuthorities', 'Other authorities detail.'],
+      ['publicConsultation', 'No']
     ])('renders a redaction field for %s', (fieldId, text) => {
       const $component = render()
 
       const $field = $component(`#redaction-field-${fieldId}`)
       expect($field).toHaveLength(1)
-      expect($field.find('input[name="fieldKey"]').attr('value')).toBe(
-        fieldId.replace('-', '.')
-      )
+      expect($field.find('input[name="fieldKey"]').attr('value')).toBe(fieldId)
       expect($field.find('.app-redaction-field__input').attr('value')).toBe(
         text
       )

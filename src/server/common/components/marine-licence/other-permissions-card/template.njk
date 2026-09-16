@@ -6,11 +6,9 @@
 {% if params.specialLegalPowers %}
   {% if params.specialLegalPowers.agree === 'yes' %}
     {% set value = { text: params.specialLegalPowers.details } %}
-    {% set specialLegalPowersField = "details" %}
     {% set specialLegalPowersText = params.specialLegalPowers.details %}
   {% else %}
     {% set value = { text: "No" } %}
-    {% set specialLegalPowersField = "agree" %}
     {% set specialLegalPowersText = "No" %}
   {% endif %}
 
@@ -18,12 +16,12 @@
     key: { text: "Special legal powers to do any of this project" },
     value: {
       html: appMarineLicenceRedactionField({
-        fieldId: "specialLegalPowers-" + specialLegalPowersField,
-        fieldKey: "specialLegalPowers." + specialLegalPowersField,
+        fieldId: "specialLegalPowers",
+        fieldKey: "specialLegalPowers",
         label: "special legal powers",
         originalText: specialLegalPowersText,
-        redaction: params.redactions.specialLegalPowers[specialLegalPowersField],
-        isRedacted: params.redactions.specialLegalPowers[specialLegalPowersField],
+        redaction: params.redactions.specialLegalPowers,
+        isRedacted: params.redactions.specialLegalPowers,
         saveUrl: params.redactionSaveUrl,
         csrfToken: params.csrfToken
       }),
@@ -44,10 +42,8 @@
 
 {% if params.harbourAuthority %}
   {% if params.harbourAuthority.area === 'yes' %}
-    {% set harbourAuthorityField = "details" %}
     {% set harbourAuthorityText = params.harbourAuthority.details %}
   {% else %}
-    {% set harbourAuthorityField = "area" %}
     {% set harbourAuthorityText = "No" %}
   {% endif %}
 
@@ -55,12 +51,12 @@
     key: { text: "Located in a harbour authority area" },
     value: {
       html: appMarineLicenceRedactionField({
-        fieldId: "harbourAuthority-" + harbourAuthorityField,
-        fieldKey: "harbourAuthority." + harbourAuthorityField,
+        fieldId: "harbourAuthority",
+        fieldKey: "harbourAuthority",
         label: "harbour authority area",
         originalText: harbourAuthorityText,
-        redaction: params.redactions.harbourAuthority[harbourAuthorityField],
-        isRedacted: params.redactions.harbourAuthority[harbourAuthorityField],
+        redaction: params.redactions.harbourAuthority,
+        isRedacted: params.redactions.harbourAuthority,
         saveUrl: params.redactionSaveUrl,
         csrfToken: params.csrfToken
       }),
@@ -84,11 +80,9 @@
 {% if params.otherAuthorities %}
   {% if params.otherAuthorities.agree === 'yes' %}
     {% set value = { text: params.otherAuthorities.details } %}
-    {% set otherAuthoritiesField = "details" %}
     {% set otherAuthoritiesText = params.otherAuthorities.details %}
   {% else %}
     {% set value = { text: "No" } %}
-    {% set otherAuthoritiesField = "agree" %}
     {% set otherAuthoritiesText = "No" %}
   {% endif %}
 
@@ -96,12 +90,12 @@
     key: { text: "Permission from any other authorities in relation to this project" },
     value: {
       html: appMarineLicenceRedactionField({
-        fieldId: "otherAuthorities-" + otherAuthoritiesField,
-        fieldKey: "otherAuthorities." + otherAuthoritiesField,
+        fieldId: "otherAuthorities",
+        fieldKey: "otherAuthorities",
         label: "other authorities",
         originalText: otherAuthoritiesText,
-        redaction: params.redactions.otherAuthorities[otherAuthoritiesField],
-        isRedacted: params.redactions.otherAuthorities[otherAuthoritiesField],
+        redaction: params.redactions.otherAuthorities,
+        isRedacted: params.redactions.otherAuthorities,
         saveUrl: params.redactionSaveUrl,
         csrfToken: params.csrfToken
       }),
@@ -121,10 +115,8 @@
 {% endif %}
 
 {% if params.publicConsultation.consulted === 'yes' %}
-  {% set publicConsultationField = "details" %}
   {% set publicConsultationText = params.publicConsultation.details %}
 {% else %}
-  {% set publicConsultationField = "consulted" %}
   {% set publicConsultationText = "No" %}
 {% endif %}
 
@@ -132,12 +124,12 @@
      key: { text:  "Pre-application public groups or organisations consultation" },
      value: {
        html: appMarineLicenceRedactionField({
-         fieldId: "publicConsultation-" + publicConsultationField,
-         fieldKey: "publicConsultation." + publicConsultationField,
+         fieldId: "publicConsultation",
+         fieldKey: "publicConsultation",
          label: "public consultation",
          originalText: publicConsultationText,
-         redaction: params.redactions.publicConsultation[publicConsultationField],
-         isRedacted: params.redactions.publicConsultation[publicConsultationField],
+         redaction: params.redactions.publicConsultation,
+         isRedacted: params.redactions.publicConsultation,
          saveUrl: params.redactionSaveUrl,
          csrfToken: params.csrfToken
        }),

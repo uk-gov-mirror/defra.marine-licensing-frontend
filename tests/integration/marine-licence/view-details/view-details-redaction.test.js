@@ -79,13 +79,11 @@ describe('Marine Licence View Details Redaction', () => {
     test.each(['specialLegalPowers', 'harbourAuthority', 'publicConsultation'])(
       'renders a redaction field for %s',
       (groupName) => {
-        const $field = document.querySelector(
-          `#redaction-field-${groupName}-details`
-        )
+        const $field = document.querySelector(`#redaction-field-${groupName}`)
 
         expect($field).not.toBeNull()
         expect($field.querySelector('input[name="fieldKey"]').value).toBe(
-          `${groupName}.details`
+          `${groupName}`
         )
       }
     )
