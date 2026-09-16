@@ -470,6 +470,31 @@ describe('MarineLicenceService', () => {
       )
     })
 
+    test('should send drawingIndex if available', async () => {
+      vi.mocked(authenticatedPostRequest).mockResolvedValue({
+        payload: { message: 'success' }
+      })
+
+      await service.saveRedaction(
+        validId,
+        'siteDetails.constructionDrawings.withholdDocument',
+        undefined,
+        { siteIndex: 0, drawingIndex: 1, withhold: true }
+      )
+
+      expect(authenticatedPostRequest).toHaveBeenCalledWith(
+        mockRequest,
+        apiRoutes.REDACT_TEXT,
+        {
+          id: validId,
+          fieldKey: 'siteDetails.constructionDrawings.withholdDocument',
+          siteIndex: 0,
+          drawingIndex: 1,
+          withhold: true
+        }
+      )
+    })
+
     test('should send remove with no text for a location flag', async () => {
       vi.mocked(authenticatedPostRequest).mockResolvedValue({
         payload: { message: 'success' }

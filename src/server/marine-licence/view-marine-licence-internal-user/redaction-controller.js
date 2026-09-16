@@ -12,6 +12,7 @@ const redactionPayloadSchema = joi.object({
   fieldKey: joi.string().required(),
   index: joi.number().integer().min(0).optional(),
   activityIndex: joi.number().integer().min(0).optional(),
+  drawingIndex: joi.number().integer().min(0).optional(),
   policyCode: joi.string().optional(),
   withhold: joi.boolean().optional(),
   remove: joi.boolean().optional(),
@@ -50,6 +51,7 @@ export const saveRedactionController = {
       fieldKey,
       index,
       activityIndex,
+      drawingIndex,
       marineLicenceId,
       policyCode,
       text,
@@ -67,6 +69,7 @@ export const saveRedactionController = {
       await service.saveRedaction(marineLicenceId, fieldKey, redactionText, {
         siteIndex: index,
         activityIndex,
+        drawingIndex,
         policyCode,
         remove,
         withhold
