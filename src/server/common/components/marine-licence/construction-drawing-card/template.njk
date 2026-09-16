@@ -13,28 +13,86 @@
 {% if siteRequiresConstructionDrawing %}
   {% set constructionDrawings = params.constructionDrawings or [] %}
   {% set drawingCount = constructionDrawings.length if constructionDrawings.length > 1 else 1 %}
+  {% set siteIndex = params.siteNumber - 1 %}
 
   {% for drawingIndex in range(0, drawingCount) %}
     {% set drawing = constructionDrawings[drawingIndex] or {} %}
     {% set drawingNumber = drawingIndex + 1 %}
+    {% set isDrawingWithheld = params.redactions.siteDetails[siteIndex].constructionDrawings[drawingIndex].withholdDocument %}
 
-    {% set drawingRows = [{
-      key: { text: "File upload" },
-      value: { html: appIncompleteField({ text: drawing.filename }) },
-      actions: setSiteDetailsAction(drawing.filename, 'upload-construction-drawing', params.siteNumber, "", { drawingNumber: drawingNumber })
-    }] %}
+    {% if params.enableRedaction %}
+      {% set withholdButtonHtml %}
+        {% if not isDrawingWithheld %}
+           Withhold document
+           {% else %}
+           Remove redaction
+        {% endif %}
+        <span class="govuk-visually-hidden"> for site {{ params.siteNumber }} construction drawing {{ drawingNumber }}</span>
+      {% endset %}
+
+      {% set withholdButtonClasses %}
+        {{ "" if isDrawingWithheld else "govuk-!-margin-top-4" }}
+      {% endset %}
+
+      {% set drawingFileHtml %}
+        {% if not isDrawingWithheld %}
+          <p class="govuk-body">{{ drawing.filename }}</p>
+        {% endif %}
+
+        <form class="app-withhold-location__form" method="post" action="{{ params.redactionSaveUrl }}">
+          <input type="hidden" name="fieldKey" value="siteDetails.constructionDrawings.withholdDocument">
+          <input type="hidden" name="marineLicenceId" value="{{ params.marineLicenceId }}">
+          <input type="hidden" name="index" value="{{ siteIndex }}">
+          <input type="hidden" name="drawingIndex" value="{{ drawingIndex }}">
+          <input type="hidden" name="withhold" value="{{ "false" if isDrawingWithheld else "true" }}">
+          <input type="hidden" name="csrfToken" value="{{ params.csrfToken }}">
+
+          <div {%if isDrawingWithheld %}class="app-redaction-inset"{% endif %}>
+            {% if isDrawingWithheld %}
+                <span class="app-redaction-label">***REDACTED***</span>
+                <p class="govuk-body govuk-!-margin-top-1">This document will not be published on the public register.</p>
+            {% endif %}
+
+            <div class="govuk-button-group {{ withholdButtonClasses }}">
+              {{ govukButton({
+                html: withholdButtonHtml,
+                type: "submit",
+                classes: "govuk-link govuk-button--as-link govuk-!-margin-bottom-0 app-withhold-location__button"
+              }) }}
+            </div>
+          </div>
+        </form>
+      {% endset %}
+
+      {% set drawingRows = [{
+        key: { text: "File upload" },
+        value: {
+          html: drawingFileHtml,
+          classes: "govuk-summary-list__value--full-width"
+        }
+      }] %}
+    {% else %}
+      {% set drawingRows = [{
+        key: { text: "File upload" },
+        value: { html: appIncompleteField({ text: drawing.filename }) },
+        actions: setSiteDetailsAction(drawing.filename, 'upload-construction-drawing', params.siteNumber, "", { drawingNumber: drawingNumber })
+      }] %}
+    {% endif %}
 
     {% set deleteActionItems = [{
       href: "delete-construction-drawing?site=" + params.siteNumber + "&drawing=" + drawingNumber,
       text: "Delete file upload",
       classes: "govuk-link--no-visited-state"
-    }] if drawingIndex > 0 else [] %}
+    }] if drawingIndex > 0 and not params.enableRedaction else [] %}
+
+    {% set drawingCardAttributes = { id: "construction-drawing-site-" + params.siteNumber + "-" + drawingNumber } %}
+    {% if params.enableRedaction %}
+      {% set drawingCardAttributes = { id: "construction-drawing-site-" + params.siteNumber + "-" + drawingNumber, "data-module": "withhold-location" } %}
+    {% endif %}
 
     {{ govukSummaryList({
       card: {
-        attributes: {
-          id: "construction-drawing-site-" + params.siteNumber + "-" + drawingNumber
-        },
+        attributes: drawingCardAttributes,
         title: {
           text: "Site " + params.siteNumber + " - Construction drawing " + drawingNumber
         },
@@ -47,21 +105,23 @@
     }) }}
   {% endfor %}
 
-  <form method="POST">
-    <input type="hidden" name="csrfToken" value="{{ params.csrfToken }}">
-    <input type="hidden" name="siteNumber" value="{{ params.siteNumber }}">
+  {% if not params.enableRedaction %}
+    <form method="POST">
+      <input type="hidden" name="csrfToken" value="{{ params.csrfToken }}">
+      <input type="hidden" name="siteNumber" value="{{ params.siteNumber }}">
 
-    <div class="govuk-!-margin-bottom-6">
-      {{ govukButton({
-        text: "Add another construction drawing for site " + params.siteNumber,
-        classes: "govuk-button--secondary",
-        attributes: {
-          id: 'add-another-construction-drawing-site-' + params.siteNumber,
-          name: "addConstructionDrawing",
-          value: "addConstructionDrawing",
-          type: "submit"
-        }
-      }) }}
-    </div>
-  </form>
+      <div class="govuk-!-margin-bottom-6">
+        {{ govukButton({
+          text: "Add another construction drawing for site " + params.siteNumber,
+          classes: "govuk-button--secondary",
+          attributes: {
+            id: 'add-another-construction-drawing-site-' + params.siteNumber,
+            name: "addConstructionDrawing",
+            value: "addConstructionDrawing",
+            type: "submit"
+          }
+        }) }}
+      </div>
+    </form>
+  {% endif %}
 {% endif %}
