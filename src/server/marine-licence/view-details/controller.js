@@ -20,8 +20,15 @@ import {
   FEE_ESTIMATE_AMOUNT,
   FEE_ESTIMATE_MONITORING_AMOUNT
 } from '#src/server/common/validation/fee-estimate/constants.js'
+import { buildApplicationTasks } from '#src/server/common/helpers/marine-licence/application-tasks/build.js'
+import { getUserSession } from '#src/server/common/plugins/auth/utils.js'
 
 export const VIEW_DETAILS_VIEW_ROUTE = 'marine-licence/view-details/index'
+
+const getCurrentContactId = async (request) => {
+  const userSession = await getUserSession(request, request.state?.userSession)
+  return userSession?.contactId
+}
 
 const getApplicantBackLink = (status, marineLicenceId) => {
   if (status === PROJECT_STATUS.TRANSFERRED) {
@@ -85,6 +92,14 @@ export const viewDetailsController = {
       const applicationDetailsCardData =
         buildApplicationDetailsCardData(marineLicence)
 
+      const applicationTasks = buildApplicationTasks({
+        marineLicence,
+        currentContactId: isApplicantView
+          ? await getCurrentContactId(request)
+          : null,
+        isApplicantView
+      })
+
       return h.view(VIEW_DETAILS_VIEW_ROUTE, {
         pageTitle: formattedMarineLicence.projectName,
         specialLegalPowers: formattedMarineLicence.specialLegalPowers,
@@ -110,6 +125,7 @@ export const viewDetailsController = {
         invoicingChangeLink:
           marineLicenceRoutes.MARINE_LICENCE_CHECK_INVOICING_DETAILS,
         marinePlanPolicies,
+        applicationTasks,
         amount: FEE_ESTIMATE_AMOUNT,
         monitoringAmount: FEE_ESTIMATE_MONITORING_AMOUNT,
         ...applicationDetailsCardData

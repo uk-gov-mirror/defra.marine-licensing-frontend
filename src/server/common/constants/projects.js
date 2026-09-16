@@ -6,7 +6,9 @@ export const PROJECT_STATUS = {
   REJECTED: 'Rejected',
   SUBMITTED: 'Submitted',
   TRANSFERRED: 'Transferred',
-  WITHDRAWN: 'Withdrawn'
+  WITHDRAWN: 'Withdrawn',
+  // Derived by the API from outstanding application tasks; never stored on a project.
+  ACTION_REQUIRED: 'Action required'
 }
 
 // An exemption whose activity period has ended can no longer be withdrawn.

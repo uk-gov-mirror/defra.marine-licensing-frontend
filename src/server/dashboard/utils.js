@@ -308,10 +308,15 @@ const MARINE_LICENCE_ONLY_STATUS_KEYS = new Set([
   'WITHDRAWN'
 ])
 
+// Filtering the dashboard by "Action required" is ML-1538; until then it must not
+// appear as a filter option even though projects can display that status.
+const UNFILTERABLE_STATUS_KEYS = new Set(['ACTION_REQUIRED'])
+
 export const getStatusOptions = (status, marineLicenceEnabled = true) => {
   const isMultipleSelected = Array.isArray(status)
 
   return Object.entries(PROJECT_STATUS)
+    .filter(([key]) => !UNFILTERABLE_STATUS_KEYS.has(key))
     .filter(
       ([key]) =>
         marineLicenceEnabled || !MARINE_LICENCE_ONLY_STATUS_KEYS.has(key)
