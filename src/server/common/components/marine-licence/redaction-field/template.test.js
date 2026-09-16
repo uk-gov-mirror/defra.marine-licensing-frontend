@@ -55,17 +55,11 @@ describe('Marine Licence Redaction Field Component', () => {
     const $component = renderComponent('marine-licence/redaction-field', {
       ...baseParams,
       isRedacted: true,
-<<<<<<< HEAD
       redaction: {
         redactedText:
           'Redacted preferred dates <span class="app-redaction-label">***REDACTED***</span>',
         redactedTextValue: 'Redacted preferred dates'
       }
-=======
-      redactions: { redactedTextValue: 'Redacted preferred dates' },
-      publishedText:
-        'Redacted preferred dates <span class="app-redaction-label">***REDACTED***</span>'
->>>>>>> main
     })
 
     expect($component('.app-redaction-field__trigger').text()).toContain(
