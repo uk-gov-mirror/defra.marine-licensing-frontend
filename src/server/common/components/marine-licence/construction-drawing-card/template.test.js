@@ -145,6 +145,8 @@ describe('Marine Licence Construction Drawing Card', () => {
         redactions: {},
         marineLicenceId: '123',
         redactionSaveUrl: '/view-marine-licence-details/test-id/redact',
+        replaceDocumentUrl:
+          '/marine-licence/redaction/MLA-2026-10264/replace-document',
         csrfToken: 'test-crumb-token',
         ...overrides
       })
@@ -237,6 +239,18 @@ describe('Marine Licence Construction Drawing Card', () => {
       expect(
         $component('#add-another-construction-drawing-site-2')
       ).toHaveLength(0)
+    })
+
+    test('links Replace document at the drawing being replaced', () => {
+      const $component = render()
+
+      const $link = $component('#construction-drawing-site-2-2').find(
+        'a:contains("Replace document")'
+      )
+
+      expect($link.attr('href')).toBe(
+        '/marine-licence/redaction/MLA-2026-10264/replace-document?type=construction-drawing&site=2&drawing=2'
+      )
     })
 
     test('renders a card per uploaded drawing only', () => {

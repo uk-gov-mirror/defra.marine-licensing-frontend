@@ -6,6 +6,10 @@ import { marineLicenceRoutes } from '#src/server/common/constants/routes.js'
 import { isClientSideFetchRequest } from '#src/server/common/helpers/is-client-side-fetch-request.js'
 import { viewDetailsInternalUserController } from '#src/server/marine-licence/view-marine-licence-internal-user/controller.js'
 import { REDACTION_LABEL } from '#src/server/marine-licence/view-details/utils.js'
+import {
+  replaceDocumentUrls,
+  REPLACE_DOCUMENT_TYPES
+} from '#src/server/marine-licence/view-marine-licence-internal-user/replace-document/index.js'
 
 const redactionPayloadSchema = joi.object({
   marineLicenceId: joi.string().optional(),
@@ -89,5 +93,40 @@ export const saveRedactionController = {
     }
 
     return viewDetailsInternalUserController.handler(request, h)
+  }
+}
+
+const onlyForConstructionDrawing = joi.number().integer().min(1).when('type', {
+  is: REPLACE_DOCUMENT_TYPES.CONSTRUCTION_DRAWING,
+  then: joi.required(),
+  otherwise: joi.forbidden()
+})
+
+const replaceDocumentQuerySchema = joi.object({
+  type: joi
+    .string()
+    .valid(...Object.values(REPLACE_DOCUMENT_TYPES))
+    .required(),
+  site: onlyForConstructionDrawing,
+  drawing: onlyForConstructionDrawing
+})
+
+export const replaceDocumentController = {
+  options: {
+    validate: {
+      query: replaceDocumentQuerySchema,
+      failAction
+    }
+  },
+  handler(request, h) {
+    const { applicationReference } = request.params
+    const { type, site, drawing } = request.query
+
+    const { uploadUrl } = replaceDocumentUrls(applicationReference, type, {
+      site,
+      drawing
+    })
+
+    return h.redirect(uploadUrl)
   }
 }

@@ -55,8 +55,10 @@
           filename: params.waterFrameworkDirectiveData.uploadedFile.value.text,
           label: "the Water Framework Directive assessment",
           fieldKey: "waterFrameworkDirective.withholdDocument",
+          redactedDocument: params.redactions.waterFrameworkDirective.withholdDocument.redactedDocument,
           marineLicenceId: params.marineLicenceId,
           saveUrl: params.redactionSaveUrl,
+          replaceDocumentUrl: params.replaceDocumentUrl + "?type=water-framework-directive",
           csrfToken: params.csrfToken
         }),
         classes: "govuk-summary-list__value--full-width"

@@ -33,6 +33,10 @@
     {% if params.isWithheld %}
         <span class="app-redaction-label">***REDACTED***</span>
         <p class="govuk-body govuk-!-margin-top-1">This document will not be published on the public register.</p>
+
+        {% if params.redactedDocument.filename %}
+          <p class="govuk-body app-withhold__redacted-document">{{ params.redactedDocument.filename }}</p>
+        {% endif %}
     {% endif %}
 
     <div class="govuk-button-group {{ withholdButtonClasses }}">
@@ -41,6 +45,10 @@
         type: "submit",
         classes: "govuk-link govuk-button--as-link govuk-!-margin-bottom-0 app-withhold__button"
       }) }}
+
+      {% if not params.isWithheld %}
+        <a class="govuk-link" href="{{ params.replaceDocumentUrl }}">Replace document</a>
+      {% endif %}
     </div>
   </div>
 </form>

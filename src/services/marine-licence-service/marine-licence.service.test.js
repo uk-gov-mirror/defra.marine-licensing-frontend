@@ -495,6 +495,43 @@ describe('MarineLicenceService', () => {
       )
     })
 
+    test('should send file upload information if available', async () => {
+      vi.mocked(authenticatedPostRequest).mockResolvedValue({
+        payload: { message: 'success' }
+      })
+
+      await service.saveRedaction(
+        validId,
+        'siteDetails.constructionDrawings.withholdDocument',
+        undefined,
+        {
+          filename: 'test-file',
+          withhold: true,
+          s3Location: {
+            checksumSha256: 'test-checksum',
+            s3Bucket: 'test-bucket',
+            s3Key: 'test-key'
+          }
+        }
+      )
+
+      expect(authenticatedPostRequest).toHaveBeenCalledWith(
+        mockRequest,
+        apiRoutes.REDACT_TEXT,
+        {
+          id: validId,
+          fieldKey: 'siteDetails.constructionDrawings.withholdDocument',
+          filename: 'test-file',
+          withhold: true,
+          s3Location: {
+            checksumSha256: 'test-checksum',
+            s3Bucket: 'test-bucket',
+            s3Key: 'test-key'
+          }
+        }
+      )
+    })
+
     test('should send remove with no text for a location flag', async () => {
       vi.mocked(authenticatedPostRequest).mockResolvedValue({
         payload: { message: 'success' }

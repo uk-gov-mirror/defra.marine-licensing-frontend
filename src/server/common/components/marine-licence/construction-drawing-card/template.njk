@@ -44,10 +44,12 @@
             filename: drawing.filename,
             label: "site " + params.siteNumber + " construction drawing " + drawingNumber,
             fieldKey: "siteDetails.constructionDrawings.withholdDocument",
+            redactedDocument: params.redactions.siteDetails[siteIndex].constructionDrawings[drawingIndex].withholdDocument.redactedDocument,
             marineLicenceId: params.marineLicenceId,
             index: siteIndex,
             drawingIndex: drawingIndex,
             saveUrl: params.redactionSaveUrl,
+            replaceDocumentUrl: params.replaceDocumentUrl + "?type=construction-drawing&site=" + params.siteNumber + "&drawing=" + drawingNumber,
             csrfToken: params.csrfToken
           }),
           classes: "govuk-summary-list__value--full-width"

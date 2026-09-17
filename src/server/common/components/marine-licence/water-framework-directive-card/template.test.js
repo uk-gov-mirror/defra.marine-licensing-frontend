@@ -118,6 +118,8 @@ describe('Marine Licence Water Framework Directive Component', () => {
         enableRedaction: true,
         redactions: {},
         redactionSaveUrl: '/view-marine-licence-details/test-id/redact',
+        replaceDocumentUrl:
+          '/marine-licence/redaction/MLA-2026-10264/replace-document',
         csrfToken: 'test-crumb-token',
         ...overrides
       })
@@ -163,7 +165,19 @@ describe('Marine Licence Water Framework Directive Component', () => {
         })
 
       const withheld = {
-        waterFrameworkDirective: { withholdDocument: true }
+        waterFrameworkDirective: { withholdDocument: { withhold: true } }
+      }
+
+      const withheldWithReplacement = {
+        waterFrameworkDirective: {
+          withholdDocument: {
+            withhold: true,
+            redactedDocument: {
+              filename: 'redacted-assessment.odt',
+              url: '/download/redacted-assessment.odt'
+            }
+          }
+        }
       }
 
       const withholdForm = ($component) =>
@@ -204,6 +218,31 @@ describe('Marine Licence Water Framework Directive Component', () => {
         expect(
           withholdForm($component).find('input[name="withhold"]').attr('value')
         ).toBe('false')
+      })
+
+      test('links the replacement document above Remove redaction', () => {
+        const $component = renderWithFile({
+          redactions: withheldWithReplacement
+        })
+
+        const $link = $component('.app-withhold__redacted-document')
+        expect($link.text()).toBe('redacted-assessment.odt')
+      })
+
+      test('renders no replacement link when nothing has replaced the document', () => {
+        const $component = renderWithFile({ redactions: withheld })
+
+        expect($component('.app-withhold__redacted-document')).toHaveLength(0)
+      })
+
+      test('links Replace document at the assessment upload', () => {
+        const $component = renderWithFile()
+
+        const $link = $component('a:contains("Replace document")')
+
+        expect($link.attr('href')).toBe(
+          '/marine-licence/redaction/MLA-2026-10264/replace-document?type=water-framework-directive'
+        )
       })
 
       test('renders no withhold control when redaction is not enabled', () => {

@@ -85,7 +85,9 @@ export class MarineLicenceService {
       drawingIndex,
       policyCode,
       remove,
-      withhold
+      withhold,
+      filename,
+      s3Location
     } = {}
   ) {
     const { payload } = await authenticatedPostRequest(
@@ -100,7 +102,9 @@ export class MarineLicenceService {
         ...(drawingIndex !== undefined && { drawingIndex }),
         ...(policyCode !== undefined && { policyCode }),
         ...(remove !== undefined && { remove }),
-        ...(withhold !== undefined && { withhold })
+        ...(withhold !== undefined && { withhold }),
+        ...(filename !== undefined && { filename }),
+        ...(s3Location !== undefined && { s3Location })
       }
     )
     if (payload?.message !== 'success') {
