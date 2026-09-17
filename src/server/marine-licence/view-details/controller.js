@@ -38,6 +38,84 @@ const getApplicantBackLink = (status, marineLicenceId) => {
   return routes.DASHBOARD
 }
 
+const fetchViewableMarineLicence = async (
+  request,
+  marineLicenceId,
+  isPublicView
+) => {
+  const service = getMarineLicenceService(request)
+  const serviceMethod = isPublicView
+    ? 'getPublicMarineLicenceById'
+    : 'getMarineLicenceById'
+  const marineLicence = await service[serviceMethod](marineLicenceId)
+
+  if (!isProjectViewable(marineLicence)) {
+    request.logger.error(
+      {
+        id: marineLicenceId,
+        status: marineLicence.status,
+        hasApplicationReference: !!marineLicence.applicationReference
+      },
+      errorMessages.MARINE_LICENCE_NOT_SUBMITTED
+    )
+    throw Boom.forbidden(errorMessages.MARINE_LICENCE_NOT_SUBMITTED)
+  }
+
+  return marineLicence
+}
+
+const buildViewModel = async ({
+  request,
+  marineLicence,
+  marineLicenceId,
+  isApplicantView
+}) => {
+  const formattedMarineLicence = buildSummaryData(marineLicence)
+  const { coordinatesType, summaryData } = buildSiteData(marineLicence)
+
+  const applicationTasks = buildApplicationTasks({
+    marineLicence,
+    currentContactId: isApplicantView
+      ? await getCurrentContactId(request)
+      : null,
+    isApplicantView
+  })
+
+  return {
+    pageTitle: formattedMarineLicence.projectName,
+    specialLegalPowers: formattedMarineLicence.specialLegalPowers,
+    publicRegister: formattedMarineLicence.publicRegister,
+    harbourAuthority: formattedMarineLicence.harbourAuthority,
+    otherAuthorities: formattedMarineLicence.otherAuthorities,
+    preferredDates: formattedMarineLicence.preferredDates,
+    projectName: formattedMarineLicence.projectName,
+    projectBackground: formattedMarineLicence.projectBackground,
+    publicConsultation: formattedMarineLicence.publicConsultation,
+    coordinatesType,
+    summaryData,
+    isReadOnly: true,
+    pageCaption: isApplicantView
+      ? `${marineLicence.applicationReference} - Marine licence`
+      : marineLicence.applicationReference,
+    backLink: isApplicantView
+      ? getApplicantBackLink(marineLicence.status, marineLicenceId)
+      : null,
+    isApplicantView,
+    marineLicenceId,
+    waterFrameworkDirectiveData: waterFrameworkReviewData(
+      formattedMarineLicence.waterFrameworkDirective
+    ),
+    invoicingData: formattedMarineLicence.invoicing,
+    invoicingChangeLink:
+      marineLicenceRoutes.MARINE_LICENCE_CHECK_INVOICING_DETAILS,
+    marinePlanPolicies: buildMarinePlanPoliciesData(marineLicence),
+    applicationTasks,
+    amount: FEE_ESTIMATE_AMOUNT,
+    monitoringAmount: FEE_ESTIMATE_MONITORING_AMOUNT,
+    ...buildApplicationDetailsCardData(marineLicence)
+  }
+}
+
 export const viewDetailsController = {
   async handler(request, h) {
     const { marineLicenceId } = request.params
@@ -49,77 +127,20 @@ export const viewDetailsController = {
     const isApplicantView = !isPublicView
 
     try {
-      const service = getMarineLicenceService(request)
-      const serviceMethod = isPublicView
-        ? 'getPublicMarineLicenceById'
-        : 'getMarineLicenceById'
-      const marineLicence = await service[serviceMethod](marineLicenceId)
-
-      if (!isProjectViewable(marineLicence)) {
-        request.logger.error(
-          {
-            id: marineLicenceId,
-            status: marineLicence.status,
-            hasApplicationReference: !!marineLicence.applicationReference
-          },
-          errorMessages.MARINE_LICENCE_NOT_SUBMITTED
-        )
-        throw Boom.forbidden(errorMessages.MARINE_LICENCE_NOT_SUBMITTED)
-      }
-
-      const formattedMarineLicence = buildSummaryData(marineLicence)
-      const { coordinatesType, summaryData } = buildSiteData(marineLicence)
-
-      const pageCaption = isApplicantView
-        ? `${marineLicence.applicationReference} - Marine licence`
-        : marineLicence.applicationReference
-
-      const waterFrameworkDirectiveData = waterFrameworkReviewData(
-        formattedMarineLicence.waterFrameworkDirective
+      const marineLicence = await fetchViewableMarineLicence(
+        request,
+        marineLicenceId,
+        isPublicView
       )
 
-      const marinePlanPolicies = buildMarinePlanPoliciesData(marineLicence)
-
-      const applicationDetailsCardData =
-        buildApplicationDetailsCardData(marineLicence)
-
-      const applicationTasks = buildApplicationTasks({
+      const viewModel = await buildViewModel({
+        request,
         marineLicence,
-        currentContactId: isApplicantView
-          ? await getCurrentContactId(request)
-          : null,
+        marineLicenceId,
         isApplicantView
       })
 
-      return h.view(VIEW_DETAILS_VIEW_ROUTE, {
-        pageTitle: formattedMarineLicence.projectName,
-        specialLegalPowers: formattedMarineLicence.specialLegalPowers,
-        publicRegister: formattedMarineLicence.publicRegister,
-        harbourAuthority: formattedMarineLicence.harbourAuthority,
-        otherAuthorities: formattedMarineLicence.otherAuthorities,
-        preferredDates: formattedMarineLicence.preferredDates,
-        projectName: formattedMarineLicence.projectName,
-        projectBackground: formattedMarineLicence.projectBackground,
-        publicConsultation: formattedMarineLicence.publicConsultation,
-        coordinatesType,
-        summaryData,
-        isReadOnly: true,
-        pageCaption,
-        backLink: isApplicantView
-          ? getApplicantBackLink(marineLicence.status, marineLicenceId)
-          : null,
-        isApplicantView,
-        marineLicenceId,
-        waterFrameworkDirectiveData,
-        invoicingData: formattedMarineLicence.invoicing,
-        invoicingChangeLink:
-          marineLicenceRoutes.MARINE_LICENCE_CHECK_INVOICING_DETAILS,
-        marinePlanPolicies,
-        applicationTasks,
-        amount: FEE_ESTIMATE_AMOUNT,
-        monitoringAmount: FEE_ESTIMATE_MONITORING_AMOUNT,
-        ...applicationDetailsCardData
-      })
+      return h.view(VIEW_DETAILS_VIEW_ROUTE, viewModel)
     } catch (error) {
       if (error.isBoom) {
         throw error
