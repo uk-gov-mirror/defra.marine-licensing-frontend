@@ -141,7 +141,7 @@ describe('Marine Licence Construction Drawing Card', () => {
           { filename: 'drawing-one.pdf' },
           { filename: 'drawing-two.pdf' }
         ],
-        enableRedaction: true,
+        isReadOnly: true,
         redactions: {},
         marineLicenceId: '123',
         redactionSaveUrl: '/view-marine-licence-details/test-id/redact',
@@ -151,7 +151,11 @@ describe('Marine Licence Construction Drawing Card', () => {
 
     const withheldSecondDrawing = {
       siteDetails: {
-        1: { constructionDrawings: { 1: { withholdDocument: true } } }
+        1: {
+          constructionDrawings: {
+            1: { withholdDocument: { withhold: true } }
+          }
+        }
       }
     }
 
@@ -208,17 +212,49 @@ describe('Marine Licence Construction Drawing Card', () => {
       )
     })
 
-    test('hides the applicant delete and add controls when redaction is enabled', () => {
-      const $component = render()
+    test('renders not withheld', () => {
+      const $component = render({
+        redactions: {
+          siteDetails: {
+            1: {
+              constructionDrawings: {
+                1: { withholdDocument: { withhold: false } }
+              }
+            }
+          }
+        }
+      })
 
+      expect($component('#construction-drawing-site-2-2').text()).toContain(
+        'drawing-two.pdf'
+      )
+      expect(withholdForm($component, 2).find('button').text()).toContain(
+        'Withhold document'
+      )
+
+      expect($component('.govuk-summary-list__actions a')).toHaveLength(0)
       expect($component('.govuk-summary-card__actions a')).toHaveLength(0)
       expect(
         $component('#add-another-construction-drawing-site-2')
       ).toHaveLength(0)
     })
 
-    test('renders no withhold control when redaction is not enabled', () => {
-      const $component = render({ enableRedaction: false })
+    test('renders a card per uploaded drawing only', () => {
+      const $component = render({
+        constructionDrawings: [{ filename: 'drawing-one.pdf' }]
+      })
+
+      expect($component('.govuk-summary-card')).toHaveLength(1)
+    })
+
+    test('renders nothing when read only with no drawings uploaded', () => {
+      const $component = render({ constructionDrawings: [] })
+
+      expect($component('.govuk-summary-card')).toHaveLength(0)
+    })
+
+    test('renders no withhold control when not read only', () => {
+      const $component = render({ isReadOnly: false })
 
       expect($component('input[name="withhold"]')).toHaveLength(0)
       expect($component('[data-module="withhold-location"]')).toHaveLength(0)

@@ -5,7 +5,7 @@
 {% if params.waterFrameworkDirectiveData.nauticalMile %}
 {% set rows = [] %}
 
-{% set isFileWithheld = params.redactions.waterFrameworkDirective.withholdDocument %}
+{% set isFileWithheld = params.redactions.waterFrameworkDirective.withholdDocument.withhold %}
 
 {% set rows = (rows.push({
   key: params.waterFrameworkDirectiveData.nauticalMile.key,

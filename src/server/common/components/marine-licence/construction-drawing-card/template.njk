@@ -11,22 +11,36 @@
   {% endif %}
 {% endfor %}
 
-{% if siteRequiresConstructionDrawing %}
-  {% set constructionDrawings = params.constructionDrawings or [] %}
-  {% set drawingCount = constructionDrawings.length if constructionDrawings.length > 1 else 1 %}
+{% set constructionDrawings = params.constructionDrawings or [] %}
+
+{% if params.isReadOnly %}
+
+  {# Readonly redactable card variant #}
+
   {% set siteIndex = params.siteNumber - 1 %}
 
-  {% for drawingIndex in range(0, drawingCount) %}
-    {% set drawing = constructionDrawings[drawingIndex] or {} %}
-    {% set drawingNumber = drawingIndex + 1 %}
-    {% set isDrawingWithheld = params.redactions.siteDetails[siteIndex].constructionDrawings[drawingIndex].withholdDocument %}
+  {% for drawing in constructionDrawings %}
+    {% set drawingIndex = loop.index0 %}
+    {% set drawingNumber = loop.index %}
 
-    {% if params.enableRedaction %}
-      {% set drawingRows = [{
+    {% set isFileWithheld = params.redactions.siteDetails[siteIndex].constructionDrawings[drawingIndex].withholdDocument.withhold %}
+
+    {{ govukSummaryList({
+      card: {
+        attributes: {
+          id: "construction-drawing-site-" + params.siteNumber + "-" + drawingNumber,
+          "data-module": "withhold-location"
+        },
+        title: {
+          text: "Site " + params.siteNumber + " - Construction drawing " + drawingNumber
+        }
+      },
+      classes: "govuk-summary-list--full-width",
+      rows: [{
         key: { text: "File upload" },
         value: {
           html: appMarineLicenceWithholdDocument({
-            isWithheld: isDrawingWithheld,
+            isWithheld: isFileWithheld,
             filename: drawing.filename,
             label: "site " + params.siteNumber + " construction drawing " + drawingNumber,
             fieldKey: "siteDetails.constructionDrawings.withholdDocument",
@@ -38,42 +52,50 @@
           }),
           classes: "govuk-summary-list__value--full-width"
         }
-      }] %}
-    {% else %}
+      }]
+    }) }}
+  {% endfor %}
+  {% else %}
+
+    {# 'Add' drawing card variant #}
+
+    {% if siteRequiresConstructionDrawing %}
+
+    {% set drawingCount = constructionDrawings.length if constructionDrawings.length > 1 else 1 %}
+
+    {% for drawingIndex in range(0, drawingCount) %}
+      {% set drawing = constructionDrawings[drawingIndex] or {} %}
+      {% set drawingNumber = drawingIndex + 1 %}
+
       {% set drawingRows = [{
         key: { text: "File upload" },
         value: { html: appIncompleteField({ text: drawing.filename }) },
         actions: setSiteDetailsAction(drawing.filename, 'upload-construction-drawing', params.siteNumber, "", { drawingNumber: drawingNumber })
       }] %}
-    {% endif %}
 
-    {% set deleteActionItems = [{
-      href: "delete-construction-drawing?site=" + params.siteNumber + "&drawing=" + drawingNumber,
-      text: "Delete file upload",
-      classes: "govuk-link--no-visited-state"
-    }] if drawingIndex > 0 and not params.enableRedaction else [] %}
+      {% set deleteActionItems = [{
+        href: "delete-construction-drawing?site=" + params.siteNumber + "&drawing=" + drawingNumber,
+        text: "Delete file upload",
+        classes: "govuk-link--no-visited-state"
+      }] if drawingIndex > 0 else [] %}
 
-    {% set drawingCardAttributes = { id: "construction-drawing-site-" + params.siteNumber + "-" + drawingNumber } %}
-    {% if params.enableRedaction %}
-      {% set drawingCardAttributes = { id: "construction-drawing-site-" + params.siteNumber + "-" + drawingNumber, "data-module": "withhold-location" } %}
-    {% endif %}
-
-    {{ govukSummaryList({
-      card: {
-        attributes: drawingCardAttributes,
-        title: {
-          text: "Site " + params.siteNumber + " - Construction drawing " + drawingNumber
+      {{ govukSummaryList({
+        card: {
+          attributes: {
+            id: "construction-drawing-site-" + params.siteNumber + "-" + drawingNumber
+          },
+          title: {
+            text: "Site " + params.siteNumber + " - Construction drawing " + drawingNumber
+          },
+          actions: {
+            items: deleteActionItems
+          }
         },
-        actions: {
-          items: deleteActionItems
-        }
-      },
-      classes: "govuk-summary-list--full-width",
-      rows: drawingRows
-    }) }}
-  {% endfor %}
+        classes: "govuk-summary-list--full-width",
+        rows: drawingRows
+      }) }}
+    {% endfor %}
 
-  {% if not params.enableRedaction %}
     <form method="POST">
       <input type="hidden" name="csrfToken" value="{{ params.csrfToken }}">
       <input type="hidden" name="siteNumber" value="{{ params.siteNumber }}">
