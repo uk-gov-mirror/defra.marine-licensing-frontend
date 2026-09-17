@@ -232,7 +232,7 @@ describe('Marine Licence View Details Redaction', () => {
 
     test('offers to withhold the location of a site that is on show', () => {
       const $button = document.querySelector(
-        '#site-details-1 .app-withhold-location__button'
+        '#site-details-1 .app-withhold__button'
       )
 
       expect($button.textContent).toContain('Withhold location')
@@ -245,7 +245,9 @@ describe('Marine Licence View Details Redaction', () => {
       vi.mocked(getAuthProvider).mockReturnValue(AUTH_STRATEGIES.ENTRA_ID)
       mockMarineLicence({
         ...mockSubmittedMarineLicenceApplication,
-        redactions: { siteDetails: { 0: { withholdLocation: true } } }
+        redactions: {
+          siteDetails: { 0: { withholdLocation: { withhold: true } } }
+        }
       })
 
       const withheldDocument = await loadPage({
@@ -258,7 +260,7 @@ describe('Marine Licence View Details Redaction', () => {
       )
 
       const $button = withheldDocument.querySelector(
-        '#site-details-1 .app-withhold-location__button'
+        '#site-details-1 .app-withhold__button'
       )
 
       expect($container.textContent).toContain(
@@ -269,6 +271,96 @@ describe('Marine Licence View Details Redaction', () => {
       expect(
         withheldDocument.querySelector('#site-details-1 .app-site-details-map')
       ).toBeNull()
+    })
+  })
+
+  describe('construction drawing cards', () => {
+    const referenceUrl = toApplicationReferenceUrlSegment(
+      mockSubmittedMarineLicenceApplication.applicationReference
+    )
+    const viewUrl = `${marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS_INTERNAL_USER}/${referenceUrl}`
+    const redactUrl = `${viewUrl}/redact`
+
+    const loadWithDrawings = async (redactions) => {
+      vi.mocked(getAuthProvider).mockReturnValue(AUTH_STRATEGIES.ENTRA_ID)
+      mockMarineLicence({
+        ...mockSubmittedMarineLicenceApplication,
+        siteDetails: mockSubmittedMarineLicenceApplication.siteDetails.map(
+          (site) => ({
+            ...site,
+            constructionDrawings: [
+              { filename: 'drawing-one.pdf' },
+              { filename: 'drawing-two.pdf' }
+            ]
+          })
+        ),
+        redactions
+      })
+
+      return loadPage({ requestUrl: viewUrl, server: getServer() })
+    }
+
+    test('renders no card when the site has no construction drawings', () => {
+      expect(
+        document.querySelector('#construction-drawing-site-1-1')
+      ).toBeNull()
+    })
+
+    test('renders a card per drawing, offering to withhold each one', async () => {
+      const drawingsDocument = await loadWithDrawings()
+
+      const $card = drawingsDocument.querySelector(
+        '#construction-drawing-site-1-2'
+      )
+      const $form = $card.querySelector('.app-withhold-location__form')
+
+      expect($card.textContent).toContain('drawing-two.pdf')
+      expect($form.getAttribute('action')).toBe(redactUrl)
+      expect($form.querySelector('input[name="fieldKey"]').value).toBe(
+        'siteDetails.constructionDrawings.withholdDocument'
+      )
+      expect($form.querySelector('input[name="index"]').value).toBe('0')
+      expect($form.querySelector('input[name="drawingIndex"]').value).toBe('1')
+      expect($form.querySelector('input[name="withhold"]').value).toBe('true')
+      expect(
+        $card.querySelector('.app-withhold__button').textContent
+      ).toContain('Withhold document')
+    })
+
+    test('offers to remove the redaction on a withheld drawing only', async () => {
+      const withheldDocument = await loadWithDrawings({
+        siteDetails: {
+          0: {
+            constructionDrawings: {
+              0: { withholdDocument: { withhold: true } }
+            }
+          }
+        }
+      })
+
+      const $withheld = withheldDocument.querySelector(
+        '#construction-drawing-site-1-1'
+      )
+
+      expect($withheld.textContent).not.toContain('drawing-one.pdf')
+      expect($withheld.textContent).toContain(
+        'This document will not be published on the public register.'
+      )
+      expect(
+        $withheld.querySelector('.app-withhold__button').textContent
+      ).toContain('Remove redaction')
+      expect($withheld.querySelector('input[name="withhold"]').value).toBe(
+        'false'
+      )
+
+      const $onShow = withheldDocument.querySelector(
+        '#construction-drawing-site-1-2'
+      )
+
+      expect($onShow.textContent).toContain('drawing-two.pdf')
+      expect(
+        $onShow.querySelector('.app-withhold__button').textContent
+      ).toContain('Withhold document')
     })
   })
 
