@@ -31,19 +31,24 @@ describe('buildWithholdingSections', () => {
     const sections = buildWithholdingSections(
       buildTask({
         nationalSecurity: { withheldSome: false, comments: 'NS comments' },
-        commercialConfidentiality: { withheldSome: true, comments: 'CC comments' }
+        commercialConfidentiality: {
+          withheldSome: true,
+          comments: 'CC comments'
+        }
       })
     )
 
     expect(sections).toEqual([
       {
         heading: 'National security',
-        decision: "We've decided not to withhold the information you asked us to.",
+        decision:
+          "We've decided not to withhold the information you asked us to.",
         paragraphs: ['NS comments']
       },
       {
         heading: 'Commercial or industrial confidentiality',
-        decision: "We've agreed to withhold some of the information you asked us to.",
+        decision:
+          "We've agreed to withhold some of the information you asked us to.",
         paragraphs: ['CC comments']
       }
     ])

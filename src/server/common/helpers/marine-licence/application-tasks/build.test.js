@@ -53,9 +53,7 @@ describe('buildApplicationTasks', () => {
   })
 
   it('returns nothing when the application has no tasks', () => {
-    expect(
-      build({ marineLicence: buildMarineLicence([]) })
-    ).toEqual([])
+    expect(build({ marineLicence: buildMarineLicence([]) })).toEqual([])
   })
 
   it('returns nothing when applicationTasks is absent', () => {
@@ -95,7 +93,9 @@ describe('buildApplicationTasks', () => {
   it('skips a task type it does not recognise', () => {
     expect(
       build({
-        marineLicence: buildMarineLicence([buildTask({ type: 'SOMETHING_NEW' })])
+        marineLicence: buildMarineLicence([
+          buildTask({ type: 'SOMETHING_NEW' })
+        ])
       })
     ).toEqual([])
   })

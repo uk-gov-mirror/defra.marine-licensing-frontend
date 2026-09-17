@@ -75,7 +75,9 @@ describe('withholding notification controller', () => {
       const { statusCode, result } = await get()
 
       expect(statusCode).toBe(200)
-      expect(result).toContain('Update on the information you asked us to withhold')
+      expect(result).toContain(
+        'Update on the information you asked us to withhold'
+      )
       expect(result).toContain('National security')
       expect(result).toContain(
         'We&#39;ve decided not to withhold the information you asked us to.'
@@ -104,7 +106,10 @@ describe('withholding notification controller', () => {
     test('omits national security when it was not flagged', async () => {
       mockService.getMarineLicenceById.mockResolvedValue(
         buildLicence({
-          commercialConfidentiality: { withheldSome: false, comments: 'CC only' }
+          commercialConfidentiality: {
+            withheldSome: false,
+            comments: 'CC only'
+          }
         })
       )
 
@@ -166,7 +171,11 @@ describe('withholding notification controller', () => {
       makePostRequest({
         url: '/marine-licence/withholding-notification',
         server: getServer(),
-        formData: { marineLicenceId: MARINE_LICENCE_ID, taskId: TASK_ID, ...formData }
+        formData: {
+          marineLicenceId: MARINE_LICENCE_ID,
+          taskId: TASK_ID,
+          ...formData
+        }
       })
 
     test('marks the task as read and returns to view details', async () => {

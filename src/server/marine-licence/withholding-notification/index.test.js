@@ -4,7 +4,10 @@ import { marineLicenceRoutes } from '#src/server/common/constants/routes.js'
 describe('withholdingNotificationRoutes', () => {
   test('registers the detail page and its mark as read submission', () => {
     expect(
-      withholdingNotificationRoutes.map(({ method, path }) => ({ method, path }))
+      withholdingNotificationRoutes.map(({ method, path }) => ({
+        method,
+        path
+      }))
     ).toEqual([
       {
         method: 'GET',
