@@ -69,6 +69,7 @@ export const viewDetailsInternalUserController = {
         projectName: formattedMarineLicence.projectName,
         projectBackground: formattedMarineLicence.projectBackground,
         publicConsultation: formattedMarineLicence.publicConsultation,
+        publicRegister: formattedMarineLicence.publicRegister,
         coordinatesType,
         summaryData,
         isReadOnly: true,

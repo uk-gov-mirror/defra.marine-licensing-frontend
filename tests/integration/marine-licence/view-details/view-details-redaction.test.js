@@ -52,6 +52,35 @@ describe('Marine Licence View Details Redaction', () => {
     )
   })
 
+  describe('applicant withhold reason', () => {
+    test('does not show the withhold inset when the applicant consented to sharing', () => {
+      expect(document.querySelector('#applicant-withhold-reason')).toBeNull()
+    })
+
+    test('shows the applicant reason when they asked to withhold information', async () => {
+      const reason = 'Commercially sensitive working hours'
+
+      vi.mocked(getAuthProvider).mockReturnValue(AUTH_STRATEGIES.ENTRA_ID)
+      mockMarineLicence({
+        ...mockSubmittedMarineLicenceApplication,
+        publicRegister: { withholdConsent: 'yes', reason }
+      })
+
+      const withheldDocument = await loadPage({
+        requestUrl: `${marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS_INTERNAL_USER}/${toApplicationReferenceUrlSegment(mockSubmittedMarineLicenceApplication.applicationReference)}`,
+        server: getServer()
+      })
+
+      const inset = withheldDocument.querySelector('#applicant-withhold-reason')
+
+      expect(inset).not.toBeNull()
+      expect(inset.textContent).toContain(
+        'The information the applicant wants withheld and why'
+      )
+      expect(inset.textContent).toContain(reason)
+    })
+  })
+
   describe('redaction field', () => {
     const referenceUrl = toApplicationReferenceUrlSegment(
       mockSubmittedMarineLicenceApplication.applicationReference
