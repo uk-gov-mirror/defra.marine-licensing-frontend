@@ -74,6 +74,19 @@ describe('buildWithholdingSections', () => {
     expect(sections[0].heading).toBe('Commercial or industrial confidentiality')
   })
 
+  it('starts a new paragraph at every newline, so nothing the caseworker typed is lost', () => {
+    const [section] = buildWithholdingSections(
+      buildTask({
+        nationalSecurity: {
+          withheldSome: true,
+          comments: 'Withheld fields:\nName\nAddress'
+        }
+      })
+    )
+
+    expect(section.paragraphs).toEqual(['Withheld fields:', 'Name', 'Address'])
+  })
+
   it('splits the caseworker comments into paragraphs on blank lines', () => {
     const [section] = buildWithholdingSections(
       buildTask({

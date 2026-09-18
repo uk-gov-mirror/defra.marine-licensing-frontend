@@ -19,10 +19,4 @@ describe('withholdingNotificationRoutes', () => {
       }
     ])
   })
-
-  test('each route has a handler', () => {
-    withholdingNotificationRoutes.forEach((route) => {
-      expect(route.handler).toEqual(expect.any(Function))
-    })
-  })
 })

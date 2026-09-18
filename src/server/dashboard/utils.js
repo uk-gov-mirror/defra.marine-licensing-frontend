@@ -206,7 +206,8 @@ export const getStatusLabelText = (status) => {
 
 export const formatProjectsForDisplay = (projects, isEmployee = false) =>
   projects.map((project) => {
-    const { status, projectType } = project
+    const { status, displayStatus, projectType } = project
+    const statusToShow = displayStatus ?? status
 
     const baseRow = [
       { text: project.projectName },
@@ -218,9 +219,9 @@ export const formatProjectsForDisplay = (projects, isEmployee = false) =>
       },
       { text: project.applicationReference || '-' },
       {
-        html: `<strong class="govuk-tag ${getTagStyle(status)}">${getStatusLabelText(project.status)}</strong>`,
+        html: `<strong class="govuk-tag ${getTagStyle(statusToShow)}">${getStatusLabelText(statusToShow)}</strong>`,
         attributes: {
-          'data-sort-value': project.status
+          'data-sort-value': statusToShow
         }
       },
       {
@@ -308,15 +309,10 @@ const MARINE_LICENCE_ONLY_STATUS_KEYS = new Set([
   'WITHDRAWN'
 ])
 
-// Filtering the dashboard by "Action required" is ML-1538; until then it must not
-// appear as a filter option even though projects can display that status.
-const UNFILTERABLE_STATUS_KEYS = new Set(['ACTION_REQUIRED'])
-
 export const getStatusOptions = (status, marineLicenceEnabled = true) => {
   const isMultipleSelected = Array.isArray(status)
 
   return Object.entries(PROJECT_STATUS)
-    .filter(([key]) => !UNFILTERABLE_STATUS_KEYS.has(key))
     .filter(
       ([key]) =>
         marineLicenceEnabled || !MARINE_LICENCE_ONLY_STATUS_KEYS.has(key)

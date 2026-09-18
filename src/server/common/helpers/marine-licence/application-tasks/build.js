@@ -15,7 +15,7 @@ const buildTaskItem = (task, marineLicenceId) => {
 
   return {
     title: { text: definition.title },
-    href: definition.buildHref(marineLicenceId, task.taskId),
+    href: definition.buildHref(marineLicenceId),
     status: isResolved
       ? { text: definition.resolvedLabel }
       : {

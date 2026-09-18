@@ -6,8 +6,14 @@ export const PROJECT_STATUS = {
   REJECTED: 'Rejected',
   SUBMITTED: 'Submitted',
   TRANSFERRED: 'Transferred',
-  WITHDRAWN: 'Withdrawn',
-  // Derived by the API from outstanding application tasks; never stored on a project.
+  WITHDRAWN: 'Withdrawn'
+}
+
+// Derived by the API from outstanding application tasks and carried on `displayStatus`,
+// never on `status`. Deliberately outside PROJECT_STATUS: it is a label to render, not a
+// status an application can be in, and anything comparing or filtering `status` must not
+// see it.
+export const DISPLAY_STATUS = {
   ACTION_REQUIRED: 'Action required'
 }
 

@@ -4,7 +4,7 @@ import {
 } from '#src/server/marine-licence/withholding-notification/constants.js'
 import { APPLICATION_TASK_TYPE } from '#src/server/common/helpers/marine-licence/application-tasks/registry.js'
 
-const BASIS_KEYS = ['nationalSecurity', 'commercialConfidentiality']
+const BASIS_KEYS = Object.keys(WITHHOLDING_SECTION_HEADINGS)
 
 export const findWithholdingTask = (marineLicence) =>
   (marineLicence?.applicationTasks ?? []).find(
@@ -13,7 +13,7 @@ export const findWithholdingTask = (marineLicence) =>
 
 const buildParagraphs = (comments) =>
   (comments ?? '')
-    .split(/\n\s*\n/)
+    .split(/\n+/)
     .map((paragraph) => paragraph.trim())
     .filter(Boolean)
 

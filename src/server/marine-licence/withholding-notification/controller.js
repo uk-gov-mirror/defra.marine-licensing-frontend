@@ -56,7 +56,7 @@ export const withholdingNotificationController = {
       return h.view(WITHHOLDING_NOTIFICATION_VIEW_ROUTE, {
         pageTitle: WITHHOLDING_NOTIFICATION_PAGE_TITLE,
         heading: WITHHOLDING_NOTIFICATION_PAGE_TITLE,
-        pageCaption: `${marineLicence.applicationReference} – ${marineLicence.projectName}`,
+        pageCaption: `${marineLicence.applicationReference} - ${marineLicence.projectName}`,
         sections: buildWithholdingSections(task),
         marineLicenceId,
         taskId: task.taskId,
@@ -80,6 +80,8 @@ export const withholdingNotificationController = {
   }
 }
 
+// Ownership is enforced by the API: the resolve endpoint runs authorizeOwnership, so a
+// forged marineLicenceId in this payload resolves nothing.
 export const withholdingNotificationSubmitController = {
   options: {
     validate: {
