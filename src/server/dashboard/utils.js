@@ -253,6 +253,30 @@ export const formatProjectsForDisplay = (projects, isEmployee = false) =>
     }
   })
 
+const getOwnerCategory = (searchParams, users, contactId) => {
+  const { show, user: userSearchParam } = searchParams
+
+  if (show !== USER_CHOICE_VALUES.SPECIFIC_USER || !userSearchParam) {
+    return null
+  }
+
+  if (!users || Object.keys(users).length === 0) {
+    return null
+  }
+
+  return {
+    heading: {
+      text: 'Owner'
+    },
+    items: userSearchParam.map((user) => ({
+      href: '#',
+      field: 'user',
+      value: user,
+      text: contactId === user ? `Mine (${users[user]})` : users[user]
+    }))
+  }
+}
+
 export const getFilterCategories = (searchParams, users, userSession = {}) => {
   const categories = []
 
@@ -260,26 +284,14 @@ export const getFilterCategories = (searchParams, users, userSession = {}) => {
     return categories
   }
 
-  const { show, user: usersearchParam } = searchParams
-  const { contactId } = userSession
+  const ownerCategory = getOwnerCategory(
+    searchParams,
+    users,
+    userSession.contactId
+  )
 
-  if (show && show === USER_CHOICE_VALUES.SPECIFIC_USER) {
-    const hasUsers = users && Object.keys(users).length > 0
-    const hasUsersToDisplay = hasUsers && usersearchParam
-
-    if (hasUsersToDisplay) {
-      categories.push({
-        heading: {
-          text: 'Owner'
-        },
-        items: usersearchParam.map((user) => ({
-          href: '#',
-          field: 'user',
-          value: user,
-          text: contactId === user ? `Mine (${users[user]})` : users[user]
-        }))
-      })
-    }
+  if (ownerCategory) {
+    categories.push(ownerCategory)
   }
 
   if (searchParams.status) {
