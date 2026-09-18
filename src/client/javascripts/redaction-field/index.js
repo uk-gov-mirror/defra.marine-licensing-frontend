@@ -56,6 +56,9 @@ export class RedactionField extends Component {
     this.$trigger.setAttribute('aria-expanded', 'true')
     this.$trigger.hidden = true
     this.$redactedTextContainer.hidden = true
+    if (this.$removeForm) {
+      this.$removeForm.hidden = true
+    }
     this.$input.focus()
   }
 
@@ -76,6 +79,9 @@ export class RedactionField extends Component {
     this.$trigger.setAttribute('aria-expanded', 'false')
     this.$trigger.hidden = false
     this.$redactedTextContainer.hidden = false
+    if (this.$removeForm) {
+      this.$removeForm.hidden = false
+    }
 
     if (focusTrigger) {
       this.$trigger.focus()

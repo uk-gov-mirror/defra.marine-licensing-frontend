@@ -9,9 +9,7 @@
   <span class="govuk-visually-hidden"> for {{ params.label }}</span>
 {% endset %}
 
-{% set withholdButtonClasses %}
-  {{ "" if params.isWithheld else "govuk-!-margin-top-4" }}
-{% endset %}
+{% set withholdButtonClasses %}{{ "" if params.isWithheld else "govuk-!-margin-top-4 govuk-!-margin-bottom-0" }}{% endset %}
 
 {% if not params.isWithheld %}
   <p class="govuk-body">{{ params.filename }}</p>

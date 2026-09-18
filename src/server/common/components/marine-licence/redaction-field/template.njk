@@ -43,7 +43,7 @@
 {% endset %}
 
 <div class="app-redaction-field" id="redaction-field-{{ params.fieldId }}" data-module="redaction-field">
-  <div {%if params.isRedacted %}class="app-redaction-inset"{% endif %}>
+  <div {%if params.isRedacted %}class="app-redaction-inset govuk-!-margin-bottom-2"{% endif %}>
     
   {% if params.isRedacted %}
         <div class="app-redaction-field__published-text" hidden>
@@ -66,10 +66,10 @@
 
     {% endif %}
 
-    <div class="govuk-button-group">
+    <div class="govuk-button-group govuk-!-margin-bottom-0">
 
         <a
-        class="govuk-link govuk-link--no-visited-state app-redaction-field__trigger"
+        class="govuk-link govuk-link--no-visited-state app-redaction-field__trigger govuk-!-margin-bottom-2"
         href="#"
         aria-expanded="false"
         aria-controls="redaction-panel-{{ params.fieldId }}"
