@@ -16,10 +16,7 @@ import {
   mockMarineLicence,
   setupTestServer
 } from '../shared/test-setup-helpers.js'
-import {
-  agentSession,
-  citizenUserSession
-} from '../shared/session-fixtures.js'
+import { agentSession, citizenUserSession } from '../shared/session-fixtures.js'
 import { selectActivityVariants } from '~/src/server/common/constants/activity-variants.js'
 import { getMarinePlanPolicyLink } from '~/src/server/common/helpers/marine-licence/marine-plan-policy-link.js'
 import { toApplicationReferenceUrlSegment } from '~/src/server/common/helpers/marine-licence/application-reference-url-segment.js'
