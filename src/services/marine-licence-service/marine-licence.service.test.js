@@ -406,6 +406,70 @@ describe('MarineLicenceService', () => {
       expect(mockLogger.error).not.toHaveBeenCalled()
     })
 
+    test('should send the index for site details', async () => {
+      vi.mocked(authenticatedPostRequest).mockResolvedValue({
+        payload: { message: 'success' }
+      })
+
+      await service.saveRedaction(validId, 'siteName', 'Redacted', {
+        siteIndex: 1
+      })
+
+      expect(authenticatedPostRequest).toHaveBeenCalledWith(
+        mockRequest,
+        apiRoutes.REDACT_TEXT,
+        { id: validId, fieldKey: 'siteName', text: 'Redacted', siteIndex: 1 }
+      )
+    })
+
+    test('should send the policy code for a marine plan policy response', async () => {
+      vi.mocked(authenticatedPostRequest).mockResolvedValue({
+        payload: { message: 'success' }
+      })
+
+      await service.saveRedaction(
+        validId,
+        'marinePlanPolicyResponses',
+        'Redacted by MMO',
+        { policyCode: 'E-AGG-3' }
+      )
+
+      expect(authenticatedPostRequest).toHaveBeenCalledWith(
+        mockRequest,
+        apiRoutes.REDACT_TEXT,
+        {
+          id: validId,
+          fieldKey: 'marinePlanPolicyResponses',
+          text: 'Redacted by MMO',
+          policyCode: 'E-AGG-3'
+        }
+      )
+    })
+
+    test('should send withhold %j with no text for a location flag', async () => {
+      vi.mocked(authenticatedPostRequest).mockResolvedValue({
+        payload: { message: 'success' }
+      })
+
+      await service.saveRedaction(
+        validId,
+        'siteDetails.withholdLocation',
+        undefined,
+        { siteIndex: 0, withhold: true }
+      )
+
+      expect(authenticatedPostRequest).toHaveBeenCalledWith(
+        mockRequest,
+        apiRoutes.REDACT_TEXT,
+        {
+          id: validId,
+          fieldKey: 'siteDetails.withholdLocation',
+          siteIndex: 0,
+          withhold: true
+        }
+      )
+    })
+
     test.each([
       ['message is not success', { payload: { message: 'error' } }],
       ['payload is undefined', {}]
