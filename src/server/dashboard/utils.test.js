@@ -1,4 +1,4 @@
-import { beforeEach, vi } from 'vitest'
+import { vi } from 'vitest'
 import {
   fetchProjects,
   sortProjectsByStatus,

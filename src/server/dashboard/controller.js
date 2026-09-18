@@ -114,7 +114,7 @@ export const dashboardController = {
     try {
       const flashedResult = request.yar.flash(FILTER_SEARCH_FLASH_KEY)
       const hasFlashedResult = flashedResult && !Array.isArray(flashedResult)
-      console.log('flashedResult', flashedResult)
+
       const { payload } = await fetchProjects(
         request,
         hasFlashedResult ? flashedResult : {}
