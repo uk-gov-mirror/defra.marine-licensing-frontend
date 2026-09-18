@@ -11,14 +11,15 @@ import {
   buildApplicationDetailsCardData,
   buildRedactionsForView
 } from '#src/server/marine-licence/view-details/utils.js'
+import { toApplicationReferenceUrlSegment } from '#src/server/common/helpers/marine-licence/application-reference-url-segment.js'
 
 export const VIEW_DETAILS_INTERNAL_USER_VIEW_ROUTE =
   'marine-licence/view-marine-licence-internal-user/index'
 
 const PAGE_TITLE = 'Redact application for the public register'
 
-const getRedactionSaveUrl = (marineLicenceId) =>
-  `${marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS_INTERNAL_USER}/${marineLicenceId}/redact`
+const getRedactionSaveUrl = (applicationReference) =>
+  `${marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS_INTERNAL_USER}/${toApplicationReferenceUrlSegment(applicationReference)}/redact`
 
 export const viewDetailsInternalUserController = {
   async handler(request, h) {
@@ -73,7 +74,9 @@ export const viewDetailsInternalUserController = {
         pageCaption: `${marineLicence.applicationReference} - ${formattedMarineLicence.projectName}`,
         backLink: null,
         marineLicenceId: marineLicence.id,
-        redactionSaveUrl: getRedactionSaveUrl(marineLicence.id),
+        redactionSaveUrl: getRedactionSaveUrl(
+          marineLicence.applicationReference
+        ),
         csrfToken: request.plugins.crumb,
         waterFrameworkDirectiveData,
         marinePlanPolicies,

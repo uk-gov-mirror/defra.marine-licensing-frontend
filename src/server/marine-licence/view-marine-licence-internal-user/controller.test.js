@@ -43,6 +43,10 @@ const createMockRequest = (overrides = {}) => ({
 describe('marine-licence view details internal-user redaction controller', () => {
   let mockMarineLicenceService
 
+  const referenceUrl = toApplicationReferenceUrlSegment(
+    mockSubmittedMarineLicenceApplication.applicationReference
+  )
+
   beforeEach(() => {
     mockMarineLicenceService = {
       getMarineLicenceById: vi
@@ -106,7 +110,7 @@ describe('marine-licence view details internal-user redaction controller', () =>
       VIEW_DETAILS_INTERNAL_USER_VIEW_ROUTE,
       expect.objectContaining({
         marineLicenceId: marineLicence.id,
-        redactionSaveUrl: `${marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS_INTERNAL_USER}/${marineLicence.id}/redact`
+        redactionSaveUrl: `${marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS_INTERNAL_USER}/${referenceUrl}/redact`
       })
     )
   })
@@ -127,7 +131,7 @@ describe('marine-licence view details internal-user redaction controller', () =>
       VIEW_DETAILS_INTERNAL_USER_VIEW_ROUTE,
       expect.objectContaining({
         preferredDates: 'July 2026 to August 2027',
-        redactionSaveUrl: `${marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS_INTERNAL_USER}/${mockMarineLicenceApplication.id}/redact`,
+        redactionSaveUrl: `${marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS_INTERNAL_USER}/${referenceUrl}/redact`,
         csrfToken: 'test-crumb-token'
       })
     )
