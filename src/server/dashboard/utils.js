@@ -20,7 +20,13 @@ import {
   MARINE_LICENCE_KEY
 } from '#src/server/common/constants/marine-licence.js'
 
-const getDraftActions = (id, escapedProjectName, projectType) => {
+export const USER_CHOICE_VALUES = {
+  ALL: 'all-projects',
+  OWN: 'my-projects',
+  SPECIFIC_USER: 'specific-user'
+}
+
+export const getDraftActions = (id, escapedProjectName, projectType) => {
   const taskListRoute =
     projectType === MARINE_LICENCE_KEY
       ? marineLicenceRoutes.MARINE_LICENCE_TASK_LIST
@@ -247,11 +253,33 @@ export const formatProjectsForDisplay = (projects, isEmployee = false) =>
     }
   })
 
-export const getFilterCategories = (searchParams) => {
+export const getFilterCategories = (searchParams, users, userSession = {}) => {
   const categories = []
 
   if (!searchParams) {
     return categories
+  }
+
+  const { show, user: usersearchParam } = searchParams
+  const { contactId } = userSession
+
+  if (show && show === USER_CHOICE_VALUES.SPECIFIC_USER) {
+    const hasUsers = users && Object.keys(users).length > 0
+    const hasUsersToDisplay = hasUsers && usersearchParam
+
+    if (hasUsersToDisplay) {
+      categories.push({
+        heading: {
+          text: 'Owner'
+        },
+        items: usersearchParam.map((user) => ({
+          href: '#',
+          field: 'user',
+          value: user,
+          text: contactId === user ? `Mine (${users[user]})` : users[user]
+        }))
+      })
+    }
   }
 
   if (searchParams.status) {
@@ -358,7 +386,9 @@ export const getUserOptions = (userSession, users, searchParams = {}) => {
     {
       value: contactId,
       text: `Mine (${displayName})`,
-      checked: show === 'specific-user' && userSearchParam.includes(contactId)
+      checked:
+        show === USER_CHOICE_VALUES.SPECIFIC_USER &&
+        userSearchParam.includes(contactId)
     }
   ]
 
@@ -371,7 +401,8 @@ export const getUserOptions = (userSession, users, searchParams = {}) => {
           value: userContactId,
           text: userDisplayName,
           checked:
-            show === 'specific-user' && userSearchParam.includes(userContactId)
+            show === USER_CHOICE_VALUES.SPECIFIC_USER &&
+            userSearchParam.includes(userContactId)
         }))
         .sort((a, b) => a.text.localeCompare(b.text))
     : []
