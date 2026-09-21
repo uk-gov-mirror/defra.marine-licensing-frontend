@@ -7,7 +7,7 @@ import {
 import { loadPage, submitForm } from '~/tests/integration/shared/app-server.js'
 import { validateErrors } from '~/tests/integration/shared/expect-utils.js'
 
-describe('Project background', () => {
+describe('Proposed works summary', () => {
   const getServer = setupTestServer()
   const marineLicence = {
     id: 'marine-licence-123',
@@ -82,7 +82,7 @@ describe('Project background', () => {
     )
   })
 
-  test('project background form state when no data set', async () => {
+  test('proposed works summary form state when no data set', async () => {
     mockMarineLicence(marineLicence)
 
     const document = await loadPage({
@@ -93,7 +93,7 @@ describe('Project background', () => {
     expect(getByRole(document, 'textbox')).toHaveValue('')
   })
 
-  test('project background form state when data is set', async () => {
+  test('proposed works summary form state when data is set', async () => {
     mockMarineLicence({
       ...marineLicence,
       projectBackground: 'Some background text'

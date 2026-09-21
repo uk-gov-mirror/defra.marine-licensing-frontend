@@ -1,7 +1,7 @@
 import { renderComponent } from '#src/server/test-helpers/component-helpers.js'
 import { mockRedactions } from '#src/server/test-helpers/mocks/marine-licence-mocks.js'
 
-describe('Marine Licence Project Details Card Component', () => {
+describe('Marine Licence Application Details Card Component', () => {
   let $component
 
   beforeEach(() => {
@@ -10,16 +10,16 @@ describe('Marine Licence Project Details Card Component', () => {
     })
   })
 
-  test('Should render project details card component', () => {
+  test('Should render application details card component', () => {
     expect($component('#project-details-card')).toHaveLength(1)
   })
 
-  test('Should display project name', () => {
+  test('Should display application name', () => {
     const htmlContent = $component.html()
     expect(htmlContent).toContain('Test Marine Project')
   })
 
-  test('Should not display project name row when not present', () => {
+  test('Should not display application name row when not present', () => {
     const $componentNoProjectName = renderComponent(
       'marine-licence/project-details-card'
     )

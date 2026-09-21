@@ -14,7 +14,7 @@ import {
   expectInputValue
 } from '~/tests/integration/shared/expect-utils.js'
 
-describe('Marine Licence - Project name', () => {
+describe('Marine Licence - Application name', () => {
   const getServer = setupTestServer()
 
   describe('when marine licence is disabled', () => {
@@ -49,7 +49,7 @@ describe('Marine Licence - Project name', () => {
       config.set('marineLicence.enabled', false)
     })
 
-    test('should render project name page when feature is enabled and no project name set', async () => {
+    test('should render application name page when feature is enabled and no application name set', async () => {
       mockMarineLicence({})
 
       const document = await loadPage({
@@ -101,7 +101,7 @@ describe('Marine Licence - Project name', () => {
       expect(caption.textContent).toBe('Marine licence')
     })
 
-    test('should render project name page when feature is enabled and editing project name', async () => {
+    test('should render application name page when feature is enabled and editing application name', async () => {
       const testProjectName = 'Test Project Name'
 
       mockMarineLicence({ id: 'test-id', projectName: testProjectName })
@@ -148,7 +148,7 @@ describe('Marine Licence - Project name', () => {
       expect(caption.textContent).toBe(testProjectName)
     })
 
-    test('should show a validation error when submitted without a project name', async () => {
+    test('should show a validation error when submitted without an application name', async () => {
       mockMarineLicence({})
 
       const submitProjectNameForm = async (formData) => {
