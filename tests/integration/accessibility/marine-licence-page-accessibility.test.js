@@ -36,7 +36,7 @@ const marineLicencePages = [
   },
   {
     url: marineLicenceRoutes.MARINE_LICENCE_PROJECT_NAME,
-    title: 'Project name'
+    title: 'Application name'
   },
   {
     url: marineLicenceRoutes.MARINE_LICENCE_PROJECT_BACKGROUND,
