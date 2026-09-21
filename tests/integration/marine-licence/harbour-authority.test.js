@@ -37,11 +37,15 @@ describe('Harbour authority', () => {
       'Are your proposed works located in a harbour authority area?'
     )
     expect(
-      getByText(document, (_, element) =>
-        element.tagName === 'P' &&
-        element.textContent.trim().endsWith(
-          'to find out if your proposed works are located in a harbour authority area.'
-        )
+      getByText(
+        document,
+        (_, element) =>
+          element.tagName === 'P' &&
+          element.textContent
+            .trim()
+            .endsWith(
+              'to find out if your proposed works are located in a harbour authority area.'
+            )
       )
     ).toBeInTheDocument()
     getByRole(document, 'button', { name: 'Save and continue' })
@@ -84,7 +88,8 @@ describe('Harbour authority', () => {
     expect(
       getInputInFieldset({
         document,
-        fieldsetLabel: 'Are your proposed works located in a harbour authority area?',
+        fieldsetLabel:
+          'Are your proposed works located in a harbour authority area?',
         inputLabel: 'Yes',
         findByHeading: true
       })
@@ -93,7 +98,8 @@ describe('Harbour authority', () => {
     expect(
       getInputInFieldset({
         document,
-        fieldsetLabel: 'Are your proposed works located in a harbour authority area?',
+        fieldsetLabel:
+          'Are your proposed works located in a harbour authority area?',
         inputLabel: 'No',
         findByHeading: true
       })
@@ -117,7 +123,8 @@ describe('Harbour authority', () => {
     expect(
       getInputInFieldset({
         document,
-        fieldsetLabel: 'Are your proposed works located in a harbour authority area?',
+        fieldsetLabel:
+          'Are your proposed works located in a harbour authority area?',
         inputLabel: 'Yes',
         findByHeading: true
       })
@@ -143,7 +150,8 @@ describe('Harbour authority', () => {
 
     expectFieldsetError({
       document,
-      fieldsetLabel: 'Are your proposed works located in a harbour authority area?',
+      fieldsetLabel:
+        'Are your proposed works located in a harbour authority area?',
       errorMessage:
         'Select whether your proposed works are located within a harbour authority area',
       findByHeading: true
@@ -164,7 +172,8 @@ describe('Harbour authority', () => {
 
     expectFieldsetError({
       document,
-      fieldsetLabel: 'Are your proposed works located in a harbour authority area?',
+      fieldsetLabel:
+        'Are your proposed works located in a harbour authority area?',
       errorMessage: 'Enter details of the harbour authority',
       findByHeading: true
     })
