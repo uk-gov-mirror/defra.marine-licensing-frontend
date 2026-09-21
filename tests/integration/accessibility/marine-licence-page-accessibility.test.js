@@ -40,7 +40,7 @@ const marineLicencePages = [
   },
   {
     url: marineLicenceRoutes.MARINE_LICENCE_PROJECT_BACKGROUND,
-    title: 'Project background'
+    title: 'Proposed works summary'
   },
   {
     url: marineLicenceRoutes.MARINE_LICENCE_FEE_ESTIMATE,

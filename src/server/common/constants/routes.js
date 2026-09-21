@@ -75,7 +75,7 @@ export const marineLicenceRoutes = {
   MARINE_LICENCE_SPECIAL_LEGAL_POWERS: '/marine-licence/special-legal-powers',
   MARINE_LICENCE_OTHER_AUTHORITIES: '/marine-licence/other-authorities',
   MARINE_LICENCE_HARBOUR_AUTHORITY: '/marine-licence/harbour-authority',
-  MARINE_LICENCE_PROJECT_BACKGROUND: '/marine-licence/project-background',
+  MARINE_LICENCE_PROJECT_BACKGROUND: '/marine-licence/proposed-works-summary',
   MARINE_LICENCE_SITE_DETAILS: '/marine-licence/site-details',
   MARINE_LICENCE_COORDINATES_TYPE_CHOICE:
     '/marine-licence/how-do-you-want-to-provide-the-coordinates',
