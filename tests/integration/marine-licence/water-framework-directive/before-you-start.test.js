@@ -1,4 +1,4 @@
-import { getAllByText, getByRole, getByText } from '@testing-library/dom'
+import { getByRole, getByText } from '@testing-library/dom'
 import { marineLicenceRoutes } from '~/src/server/common/constants/routes.js'
 import {
   mockMarineLicence,
@@ -45,11 +45,29 @@ describe('Water Framework Directive before you start page (marine licence)', () 
       )
     ).toBeInTheDocument()
     expect(
-      getAllByText(
+      getByText(
+        document,
+        'your proposed works are within one nautical mile (1.85km) of the low water line, or in a tidal river or estuary - including the shore between low and high tide'
+      )
+    ).toBeInTheDocument()
+    expect(
+      getByText(
         document,
         'your project is within one nautical mile (1.85km) of the low water line, or in a tidal river or estuary - including the shore between low and high tide'
       )
-    ).toHaveLength(2)
+    ).toBeInTheDocument()
+    expect(
+      getByText(
+        document,
+        'Even if your proposed works are within one nautical mile (1.85km) of the low water line, or in a tidal river or estuary - including the shore between low and high tide, some specific activities are excluded from having to provide a WFD assessment.'
+      )
+    ).toBeInTheDocument()
+    expect(
+      getByText(
+        document,
+        'You do not need to provide a WFD assessment if your proposed works are limited to one of the following activities:'
+      )
+    ).toBeInTheDocument()
     expect(
       getByText(document, 'Help with excluded activities')
     ).toBeInTheDocument()
