@@ -142,7 +142,7 @@ const marineLicencePages = [
   {
     url: marineLicenceRoutes.MARINE_LICENCE_WATER_FRAMEWORK_DIRECTIVE_NAUTICAL_MILE,
     title:
-      'Is your project within one nautical mile (1.85km) of the low-water line, or in a tidal river or estuary?'
+      'Are your proposed works within one nautical mile (1.85km) of the low-water line, or in a tidal river or estuary?'
   },
   {
     url: marineLicenceRoutes.MARINE_LICENCE_WATER_FRAMEWORK_DIRECTIVE_EXCLUDED_ACTIVITIES,
