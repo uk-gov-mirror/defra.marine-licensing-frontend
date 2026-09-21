@@ -53,7 +53,7 @@ const marineLicencePages = [
   {
     url: marineLicenceRoutes.MARINE_LICENCE_SPECIAL_LEGAL_POWERS,
     title:
-      'Does your organisation have special legal powers to do any of this project?',
+      'Does your organisation have special legal powers to do any of these proposed works?',
     session: agentSession
   },
   {
