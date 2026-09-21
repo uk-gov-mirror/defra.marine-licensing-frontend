@@ -16,7 +16,7 @@ describe('#buildNavigation', () => {
         expect.arrayContaining([
           {
             active: false,
-            text: 'Projects',
+            text: 'Submissions',
             href: '/projects'
           }
         ])
@@ -28,7 +28,7 @@ describe('#buildNavigation', () => {
         expect.arrayContaining([
           {
             active: false,
-            text: 'Projects',
+            text: 'Submissions',
             href: '/projects'
           }
         ])
