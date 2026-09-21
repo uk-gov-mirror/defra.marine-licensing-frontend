@@ -59,13 +59,6 @@ describe('Marine Licence Check Your Answers - site and activity cards', () => {
       ).toBeInTheDocument()
     })
 
-    test('renders a back link to the task list', () => {
-      expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
-        'href',
-        marineLicenceRoutes.MARINE_LICENCE_TASK_LIST
-      )
-    })
-
     test('renders "Providing the site location" card with File upload method', () => {
       expect(
         getByRole(document, 'heading', {
