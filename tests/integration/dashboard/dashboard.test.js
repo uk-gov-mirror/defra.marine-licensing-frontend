@@ -566,7 +566,9 @@ describe('Dashboard', () => {
 
           expect(postResponse.statusCode).toBe(302)
 
-          const sessionCookie = Array.isArray(postResponse.headers['set-cookie'])
+          const sessionCookie = Array.isArray(
+            postResponse.headers['set-cookie']
+          )
             ? postResponse.headers['set-cookie'].join('; ')
             : postResponse.headers['set-cookie']
 
