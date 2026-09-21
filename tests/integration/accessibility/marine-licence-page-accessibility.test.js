@@ -147,7 +147,7 @@ const marineLicencePages = [
   {
     url: marineLicenceRoutes.MARINE_LICENCE_WATER_FRAMEWORK_DIRECTIVE_EXCLUDED_ACTIVITIES,
     title:
-      'Is your project limited to one of the following excluded activities?'
+      'Are your proposed works limited to one of the following excluded activities?'
   },
   {
     url: marineLicenceRoutes.MARINE_LICENCE_WATER_FRAMEWORK_DIRECTIVE_REVIEW_YOUR_ANSWERS,
