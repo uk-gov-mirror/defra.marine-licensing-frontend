@@ -467,9 +467,11 @@ describe('Dashboard', () => {
         const filter = doc.querySelector('.moj-filter')
         expect(filter).toHaveAttribute('data-module', 'moj-filter')
 
-        expect(
-          queryAllByRole(filter, 'button', { name: 'Clear filters' })
-        ).toHaveLength(1)
+        const clearFiltersButtons = queryAllByRole(filter, 'button', {
+          name: 'Clear filters'
+        })
+        expect(clearFiltersButtons).toHaveLength(1)
+        expect(clearFiltersButtons[0]).toHaveAttribute('href', routes.DASHBOARD)
 
         expect(
           getByRole(filter, 'button', { name: 'Apply filters' })
