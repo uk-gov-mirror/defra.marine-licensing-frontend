@@ -547,6 +547,47 @@ describe('Dashboard', () => {
         })
       })
 
+      it('should render apostrophes in organisation names in the results subtitle', async () => {
+        vi.mocked(getUserSession).mockResolvedValue({
+          ...employeeSession,
+          organisationName: "test'org name"
+        })
+
+        try {
+          mockEmployeeExemptions(
+            mockDashboardServerResponse(employeeExemptions)
+          )
+
+          const postResponse = await makePostRequest({
+            url: routes.DASHBOARD,
+            server: getServer(),
+            formData: { show: 'all-projects' }
+          })
+
+          expect(postResponse.statusCode).toBe(302)
+
+          const sessionCookie = Array.isArray(postResponse.headers['set-cookie'])
+            ? postResponse.headers['set-cookie'].join('; ')
+            : postResponse.headers['set-cookie']
+
+          const getResponse = await makeGetRequest({
+            url: routes.DASHBOARD,
+            server: getServer(),
+            headers: { cookie: sessionCookie }
+          })
+
+          const { document } = new JSDOM(getResponse.result).window
+
+          expect(
+            getByRole(document, 'heading', {
+              name: "4 results found in 'All test'org name submissions'"
+            })
+          ).toBeInTheDocument()
+        } finally {
+          vi.mocked(getUserSession).mockResolvedValue(employeeSession)
+        }
+      })
+
       it('should check the "Submissions by owner" radio after filtering by a user', async () => {
         const johnSmithUuid = '3fa85f64-5717-4562-b3fc-2c963f66afa6'
         mockEmployeeExemptions(
