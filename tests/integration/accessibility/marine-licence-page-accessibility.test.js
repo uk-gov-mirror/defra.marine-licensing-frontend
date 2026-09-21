@@ -59,7 +59,7 @@ const marineLicencePages = [
   {
     url: marineLicenceRoutes.MARINE_LICENCE_OTHER_AUTHORITIES,
     title:
-      'Have you applied to, or got permission from, any other authorities in relation to this project?'
+      'Have you applied to, or got permission from, any other authorities in relation to these proposed works?'
   },
   {
     url: marineLicenceRoutes.MARINE_LICENCE_HARBOUR_AUTHORITY,
