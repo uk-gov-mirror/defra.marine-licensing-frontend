@@ -63,7 +63,7 @@ const marineLicencePages = [
   },
   {
     url: marineLicenceRoutes.MARINE_LICENCE_HARBOUR_AUTHORITY,
-    title: 'Is your project located in a harbour authority area?'
+    title: 'Are your proposed works located in a harbour authority area?'
   },
   {
     url: marineLicenceRoutes.MARINE_LICENCE_IS_INVOICE_ADDRESS_UK_OR_INTERNATIONAL,
