@@ -173,7 +173,7 @@ export const routes = {
   SIGNIN_ENTRA: '/signin-entra',
   SIGN_OUT: '/sign-out',
   CHANGE_ORGANISATION: '/change-organisation',
-  DASHBOARD: '/projects',
+  DASHBOARD: '/submissions',
   SERVICE_HOME: '/home',
   COOKIES: '/help/cookies',
   PRIVACY: '/help/privacy',

@@ -45,7 +45,7 @@ describe('#serviceHome', () => {
           {
             description:
               'View all of the existing submissions in this account.',
-            link: '/projects',
+            link: '/submissions',
             title: 'View submissions'
           },
           {

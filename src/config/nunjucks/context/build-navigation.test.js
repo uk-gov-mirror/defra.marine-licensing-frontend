@@ -17,7 +17,7 @@ describe('#buildNavigation', () => {
           {
             active: false,
             text: 'Submissions',
-            href: '/projects'
+            href: '/submissions'
           }
         ])
       )
@@ -29,14 +29,14 @@ describe('#buildNavigation', () => {
           {
             active: false,
             text: 'Submissions',
-            href: '/projects'
+            href: '/submissions'
           }
         ])
       )
     })
 
     test('Should include a Sign out nav link', () => {
-      expect(buildNavigation({ path: '/projects' })).toEqual(
+      expect(buildNavigation({ path: '/submissions' })).toEqual(
         expect.arrayContaining([
           {
             href: '/sign-out',
@@ -47,7 +47,7 @@ describe('#buildNavigation', () => {
     })
 
     test('should add a Defra account nav item', () => {
-      expect(buildNavigation({ path: '/projects' })).toEqual(
+      expect(buildNavigation({ path: '/submissions' })).toEqual(
         expect.arrayContaining([
           {
             text: 'Defra account',
@@ -61,7 +61,7 @@ describe('#buildNavigation', () => {
   describe('entra ID user', () => {
     test('should return no nav items', () => {
       vi.mocked(getAuthProvider).mockReturnValue(AUTH_STRATEGIES.ENTRA_ID)
-      expect(buildNavigation({ path: '/projects' })).toEqual([])
+      expect(buildNavigation({ path: '/submissions' })).toEqual([])
     })
   })
 })
