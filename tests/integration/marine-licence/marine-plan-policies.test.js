@@ -69,9 +69,8 @@ describe('Marine plan policies (policy list) page', () => {
       'href',
       marineLicenceRoutes.MARINE_LICENCE_TASK_LIST
     )
-    expect(getByRole(document, 'link', { name: 'Back' })).toHaveAttribute(
-      'href',
-      marineLicenceRoutes.MARINE_LICENCE_TASK_LIST
-    )
+    expect(
+      getByRole(document, 'link', { name: 'Back' })
+    ).toHaveAttribute('href', marineLicenceRoutes.MARINE_LICENCE_TASK_LIST)
   })
 })
