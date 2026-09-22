@@ -200,13 +200,15 @@ export const mockMarineLicenceWithApplicationTask = {
       receivedAt: '2026-08-14T10:00:00.000Z',
       resolvedAt: null,
       data: {
+        decisionDate: '2026-08-14T09:00:00.000Z',
         nationalSecurity: {
-          withheldSome: false,
-          comments: 'We did not agree that publishing this would be a risk.'
+          decision: 'DISAGREE',
+          applicantMessage:
+            'We did not agree that publishing this would be a risk.'
         },
         commercialConfidentiality: {
-          withheldSome: true,
-          comments: 'We have withheld the contractor rates.'
+          decision: 'AGREE_IN_PART',
+          applicantMessage: 'We have withheld the contractor rates.'
         }
       }
     }

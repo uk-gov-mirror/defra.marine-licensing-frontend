@@ -27,13 +27,16 @@ describe('findWithholdingTask', () => {
 })
 
 describe('buildWithholdingSections', () => {
-  it('renders both sections in order when both bases were flagged', () => {
+  it('renders both sections in order when the decision covered both', () => {
     const sections = buildWithholdingSections(
       buildTask({
-        nationalSecurity: { withheldSome: false, comments: 'NS comments' },
+        nationalSecurity: {
+          decision: 'DISAGREE',
+          applicantMessage: 'NS comments'
+        },
         commercialConfidentiality: {
-          withheldSome: true,
-          comments: 'CC comments'
+          decision: 'AGREE_IN_PART',
+          applicantMessage: 'CC comments'
         }
       })
     )
@@ -54,19 +57,24 @@ describe('buildWithholdingSections', () => {
     ])
   })
 
-  it('omits commercial confidentiality when it was not flagged', () => {
+  it('omits commercial confidentiality when the decision did not cover it', () => {
     const sections = buildWithholdingSections(
-      buildTask({ nationalSecurity: { withheldSome: true, comments: 'x' } })
+      buildTask({
+        nationalSecurity: { decision: 'AGREE', applicantMessage: 'x' }
+      })
     )
 
     expect(sections).toHaveLength(1)
     expect(sections[0].heading).toBe('National security')
   })
 
-  it('omits national security when it was not flagged', () => {
+  it('omits national security when the decision did not cover it', () => {
     const sections = buildWithholdingSections(
       buildTask({
-        commercialConfidentiality: { withheldSome: false, comments: 'x' }
+        commercialConfidentiality: {
+          decision: 'DISAGREE',
+          applicantMessage: 'x'
+        }
       })
     )
 
@@ -78,8 +86,8 @@ describe('buildWithholdingSections', () => {
     const [section] = buildWithholdingSections(
       buildTask({
         nationalSecurity: {
-          withheldSome: true,
-          comments: 'Withheld fields:\nName\nAddress'
+          decision: 'AGREE',
+          applicantMessage: 'Withheld fields:\nName\nAddress'
         }
       })
     )
@@ -91,8 +99,8 @@ describe('buildWithholdingSections', () => {
     const [section] = buildWithholdingSections(
       buildTask({
         commercialConfidentiality: {
-          withheldSome: true,
-          comments: 'First paragraph.\n\nSecond paragraph.'
+          decision: 'AGREE_IN_PART',
+          applicantMessage: 'First paragraph.\n\nSecond paragraph.'
         }
       })
     )
@@ -103,12 +111,35 @@ describe('buildWithholdingSections', () => {
     ])
   })
 
-  it('handles missing comments without producing an empty paragraph', () => {
+  it('handles a missing applicant message without producing an empty paragraph', () => {
     const [section] = buildWithholdingSections(
-      buildTask({ nationalSecurity: { withheldSome: true } })
+      buildTask({ nationalSecurity: { decision: 'AGREE' } })
     )
 
     expect(section.paragraphs).toEqual([])
+  })
+
+  it('renders the wording for a decision to withhold everything asked', () => {
+    const [section] = buildWithholdingSections(
+      buildTask({
+        nationalSecurity: { decision: 'AGREE', applicantMessage: 'x' }
+      })
+    )
+
+    expect(section.decision).toBe(
+      "We've agreed to withhold the information you asked us to."
+    )
+  })
+
+  it('renders no decision line for a decision it has no wording for', () => {
+    const [section] = buildWithholdingSections(
+      buildTask({
+        nationalSecurity: { decision: 'MAYBE', applicantMessage: 'x' }
+      })
+    )
+
+    expect(section.decision).toBe('')
+    expect(section.paragraphs).toEqual(['x'])
   })
 
   it('returns nothing when the task has no decision data', () => {

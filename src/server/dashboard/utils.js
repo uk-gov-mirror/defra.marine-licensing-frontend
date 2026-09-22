@@ -8,7 +8,6 @@ import {
 } from '#src/server/common/constants/routes.js'
 import { EXEMPTION_TYPE } from '#src/server/common/constants/exemptions.js'
 import {
-  getLifecycleStatus,
   PROJECT_STATUS,
   PROJECT_TYPE,
   UNABLE_TO_PROGRESS,
@@ -173,8 +172,7 @@ export const sortProjectsByStatus = (projects) => {
 export const getActionButtons = (project) => {
   const isOwnProject = project.isOwnProject ?? true
 
-  const { id, projectName, projectType } = project
-  const status = getLifecycleStatus(project)
+  const { status, id, projectName, projectType } = project
 
   const escapedProjectName = escapeHtml(projectName)
   const viewRoute = getViewDetailsRoute(projectType, status)

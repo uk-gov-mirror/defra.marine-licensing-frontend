@@ -5,8 +5,10 @@ export const WITHHOLDING_NOTIFICATION_PAGE_TITLE =
   'Update on the information you asked us to withhold'
 
 export const WITHHOLDING_DECISION_TEXT = {
-  withheld: "We've agreed to withhold some of the information you asked us to.",
-  notWithheld: "We've decided not to withhold the information you asked us to."
+  AGREE: "We've agreed to withhold the information you asked us to.",
+  AGREE_IN_PART:
+    "We've agreed to withhold some of the information you asked us to.",
+  DISAGREE: "We've decided not to withhold the information you asked us to."
 }
 
 export const WITHHOLDING_SECTION_HEADINGS = {

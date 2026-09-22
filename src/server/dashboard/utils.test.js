@@ -659,8 +659,8 @@ describe('getActionButtons', () => {
       id: 'ml123',
       projectName: 'Marine Licence Project',
       projectType: 'MARINE_LICENCE',
-      status: DISPLAY_STATUS.ACTION_REQUIRED,
-      previousStatus: PROJECT_STATUS.SUBMITTED,
+      status: PROJECT_STATUS.SUBMITTED,
+      displayStatus: DISPLAY_STATUS.ACTION_REQUIRED,
       isOwnProject: true
     }
     const result = getActionButtons(actionRequired)
@@ -674,8 +674,8 @@ describe('getActionButtons', () => {
       id: 'ml123',
       projectName: 'Marine Licence Project',
       projectType: 'MARINE_LICENCE',
-      status: DISPLAY_STATUS.ACTION_REQUIRED,
-      previousStatus: PROJECT_STATUS.DRAFT,
+      status: PROJECT_STATUS.DRAFT,
+      displayStatus: DISPLAY_STATUS.ACTION_REQUIRED,
       isOwnProject: true
     }
     const result = getActionButtons(actionRequired)
@@ -689,13 +689,13 @@ describe('getActionButtons', () => {
     [PROJECT_STATUS.REJECTED, 'MARINE_LICENCE_APPLICATION_REJECTED']
   ])(
     'routes a %s marine licence to its own page while an application task is outstanding',
-    (previousStatus, route) => {
+    (status, route) => {
       const result = getActionButtons({
         id: 'ml123',
         projectName: 'Marine Licence Project',
         projectType: 'MARINE_LICENCE',
-        status: DISPLAY_STATUS.ACTION_REQUIRED,
-        previousStatus,
+        status,
+        displayStatus: DISPLAY_STATUS.ACTION_REQUIRED,
         isOwnProject: true
       })
 
@@ -710,8 +710,8 @@ describe('getActionButtons', () => {
       id: 'abc123',
       projectName: 'Test Project',
       projectType: 'exemption',
-      status: DISPLAY_STATUS.ACTION_REQUIRED,
-      previousStatus: PROJECT_STATUS.ACTIVE,
+      status: PROJECT_STATUS.ACTIVE,
+      displayStatus: DISPLAY_STATUS.ACTION_REQUIRED,
       isOwnProject: true
     }
 

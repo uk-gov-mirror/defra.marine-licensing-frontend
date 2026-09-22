@@ -40,7 +40,7 @@ describe('Withholding notification', () => {
     loadPage({ requestUrl: pageUrl, server: getServer() })
 
   describe('GET', () => {
-    test('renders a section per basis with its decision and comments', async () => {
+    test('renders a section per basis with its decision and message', async () => {
       const document = await loadNotification()
 
       expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
@@ -57,7 +57,7 @@ describe('Withholding notification', () => {
         )
       ).toBeInTheDocument()
       expect(
-        getByText(document, task.data.nationalSecurity.comments)
+        getByText(document, task.data.nationalSecurity.applicantMessage)
       ).toBeInTheDocument()
 
       expect(
@@ -72,7 +72,10 @@ describe('Withholding notification', () => {
         )
       ).toBeInTheDocument()
       expect(
-        getByText(document, task.data.commercialConfidentiality.comments)
+        getByText(
+          document,
+          task.data.commercialConfidentiality.applicantMessage
+        )
       ).toBeInTheDocument()
     })
 

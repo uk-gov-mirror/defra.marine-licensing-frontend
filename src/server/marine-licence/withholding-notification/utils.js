@@ -17,17 +17,15 @@ const buildParagraphs = (comments) =>
     .map((paragraph) => paragraph.trim())
     .filter(Boolean)
 
-// A basis is absent from the task data unless the caseworker flagged redaction on it,
+// A basis is absent from the task data unless the caseworker's decision covered it,
 // which is what keeps the section off the page entirely.
 export const buildWithholdingSections = (task) =>
   BASIS_KEYS.filter((key) => task?.data?.[key]).map((key) => {
-    const { withheldSome, comments } = task.data[key]
+    const { decision, applicantMessage } = task.data[key]
 
     return {
       heading: WITHHOLDING_SECTION_HEADINGS[key],
-      decision: withheldSome
-        ? WITHHOLDING_DECISION_TEXT.withheld
-        : WITHHOLDING_DECISION_TEXT.notWithheld,
-      paragraphs: buildParagraphs(comments)
+      decision: WITHHOLDING_DECISION_TEXT[decision] ?? '',
+      paragraphs: buildParagraphs(applicantMessage)
     }
   })
