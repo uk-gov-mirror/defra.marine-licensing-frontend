@@ -85,7 +85,8 @@ describe('#withdrawMarineLicence', () => {
       mockedGetMarineLicenceCache.mockReturnValue({ id: marineLicenceId })
       mockGetMarineLicenceById.mockResolvedValue({
         ...submittedMarineLicence,
-        displayStatus: DISPLAY_STATUS.ACTION_REQUIRED
+        status: DISPLAY_STATUS.ACTION_REQUIRED,
+        previousStatus: PROJECT_STATUS.SUBMITTED
       })
 
       await withdrawMarineLicenceConfirmController.handler(mockRequest, mockH)
@@ -117,6 +118,24 @@ describe('#withdrawMarineLicence', () => {
       mockGetMarineLicenceById.mockResolvedValue({
         ...submittedMarineLicence,
         status
+      })
+
+      const result = await withdrawMarineLicenceConfirmController.handler(
+        mockRequest,
+        mockH
+      )
+
+      expect(mockH.view).not.toHaveBeenCalled()
+      expect(mockH.redirect).toHaveBeenCalledWith(routes.DASHBOARD)
+      expect(result).toBe('redirect-response')
+    })
+
+    it('should redirect to dashboard when a masked application is already withdrawn', async () => {
+      mockedGetMarineLicenceCache.mockReturnValue({ id: marineLicenceId })
+      mockGetMarineLicenceById.mockResolvedValue({
+        ...submittedMarineLicence,
+        status: DISPLAY_STATUS.ACTION_REQUIRED,
+        previousStatus: PROJECT_STATUS.WITHDRAWN
       })
 
       const result = await withdrawMarineLicenceConfirmController.handler(

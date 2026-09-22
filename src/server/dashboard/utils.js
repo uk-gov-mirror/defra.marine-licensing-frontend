@@ -8,6 +8,7 @@ import {
 } from '#src/server/common/constants/routes.js'
 import { EXEMPTION_TYPE } from '#src/server/common/constants/exemptions.js'
 import {
+  getLifecycleStatus,
   PROJECT_STATUS,
   PROJECT_TYPE,
   UNABLE_TO_PROGRESS,
@@ -172,7 +173,8 @@ export const sortProjectsByStatus = (projects) => {
 export const getActionButtons = (project) => {
   const isOwnProject = project.isOwnProject ?? true
 
-  const { status, id, projectName, projectType } = project
+  const { id, projectName, projectType } = project
+  const status = getLifecycleStatus(project)
 
   const escapedProjectName = escapeHtml(projectName)
   const viewRoute = getViewDetailsRoute(projectType, status)
@@ -197,9 +199,9 @@ export const getActionButtons = (project) => {
       : getActiveActions(id, escapedProjectName, viewRoute, withdrawRoute)
   }
 
-  return project.status === PROJECT_STATUS.DRAFT
+  return status === PROJECT_STATUS.DRAFT
     ? ''
-    : `<a href="${viewRoute}/${project.id}" class="govuk-link govuk-link--no-visited-state" aria-label="View details of ${escapedProjectName}">View details</a>`
+    : `<a href="${viewRoute}/${id}" class="govuk-link govuk-link--no-visited-state" aria-label="View details of ${escapedProjectName}">View details</a>`
 }
 
 export const getStatusLabelText = (status) => {
