@@ -1,0 +1,43 @@
+{% from "marine-licence/application-details-card/macro.njk" import appMarineLicenceApplicationDetailsCard %}
+{% extends 'layouts/page.njk' %}
+
+{% set rejectedReasonsOutput %}
+
+  {% if rejectedReasons %}
+    <ul class="govuk-list govuk-list--bullet">
+    {% for reason in rejectedReasons %}
+      <li>{{reason}}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  {% if rejectedInformation %}
+    <p class="govuk-body">{{ rejectedInformation }}</p>
+  {% endif %}
+
+{% endset %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-full">
+      <span class="govuk-caption-l">{{ pageCaption }}</span>
+      <h1 class="govuk-heading-l" id="redaction-preview-heading">{{ headingHtml | safe }}</h1>
+      <div class="govuk-inset-text" id="redaction-preview-notice">
+        This is a preview of how the application will appear on the public register.
+      </div>
+
+      {{ appMarineLicenceApplicationDetailsCard({
+        statusTag: statusTag,
+        isTransferred: isTransferred,
+        isRejected: isRejected,
+        applicationReference: applicationReference,
+        rejectedDate: rejectedDate,
+        rejectedReasons: rejectedReasonsOutput,
+        transferredDate: transferredDate,
+        withdrawnAt: withdrawnAt,
+        submittedAt: submittedAt
+      }) }}
+
+    </div>
+  </div>
+{% endblock %}

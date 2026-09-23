@@ -8,6 +8,7 @@
 {% from "marine-licence/water-framework-directive-card/macro.njk" import appMarineLicenceWaterFrameworkDirectiveCard %}
 {% from "marine-licence/marine-plan-policies-card/macro.njk" import appMarineLicenceMarinePlanPoliciesCard %}
 {% from "marine-licence/construction-drawing-card/macro.njk" import appMarineLicenceConstructionDrawingCard %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
 
 {% set rejectedReasonsOutput %}
 
@@ -154,6 +155,15 @@
         redactionSaveUrl: redactionSaveUrl,
         csrfToken: csrfToken
       }) }}
+
+      {% if redactions | length %}
+        {{ govukButton({
+          text: "Preview with redactions",
+          href: redactionPreviewUrl,
+          classes: "govuk-button--secondary"
+        }) }}
+      {% endif %}
+
 
     </div>
   </div>

@@ -1,4 +1,4 @@
-import { getByRole } from '@testing-library/dom'
+import { getByRole, queryByRole } from '@testing-library/dom'
 import { marineLicenceRoutes } from '~/src/server/common/constants/routes.js'
 import {
   mockMarineLicence,
@@ -50,6 +50,12 @@ describe('Marine Licence View Details Redaction', () => {
     expect(document.querySelector('.app-redaction-label').textContent).toBe(
       '***REDACTED***'
     )
+  })
+
+  test('does not link to the preview when nothing has been redacted', () => {
+    expect(
+      queryByRole(document, 'button', { name: 'Preview with redactions' })
+    ).toBeNull()
   })
 
   describe('applicant withhold reason', () => {
@@ -240,6 +246,15 @@ describe('Marine Licence View Details Redaction', () => {
           '#redaction-field-preferredDates .app-redaction-field__input'
         ).value
       ).toBe(redactedText)
+
+      const previewLink = getByRole(redactedDocument, 'button', {
+        name: 'Preview with redactions'
+      })
+
+      expect(previewLink.getAttribute('href')).toBe(`${viewUrl}/preview`)
+      expect(previewLink.classList.contains('govuk-button--secondary')).toBe(
+        true
+      )
     })
   })
 
