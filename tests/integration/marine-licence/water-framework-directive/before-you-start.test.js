@@ -1,4 +1,4 @@
-import { getByRole, getByText } from '@testing-library/dom'
+import { getByRole, getByText, queryByText } from '@testing-library/dom'
 import { marineLicenceRoutes } from '~/src/server/common/constants/routes.js'
 import {
   mockMarineLicence,
@@ -36,7 +36,9 @@ describe('Water Framework Directive before you start page (marine licence)', () 
       getByRole(document, 'heading', { name: 'Previous WFD assessments' })
     ).toBeInTheDocument()
     expect(
-      getByRole(document, 'heading', { name: 'Providing a WFD assessment' })
+      getByRole(document, 'heading', {
+        name: 'Getting a WFD assessment template'
+      })
     ).toBeInTheDocument()
     expect(
       getByText(
@@ -51,15 +53,15 @@ describe('Water Framework Directive before you start page (marine licence)', () 
       )
     ).toBeInTheDocument()
     expect(
-      getByText(
+      queryByText(
         document,
         'your project is within one nautical mile (1.85km) of the low water line, or in a tidal river or estuary - including the shore between low and high tide'
       )
-    ).toBeInTheDocument()
+    ).not.toBeInTheDocument()
     expect(
       getByText(
         document,
-        'Even if your proposed works are within one nautical mile (1.85km) of the low water line, or in a tidal river or estuary - including the shore between low and high tide, some specific activities are excluded from having to provide a WFD assessment.'
+        'Some activities do not need a WFD assessment, even if the proposed works are within one nautical mile (1.85km) of the low water line, or in a tidal river or estuary - including the shore between low and high tide.'
       )
     ).toBeInTheDocument()
     expect(
@@ -80,9 +82,37 @@ describe('Water Framework Directive before you start page (marine licence)', () 
     expect(
       getByText(
         document,
-        'You will need to upload a WFD assessment as part of your application if:'
+        "If you need to provide a WFD assessment, you can use the following template. It's called a scoping document."
       )
     ).toBeInTheDocument()
+  })
+
+  test('should link to the scoping document template and the guidance', async () => {
+    mockMarineLicence(marineLicence)
+
+    const document = await loadPage({
+      requestUrl:
+        marineLicenceRoutes.MARINE_LICENCE_WATER_FRAMEWORK_DIRECTIVE_BEFORE_YOU_START,
+      server: getServer()
+    })
+
+    const templateLink = getByRole(document, 'link', {
+      name: 'Download the WFD assessment scoping document (ODT, 24KB)'
+    })
+    expect(templateLink).toHaveAttribute(
+      'href',
+      'https://assets.publishing.service.gov.uk/media/5a7f3831e5274a2e8ab4ad9b/wfd_scoping_template.odt'
+    )
+
+    const guidanceLink = getByRole(document, 'link', {
+      name: "Read the Environment Agency's guidance on the Water Framework Directive assessments for more information (opens in new tab)"
+    })
+    expect(guidanceLink).toHaveAttribute(
+      'href',
+      'https://www.gov.uk/guidance/water-framework-directive-assessment-estuarine-and-coastal-waters'
+    )
+    expect(guidanceLink).toHaveAttribute('target', '_blank')
+    expect(guidanceLink).toHaveAttribute('rel', 'noreferrer noopener')
   })
 
   test('should have correct navigation links', async () => {
