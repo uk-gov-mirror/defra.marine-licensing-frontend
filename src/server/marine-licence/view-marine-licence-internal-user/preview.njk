@@ -1,4 +1,5 @@
 {% from "marine-licence/application-details-card/macro.njk" import appMarineLicenceApplicationDetailsCard %}
+{% from "marine-licence/project-details-card/macro.njk" import appMarineLicenceProjectDetailsCard %}
 {% extends 'layouts/page.njk' %}
 
 {% set rejectedReasonsOutput %}
@@ -36,6 +37,16 @@
         transferredDate: transferredDate,
         withdrawnAt: withdrawnAt,
         submittedAt: submittedAt
+      }) }}
+
+      {{ appMarineLicenceProjectDetailsCard({
+        projectName: projectName,
+        projectBackground: projectBackground,
+        isReadOnly: isReadOnly,
+        preferredDates: preferredDates,
+        marineLicenceId: marineLicenceId,
+        redactionSaveUrl: redactionSaveUrl,
+        csrfToken: csrfToken
       }) }}
 
     </div>

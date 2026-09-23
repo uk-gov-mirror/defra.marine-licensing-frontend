@@ -11,6 +11,7 @@ import {
   mockTransferredMarineLicenceApplication
 } from '~/src/server/test-helpers/mocks/marine-licence-mocks.js'
 import {
+  expectedProjectDetailsCard,
   expectedRejectedApplicationDetailsCard,
   expectedSubmittedApplicationDetailsCard,
   expectedTransferredApplicationDetailsCard
@@ -19,6 +20,7 @@ import { getCardRow } from './utils.js'
 import { toApplicationReferenceUrlSegment } from '~/src/server/common/helpers/marine-licence/application-reference-url-segment.js'
 import { getAuthProvider } from '~/src/server/common/helpers/authenticated-requests.js'
 import { AUTH_STRATEGIES } from '~/src/server/common/constants/auth.js'
+import { REDACTION_LABEL } from '~/src/server/common/helpers/marine-licence/redaction-label.js'
 
 vi.mock('~/src/server/common/helpers/authenticated-requests.js')
 
@@ -59,6 +61,27 @@ describe('Marine licence redaction preview', () => {
     expect(document.querySelector('.app-redaction-label')).toBeNull()
   })
 
+  test('shows the same project details as the standard page when nothing is redacted', async () => {
+    const document = await loadPreview(mockSubmittedMarineLicenceApplication)
+    const card = document.querySelector('#project-details-card')
+
+    expect(
+      getCardRow(card, 'Project name')
+        .querySelector('.govuk-summary-list__value')
+        .textContent.trim()
+    ).toBe(mockSubmittedMarineLicenceApplication.projectName)
+
+    for (const { key, value } of expectedProjectDetailsCard.rows) {
+      expect(
+        getCardRow(card, key)
+          .querySelector('.govuk-summary-list__value')
+          .textContent.trim()
+      ).toBe(value)
+    }
+
+    expect(card.querySelector('.govuk-summary-card__actions a')).toBeNull()
+  })
+
   test.each([
     ['submitted', mockSubmittedMarineLicenceApplication, expectedSubmittedApplicationDetailsCard],
     ['transferred', mockTransferredMarineLicenceApplication, expectedTransferredApplicationDetailsCard],
@@ -85,19 +108,66 @@ describe('Marine licence redaction preview', () => {
     }
   )
 
-  test('uses the redacted project name when one is stored', async () => {
-    const document = await loadPreview({
-      ...mockSubmittedMarineLicenceApplication,
-      redactions: {
-        projectName: { redactedText: 'Harbour ***REDACTED*** works' }
+  describe('redacted data', () => {
+    const cardValue = (document, cardSelector, row) =>
+      getCardRow(document.querySelector(cardSelector), row).querySelector(
+        '.govuk-summary-list__value'
+      )
+
+    const redactedCriteria = [
+      {
+        field: 'project name',
+        redactions: {
+          projectName: { redactedText: `Harbour ${REDACTION_LABEL} works` }
+        },
+        card: '#project-details-card',
+        row: 'Project name',
+        published: `Harbour ${REDACTION_LABEL} works`,
+        heading: true
+      },
+      {
+        field: 'project background',
+        redactions: {
+          projectBackground: { redactedText: `Works at ${REDACTION_LABEL}` }
+        },
+        card: '#project-details-card',
+        row: 'Project background',
+        published: `Works at ${REDACTION_LABEL}`
+      },
+      {
+        field: 'preferred dates',
+        redactions: {
+          preferredDates: { redactedText: `From ${REDACTION_LABEL}` }
+        },
+        card: '#project-details-card',
+        row: 'Preferred start and end dates of the licence',
+        published: `From ${REDACTION_LABEL}`
       }
-    })
+    ]
 
-    const heading = document.querySelector('#redaction-preview-heading')
+    test.each(redactedCriteria)(
+      'publishes the redacted $field',
+      async ({ redactions, card, row, published, heading }) => {
+        const document = await loadPreview({
+          ...mockSubmittedMarineLicenceApplication,
+          redactions
+        })
+        const value = cardValue(document, card, row)
 
-    expect(heading.textContent).toBe('Harbour ***REDACTED*** works')
-    expect(heading.querySelector('.app-redaction-label').textContent).toBe(
-      '***REDACTED***'
+        expect(value.textContent.trim()).toBe(published)
+        expect(value.querySelector('.app-redaction-label').textContent).toBe(
+          REDACTION_LABEL
+        )
+
+        if (heading) {
+          const pageHeading = document.querySelector('#redaction-preview-heading')
+
+          expect(pageHeading.textContent).toBe(published)
+          expect(
+            pageHeading.querySelector('.app-redaction-label').textContent
+          ).toBe(REDACTION_LABEL)
+        }
+      }
     )
   })
 })
