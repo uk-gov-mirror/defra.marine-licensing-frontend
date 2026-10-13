@@ -1,0 +1,39 @@
+import QRCode from 'qrcode'
+import { config } from '#src/config/config.js'
+import { marineLicenceRoutes } from '#src/server/common/constants/routes.js'
+
+export const SITE_NOTICE_QR_CODE_DEFAULT_SIZE = 200
+const ERROR_CORRECTION_LEVEL = 'Q'
+// QR spec minimum; anything smaller makes printed notices unreliable to scan
+const QUIET_ZONE_MODULES = 4
+
+export const getPublicViewDetailsAbsoluteUrl = (
+  marineLicenceId,
+  baseUrl = config.get('appBaseUrl')
+) => {
+  const base = new URL(baseUrl)
+  const basePath = base.pathname.replace(/\/+$/, '')
+  return new URL(
+    `${basePath}${marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS_PUBLIC}/${encodeURIComponent(marineLicenceId)}`,
+    base.origin
+  ).href
+}
+
+export const createQrCodeSvg = (
+  text,
+  size = SITE_NOTICE_QR_CODE_DEFAULT_SIZE
+) =>
+  QRCode.toString(text, {
+    type: 'svg',
+    errorCorrectionLevel: ERROR_CORRECTION_LEVEL,
+    margin: QUIET_ZONE_MODULES,
+    width: size
+  })
+
+export const getSiteNoticeQrCode = async (
+  marineLicenceId,
+  { size = SITE_NOTICE_QR_CODE_DEFAULT_SIZE, baseUrl } = {}
+) => {
+  const url = getPublicViewDetailsAbsoluteUrl(marineLicenceId, baseUrl)
+  return { url, svg: await createQrCodeSvg(url, size) }
+}
