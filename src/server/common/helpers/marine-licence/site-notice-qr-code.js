@@ -7,12 +7,20 @@ const ERROR_CORRECTION_LEVEL = 'Q'
 // QR spec minimum; anything smaller makes printed notices unreliable to scan
 const QUIET_ZONE_MODULES = 4
 
+const trimTrailingSlashes = (path) => {
+  let end = path.length
+  while (end > 0 && path[end - 1] === '/') {
+    end--
+  }
+  return path.slice(0, end)
+}
+
 export const getPublicViewDetailsAbsoluteUrl = (
   marineLicenceId,
   baseUrl = config.get('appBaseUrl')
 ) => {
   const base = new URL(baseUrl)
-  const basePath = base.pathname.replace(/\/+$/, '')
+  const basePath = trimTrailingSlashes(base.pathname)
   return new URL(
     `${basePath}${marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS_PUBLIC}/${encodeURIComponent(marineLicenceId)}`,
     base.origin

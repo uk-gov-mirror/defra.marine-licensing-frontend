@@ -18,6 +18,9 @@ const siteNoticeQrCodeSettings = {
 }
 
 const URL_SCHEME_MESSAGE = 'Enter a base URL starting with http:// or https://'
+const MARINE_LICENCE_ID_MAX_LENGTH = 200
+const MIN_SIZE_PIXELS = 60
+const MAX_SIZE_PIXELS = 1000
 
 const siteNoticeQrCodeSchema = joi.object({
   baseUrl: joi
@@ -31,22 +34,27 @@ const siteNoticeQrCodeSchema = joi.object({
       'string.uri': URL_SCHEME_MESSAGE,
       'string.uriCustomScheme': URL_SCHEME_MESSAGE
     }),
-  marineLicenceId: joi.string().trim().max(200).required().messages({
-    'string.empty': 'Enter a marine licence ID',
-    'any.required': 'Enter a marine licence ID',
-    'string.max': 'Marine licence ID must be 200 characters or fewer'
-  }),
+  marineLicenceId: joi
+    .string()
+    .trim()
+    .max(MARINE_LICENCE_ID_MAX_LENGTH)
+    .required()
+    .messages({
+      'string.empty': 'Enter a marine licence ID',
+      'any.required': 'Enter a marine licence ID',
+      'string.max': `Marine licence ID must be ${MARINE_LICENCE_ID_MAX_LENGTH} characters or fewer`
+    }),
   size: joi
     .number()
     .integer()
-    .min(60)
-    .max(1000)
+    .min(MIN_SIZE_PIXELS)
+    .max(MAX_SIZE_PIXELS)
     .default(SITE_NOTICE_QR_CODE_DEFAULT_SIZE)
     .messages({
       'number.base': 'Size must be a whole number of pixels',
       'number.integer': 'Size must be a whole number of pixels',
-      'number.min': 'Size must be at least 60 pixels',
-      'number.max': 'Size must be 1000 pixels or fewer'
+      'number.min': `Size must be at least ${MIN_SIZE_PIXELS} pixels`,
+      'number.max': `Size must be ${MAX_SIZE_PIXELS} pixels or fewer`
     })
 })
 
