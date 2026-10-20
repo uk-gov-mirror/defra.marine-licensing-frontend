@@ -1,6 +1,7 @@
 import { mockMarineLicenceApplication } from '~/src/server/test-helpers/mocks/marine-licence-mocks.js'
 import { marineLicenceRoutes } from '~/src/server/common/constants/routes.js'
 import {
+  mockActivityDetailsDeposit,
   mockEmptyActivityDetails,
   mockOutputActivityDetails,
   mockOutputActivityDetailsDeposit,
@@ -64,6 +65,31 @@ export const testScenarios = [
           ...mockMarineLicenceApplication.siteDetails[0],
           siteName: null,
           activityDetails: [mockOutputEmptyActivityDetails]
+        }
+      ]
+    }
+  },
+  {
+    name: 'File Upload - KML - Incomplete activity details (site name present)',
+    marineLicence: {
+      ...mockMarineLicenceApplication,
+      siteDetails: [
+        {
+          ...mockMarineLicenceApplication.siteDetails[0],
+          activityDetails: [{ ...mockActivityDetailsDeposit, workingHours: '' }]
+        }
+      ]
+    },
+    expectedPageContent: {
+      projectName: 'Test Project',
+      backLink: marineLicenceRoutes.MARINE_LICENCE_FILE_UPLOAD,
+      hasIncompleteWarning: true,
+      siteDetails: [
+        {
+          ...mockMarineLicenceApplication.siteDetails[0],
+          activityDetails: [
+            { ...mockOutputActivityDetailsDeposit, workingHours: '' }
+          ]
         }
       ]
     }

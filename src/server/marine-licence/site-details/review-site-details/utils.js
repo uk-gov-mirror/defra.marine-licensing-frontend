@@ -113,7 +113,9 @@ export const renderFileUploadReview = (h, options) => {
     ...reviewSiteDetailsPageData,
     backLink: getFileUploadBackLink(previousPage, returnToCheckYourAnswers),
     projectName: marineLicence.projectName,
-    hasIncompleteFields: hasIncompleteFields(siteDetails),
+    hasIncompleteFields:
+      hasIncompleteFields(siteDetails) ||
+      hasIncompleteActivityDetails(summaryData),
     summaryData,
     showMarinePlanPoliciesQuestion,
     errors,
@@ -152,7 +154,9 @@ export const renderManualEntryReview = (h, options) => {
     ...reviewSiteDetailsPageData,
     backLink: getManualEntryBackLink(previousPage, returnToCheckYourAnswers),
     projectName: marineLicence.projectName,
-    hasIncompleteFields: hasIncompleteFields(siteDetails),
+    hasIncompleteFields:
+      hasIncompleteFields(siteDetails) ||
+      hasIncompleteActivityDetails(summaryData),
     summaryData,
     showMarinePlanPoliciesQuestion,
     errors,
@@ -181,3 +185,20 @@ export const hasIncompleteFields = (siteDetails) => {
 
   return siteDetails.some((site) => hasMissingRequiredFields(site))
 }
+
+const ACTIVITY_FIELDS_SHOWN_AS_INCOMPLETE = [
+  'activitySubType',
+  'activityDescription',
+  'activityDuration',
+  'completionDate',
+  'activityMonths',
+  'workingHours'
+]
+
+const isActivityIncomplete = (activity) =>
+  ACTIVITY_FIELDS_SHOWN_AS_INCOMPLETE.some((field) => !activity[field])
+
+export const hasIncompleteActivityDetails = (summaryData) =>
+  (summaryData ?? []).some((site) =>
+    (site.activityDetails ?? []).some(isActivityIncomplete)
+  )
