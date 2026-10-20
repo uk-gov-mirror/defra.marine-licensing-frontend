@@ -7,6 +7,7 @@ import {
   getFileUploadBackLink,
   getManualEntryBackLink,
   hasIncompleteActivityDetails,
+  hasIncompleteConstructionDrawings,
   hasIncompleteFields,
   MANUAL_ENTRY_REVIEW_VIEW_ROUTE,
   renderFileUploadReview,
@@ -365,6 +366,53 @@ describe('siteDetails utils', () => {
               completeActivity,
               { ...completeActivity, workingHours: '' }
             ]
+          }
+        ])
+      ).toBe(true)
+    })
+  })
+
+  describe('hasIncompleteConstructionDrawings util', () => {
+    const requiresDrawing = [{ requiresConstructionDrawing: true }]
+    const uploaded = { filename: 'drawing.pdf' }
+
+    test('returns false when every drawing slot has a file', () => {
+      expect(
+        hasIncompleteConstructionDrawings([
+          {
+            activityDetails: requiresDrawing,
+            constructionDrawings: [uploaded, uploaded]
+          }
+        ])
+      ).toBe(false)
+    })
+
+    test('returns false when no activity requires a drawing', () => {
+      expect(
+        hasIncompleteConstructionDrawings([
+          {
+            activityDetails: [{ requiresConstructionDrawing: false }],
+            constructionDrawings: []
+          }
+        ])
+      ).toBe(false)
+      expect(hasIncompleteConstructionDrawings(undefined)).toBe(false)
+    })
+
+    test('returns true when a drawing is required but none is uploaded', () => {
+      expect(
+        hasIncompleteConstructionDrawings([
+          { activityDetails: requiresDrawing, constructionDrawings: undefined }
+        ])
+      ).toBe(true)
+    })
+
+    test('returns true when an added drawing slot is still empty', () => {
+      expect(
+        hasIncompleteConstructionDrawings([
+          {
+            activityDetails: requiresDrawing,
+            constructionDrawings: [uploaded, {}]
           }
         ])
       ).toBe(true)
