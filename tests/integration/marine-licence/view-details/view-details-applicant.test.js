@@ -62,9 +62,9 @@ describe('Marine Licence View Details', () => {
   test('renders the application reference alone as the page caption', async () => {
     const document = await loadViewDetailsPage(getServer())
 
-    expect(
-      document.querySelector('.govuk-caption-l').textContent.trim()
-    ).toBe(mockSubmittedMarineLicenceApplication.applicationReference)
+    expect(document.querySelector('.govuk-caption-l').textContent.trim()).toBe(
+      mockSubmittedMarineLicenceApplication.applicationReference
+    )
   })
 
   test('back link goes to dashboard for submitted applications', async () => {
