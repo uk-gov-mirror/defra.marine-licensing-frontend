@@ -63,7 +63,7 @@ describe('#siteNoticeDateDisplayed', () => {
       expect(h.view).toHaveBeenCalledWith(
         SITE_NOTICE_DATE_DISPLAYED_VIEW_ROUTE,
         {
-          backLink: displayUrl,
+          backLink: `${displayUrl}#site-location-1`,
           pageTitle: 'When did you first display the notice?',
           heading: 'When did you first display the notice?',
           projectName: 'Test Project',
@@ -168,7 +168,7 @@ describe('#siteNoticeDateDisplayed', () => {
           evidenceIndex: 0
         }
       )
-      expect(h.redirect).toHaveBeenCalledWith(displayUrl)
+      expect(h.redirect).toHaveBeenCalledWith(`${displayUrl}#site-location-1`)
     })
 
     test('redirects to view details without saving when there is no site notice task', async () => {
@@ -234,7 +234,7 @@ describe('#siteNoticeDateDisplayed', () => {
         expect.objectContaining({
           projectName: 'Test Project',
           locationIndex: 1,
-          backLink: displayUrl,
+          backLink: `${displayUrl}#site-location-1`,
           errorSummary: [
             {
               href: '#date-displayed-day',

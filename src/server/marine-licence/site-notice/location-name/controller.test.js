@@ -55,7 +55,7 @@ describe('#siteNoticeLocationName', () => {
       expect(h.view).toHaveBeenCalledWith(
         SITE_NOTICE_LOCATION_NAME_VIEW_ROUTE,
         {
-          backLink: displayUrl,
+          backLink: `${displayUrl}#site-location-1`,
           pageTitle: 'Location name',
           heading: 'Location name',
           projectName: 'Test Project',
@@ -133,7 +133,7 @@ describe('#siteNoticeLocationName', () => {
           evidenceIndex: 0
         }
       )
-      expect(h.redirect).toHaveBeenCalledWith(displayUrl)
+      expect(h.redirect).toHaveBeenCalledWith(`${displayUrl}#site-location-1`)
     })
 
     test('redirects to view details without saving when there is no site notice task', async () => {
@@ -185,7 +185,7 @@ describe('#siteNoticeLocationName', () => {
         expect.objectContaining({
           projectName: 'Test Project',
           locationIndex: 1,
-          backLink: displayUrl,
+          backLink: `${displayUrl}#site-location-1`,
           errors: expect.objectContaining({
             locationName: expect.objectContaining({
               text: 'Enter the location name'
