@@ -14,6 +14,10 @@ import {
   mockTransferredMarineLicenceApplication,
   mockRejectedMarineLicenceApplication,
   mockMarineLicenceWithApplicationTask,
+  mockMarineLicenceWithResubmissionTask,
+  mockResubmissionTaskId,
+  mockResubmissionWithAllPhotos,
+  mockResubmittedMarineLicence,
   mockApplicationTaskContactId
 } from '~/src/server/test-helpers/mocks/marine-licence-mocks.js'
 import {
@@ -350,6 +354,24 @@ const marineLicencePages = [
     url: `${marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS}/${mockMarineLicenceWithApplicationTask.id}`,
     title: mockMarineLicenceWithApplicationTask.projectName,
     marineLicence: mockMarineLicenceWithApplicationTask,
+    session: applicationTaskOwnerSession
+  },
+  {
+    url: `${marineLicenceRoutes.MARINE_LICENCE_SITE_NOTICE_RESUBMIT}/${mockMarineLicenceWithResubmissionTask.id}/${mockResubmissionTaskId}`,
+    title: 'Resubmit site notice evidence',
+    marineLicence: mockMarineLicenceWithResubmissionTask,
+    session: applicationTaskOwnerSession
+  },
+  {
+    url: `${marineLicenceRoutes.MARINE_LICENCE_SITE_NOTICE_RESUBMIT}/${mockMarineLicenceWithResubmissionTask.id}/${mockResubmissionTaskId}`,
+    title: 'Resubmit site notice evidence',
+    marineLicence: mockResubmissionWithAllPhotos(),
+    session: applicationTaskOwnerSession
+  },
+  {
+    url: `${marineLicenceRoutes.MARINE_LICENCE_SITE_NOTICE_RESUBMIT}/${mockMarineLicenceWithResubmissionTask.id}/${mockResubmissionTaskId}`,
+    title: 'Resubmit site notice evidence',
+    marineLicence: mockResubmittedMarineLicence,
     session: applicationTaskOwnerSession
   },
   {
