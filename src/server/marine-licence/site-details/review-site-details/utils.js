@@ -115,8 +115,7 @@ export const renderFileUploadReview = (h, options) => {
     projectName: marineLicence.projectName,
     hasIncompleteFields:
       hasIncompleteFields(siteDetails) ||
-      hasIncompleteActivityDetails(summaryData) ||
-      hasIncompleteConstructionDrawings(summaryData),
+      hasIncompleteActivityDetails(summaryData),
     summaryData,
     showMarinePlanPoliciesQuestion,
     errors,
@@ -157,8 +156,7 @@ export const renderManualEntryReview = (h, options) => {
     projectName: marineLicence.projectName,
     hasIncompleteFields:
       hasIncompleteFields(siteDetails) ||
-      hasIncompleteActivityDetails(summaryData) ||
-      hasIncompleteConstructionDrawings(summaryData),
+      hasIncompleteActivityDetails(summaryData),
     summaryData,
     showMarinePlanPoliciesQuestion,
     errors,
@@ -171,9 +169,16 @@ const siteRequiresConstructionDrawing = (site) =>
     SUBTYPES_REQUIRING_CONSTRUCTION_DRAWING.includes(activity.activitySubType)
   )
 
+const hasEmptyDrawingSlot = (site) => {
+  const drawings = site.constructionDrawings ?? []
+  const slotCount = Math.max(drawings.length, 1)
+  return Array.from({ length: slotCount }, (_, index) => drawings[index]).some(
+    (drawing) => !drawing?.filename
+  )
+}
+
 const isMissingConstructionDrawing = (site) =>
-  siteRequiresConstructionDrawing(site) &&
-  !site.constructionDrawings?.[0]?.s3Location
+  siteRequiresConstructionDrawing(site) && hasEmptyDrawingSlot(site)
 
 const hasMissingRequiredFields = (site) => {
   const isSiteNameMissing = !site.siteName || site.siteName.trim() === ''
@@ -204,21 +209,3 @@ export const hasIncompleteActivityDetails = (summaryData) =>
   (summaryData ?? []).some((site) =>
     (site.activityDetails ?? []).some(isActivityIncomplete)
   )
-
-const hasEmptyDrawingSlot = (site) => {
-  const requiresDrawing = (site.activityDetails ?? []).some(
-    (activity) => activity.requiresConstructionDrawing
-  )
-  if (!requiresDrawing) {
-    return false
-  }
-
-  const drawings = site.constructionDrawings ?? []
-  const slotCount = Math.max(drawings.length, 1)
-  return Array.from({ length: slotCount }, (_, index) => drawings[index]).some(
-    (drawing) => !drawing?.filename
-  )
-}
-
-export const hasIncompleteConstructionDrawings = (summaryData) =>
-  (summaryData ?? []).some(hasEmptyDrawingSlot)
