@@ -249,6 +249,90 @@ export const mockMarineLicenceWithApplicationTask = {
   ]
 }
 
+export const mockResubmissionTaskId = '507f1f77bcf86cd799439014'
+
+const mockSiteNoticeLocation = (locationName, day) => ({
+  ...mockSiteNoticeEvidence,
+  locationName,
+  dateDisplayed: { day, month: '09', year: '2026' }
+})
+
+export const mockMarineLicenceWithResubmissionTask = {
+  ...mockSubmittedMarineLicenceApplication,
+  status: 'Action required',
+  contactId: mockApplicationTaskContactId,
+  siteNoticeEvidence: [
+    mockSiteNoticeLocation('Dawlish notice board', '10'),
+    mockSiteNoticeLocation('Beach car park', '11'),
+    mockSiteNoticeLocation('Yacht club', '12'),
+    mockSiteNoticeLocation('Harbour office', '13')
+  ],
+  applicationTasks: [
+    {
+      ...mockMarineLicenceWithApplicationTask.applicationTasks[1],
+      resolvedAt: '2026-09-14T10:00:00.000Z',
+      resolvedByName: 'Sam Evans'
+    },
+    {
+      taskId: mockResubmissionTaskId,
+      type: APPLICATION_TASK_TYPE.RESUBMIT_SITE_NOTICE_EVIDENCE,
+      receivedAt: '2026-09-18T10:00:00.000Z',
+      resolvedAt: null,
+      data: {
+        locations: [
+          {
+            locationNumber: 4,
+            reason: 'The position photo does not show where the notice is.'
+          },
+          {
+            locationNumber: 1,
+            reason:
+              'The close-up photo is blurred, so we cannot read the text on the notice.'
+          },
+          { locationNumber: 3, reason: 'Both photos are too dark.' }
+        ]
+      }
+    }
+  ]
+}
+
+export const mockResubmittedPhoto = (filename) => ({
+  uploadedFile: { filename },
+  s3Location: { s3Bucket: 'mmo-uploads', s3Key: filename }
+})
+
+export const mockResubmissionWithAllPhotos = (taskOverrides) => {
+  const [siteNoticeTask, resubmissionTask] =
+    mockMarineLicenceWithResubmissionTask.applicationTasks
+
+  return {
+    ...mockMarineLicenceWithResubmissionTask,
+    applicationTasks: [
+      siteNoticeTask,
+      {
+        ...resubmissionTask,
+        ...taskOverrides,
+        data: {
+          locations: resubmissionTask.data.locations.map((location) => ({
+            ...location,
+            closeUpPhoto: mockResubmittedPhoto(
+              `close-up-${location.locationNumber}.jpg`
+            ),
+            positionPhoto: mockResubmittedPhoto(
+              `position-${location.locationNumber}.jpg`
+            )
+          }))
+        }
+      }
+    ]
+  }
+}
+
+export const mockResubmittedMarineLicence = mockResubmissionWithAllPhotos({
+  resolvedAt: '2026-09-20T10:00:00.000Z',
+  resolvedByName: 'Sam Evans'
+})
+
 export const mockRedactions = {
   projectName: {
     redactedText: 'Harbour ***REDACTED*** works',
