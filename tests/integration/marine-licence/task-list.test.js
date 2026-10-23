@@ -35,12 +35,13 @@ describe('Task List', () => {
     )
     expect(document.title).toContain('Marine licence start page')
 
-    expect(
-      getByText(
-        document,
-        'You need to complete all sections before sending your application. Your progress will be saved as you go if you need to come back later.'
-      )
-    ).toBeInTheDocument()
+    for (const paragraph of [
+      "When you provide your information you'll need to complete all sections before you can send your application.",
+      "You'll be able to start the Marine plan policy considerations once you have completed Site and activity details.",
+      'Your progress will be saved as you go if you need to come back later.'
+    ]) {
+      expect(getByText(document, paragraph)).toBeInTheDocument()
+    }
 
     expect(
       getByRole(document, 'heading', { level: 2, name: 'Application details' })
@@ -101,7 +102,7 @@ describe('Task List', () => {
 
     expect(
       getByRole(completedDocument, 'button', {
-        name: 'Check and send your information'
+        name: 'Check and send your application'
       })
     ).toBeInTheDocument()
   })
@@ -120,7 +121,7 @@ describe('Task List', () => {
 
     expect(
       queryByRole(incompleteDocument, 'button', {
-        name: 'Check and send your information'
+        name: 'Check and send your application'
       })
     ).not.toBeInTheDocument()
   })

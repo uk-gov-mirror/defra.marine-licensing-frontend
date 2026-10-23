@@ -6,8 +6,9 @@
     <div class="govuk-grid-column-two-thirds">
       <span class="govuk-caption-l">Marine licence</span>
       <h1 class="govuk-heading-l">{{ projectName }}</h1>
-      <p class="govuk-body">You need to complete all sections before sending your application. Your progress will be saved as you go if you need to come back later.</p>
-      <p class="govuk-body">You can start the Marine plan policy section once you have completed the site details section.</p>
+      <p class="govuk-body">When you provide your information you'll need to complete all sections before you can send your application.</p>
+      <p class="govuk-body">You'll be able to start the Marine plan policy considerations once you have completed Site and activity details.</p>
+      <p class="govuk-body">Your progress will be saved as you go if you need to come back later.</p>
 
       <h2 class="govuk-heading-m">Application details</h2>
       {{ govukTaskList({
@@ -59,7 +60,7 @@
         
         {% if hasCompletedAllTasks %}
           {{ govukButton({
-            text: "Check and send your information",
+            text: "Check and send your application",
             href: "/marine-licence/check-your-answers",
             attributes: {
                 id: "review-and-send"
