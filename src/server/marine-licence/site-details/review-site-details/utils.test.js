@@ -396,9 +396,7 @@ describe('siteDetails utils', () => {
     })
 
     test('returns true when a drawing is required but none is uploaded', () => {
-      expect(hasIncompleteFields([site(requiresDrawing, undefined)])).toBe(
-        true
-      )
+      expect(hasIncompleteFields([site(requiresDrawing, undefined)])).toBe(true)
     })
 
     test('returns true when an added drawing slot is still empty', () => {
