@@ -28,6 +28,9 @@ describe('Consultation details', () => {
   const requestForAdviceUrl = withId(
     marineLicenceConsultationDetailsRoutes.MARINE_LICENCE_REQUEST_FOR_ADVICE
   )
+  const consultationResponseUrl = withId(
+    marineLicenceConsultationDetailsRoutes.MARINE_LICENCE_CONSULTATION_RESPONSE
+  )
 
   const mockConsultation = (consultationType) =>
     mockMarineLicence({
@@ -110,7 +113,7 @@ describe('Consultation details', () => {
       ).toBeInTheDocument()
       expect(
         getByRole(document, 'link', { name: 'Respond to the notification' })
-      ).toHaveAttribute('href', '#')
+      ).toHaveAttribute('href', consultationResponseUrl)
       expect(document.querySelector('.govuk-summary-list')).toBeNull()
     })
 
@@ -173,7 +176,7 @@ describe('Consultation details', () => {
       ).toBeInTheDocument()
       expect(
         getByRole(document, 'button', { name: 'Respond to the request' })
-      ).toHaveAttribute('href', '#')
+      ).toHaveAttribute('href', consultationResponseUrl)
     })
 
     test('returns not found when no consultation is returned', async () => {

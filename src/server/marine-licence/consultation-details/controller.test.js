@@ -71,6 +71,7 @@ describe('#consultation-details', () => {
         marineLicenceId,
         projectName: 'Test Project',
         viewApplicationLink: `/marine-licence/view-details/${marineLicenceId}`,
+        responseLink: `/marine-licence/consultation-response/${marineLicenceId}`,
         backLink: routes.CONSULTATIONS
       })
     })
@@ -96,6 +97,7 @@ describe('#consultation-details', () => {
         marineLicenceId,
         projectName: 'Test Project',
         viewApplicationLink: `/marine-licence/view-details/${marineLicenceId}`,
+        responseLink: `/marine-licence/consultation-response/${marineLicenceId}`,
         backLink: routes.CONSULTATIONS
       })
     })

@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { vi } from 'vitest'
 import {
+  marineLicenceConsultationDetailsRoutes,
   marineLicenceRoutes,
   routes
 } from '~/src/server/common/constants/routes.js'
@@ -53,6 +54,20 @@ const marineLicencePages = [
     url: routes.CONSULTATIONS,
     title: 'Consultations',
     marineLicence: { consultations: mockConsultations },
+    session: { ...consulteeSession, shouldShowOrgOrUserName: false }
+  },
+  {
+    url: marineLicenceConsultationDetailsRoutes.MARINE_LICENCE_CONSULTATION_RESPONSE.replace(
+      '{marineLicenceId}',
+      'test-consultation-id'
+    ),
+    title: 'Your response',
+    marineLicence: {
+      consultation: {
+        projectName: 'Test Marine Project',
+        consultationType: 'REQUEST_FOR_ADVICE'
+      }
+    },
     session: { ...consulteeSession, shouldShowOrgOrUserName: false }
   },
   {
