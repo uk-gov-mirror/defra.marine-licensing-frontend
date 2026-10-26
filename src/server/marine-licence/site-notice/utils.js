@@ -40,13 +40,15 @@ export const getPhotoUploadErrorDisplay = (request) => {
 export const initiatePhotoUpload = async (
   request,
   h,
-  { field, uploadPageUrl }
+  { field, uploadPageUrl, redirectUrl }
 ) => {
   const uploadConfig = await getCdpUploadService().initiate({
-    redirectUrl: siteNoticeEvidenceUrl(
-      marineLicenceRoutes.MARINE_LICENCE_SITE_NOTICE_PHOTO_UPLOAD_AND_WAIT,
-      request
-    ),
+    redirectUrl:
+      redirectUrl ??
+      siteNoticeEvidenceUrl(
+        marineLicenceRoutes.MARINE_LICENCE_SITE_NOTICE_PHOTO_UPLOAD_AND_WAIT,
+        request
+      ),
     s3Path: PHOTO_S3_PATH,
     s3Bucket: config.get('cdpUploader').s3Bucket,
     allowedMimeTypes: PHOTO_ALLOWED_MIME_TYPES,
@@ -61,4 +63,43 @@ export const initiatePhotoUpload = async (
   })
 
   return uploadConfig
+}
+
+export const renderPhotoUploadPage = async (
+  request,
+  h,
+  {
+    field,
+    viewRoute,
+    settings,
+    uploadPageUrl,
+    redirectUrl,
+    backLink,
+    failureUrl,
+    logLabel
+  }
+) => {
+  const { errorSummary, errors } = getPhotoUploadErrorDisplay(request)
+
+  try {
+    const { uploadUrl } = await initiatePhotoUpload(request, h, {
+      field,
+      uploadPageUrl,
+      redirectUrl
+    })
+
+    return h.view(viewRoute, {
+      ...settings,
+      projectName: request.marineLicence.projectName,
+      locationIndex: getLocationIndex(request),
+      uploadUrl,
+      acceptAttribute: PHOTO_ACCEPT_ATTRIBUTE,
+      backLink,
+      errorSummary,
+      errors
+    })
+  } catch (error) {
+    request.logger.error({ err: error }, `Failed to initialise ${logLabel}`)
+    return h.redirect(failureUrl)
+  }
 }
