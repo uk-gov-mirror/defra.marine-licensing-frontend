@@ -14,6 +14,7 @@ import {
 import { statusCodes } from '~/src/server/common/constants/status-codes.js'
 import { expectInputError } from '~/tests/integration/shared/expect-utils.js'
 import { vi } from 'vitest'
+import { routes } from '#src/server/common/constants/routes.js'
 
 vi.mock('~/src/server/common/plugins/auth/utils.js')
 
@@ -82,7 +83,41 @@ describe('Consultation response', () => {
     })
 
     expect(response.statusCode).toBe(statusCodes.redirect)
-    expect(response.headers.location).toBe(consultationDetailsUrl)
+    expect(response.headers.location).toBe(routes.CONSULTATIONS)
+  })
+
+  describe('when the consultation has already been responded to', () => {
+    beforeEach(() => {
+      mockMarineLicence({
+        consultation: {
+          id: marineLicenceId,
+          projectName: 'Test Marine Project',
+          consultationType: 'REQUEST_FOR_ADVICE',
+          consultationStatus: 'RESPONDED'
+        }
+      })
+    })
+
+    test('redirects to the consultations dashboard on page load', async () => {
+      const response = await makeGetRequest({
+        url: consultationResponseUrl,
+        server: getServer()
+      })
+
+      expect(response.statusCode).toBe(statusCodes.redirect)
+      expect(response.headers.location).toBe(routes.CONSULTATIONS)
+    })
+
+    test('redirects to the consultations dashboard on submission', async () => {
+      const response = await makePostRequest({
+        url: consultationResponseUrl,
+        server: getServer(),
+        formData: { consultationResponse: 'No objections' }
+      })
+
+      expect(response.statusCode).toBe(statusCodes.redirect)
+      expect(response.headers.location).toBe(routes.CONSULTATIONS)
+    })
   })
 
   test('shows a validation error when submitted empty', async () => {

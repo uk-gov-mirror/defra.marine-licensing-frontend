@@ -1,11 +1,13 @@
 import Boom from '@hapi/boom'
 import {
   apiRoutes,
+  routes,
   marineLicenceConsultationDetailsRoutes
 } from '#src/server/common/constants/routes.js'
 import { authenticatedPatchRequest } from '#src/server/common/helpers/authenticated-requests.js'
 import { validateConsulteeUserSession } from '#src/server/common/helpers/user-session-validators.js'
 import { fetchConsultation } from '#src/server/common/helpers/marine-licence/fetch-consultation.js'
+import { CONSULTATION_STATUS_CODE } from '#src/server/common/constants/marine-licence.js'
 import {
   errorDescriptionByFieldName,
   mapErrorsForDisplay
@@ -32,29 +34,42 @@ const getConsultationDetailsLink = (marineLicenceId) =>
     marineLicenceId
   )
 
-const getViewContext = async (request) => {
-  const { marineLicenceId } = request.params
-  const consultation = await fetchConsultation(request, marineLicenceId)
+const getConsultation = async (request) => {
+  const consultation = await fetchConsultation(
+    request,
+    request.params.marineLicenceId
+  )
 
   if (!consultation) {
     throw Boom.notFound('Consultation not found')
   }
 
-  return {
-    ...consultationResponseSettings,
-    projectName: consultation.projectName,
-    backLink: getConsultationDetailsLink(marineLicenceId)
-  }
+  return consultation
 }
+
+const getViewContext = (request, consultation) => ({
+  ...consultationResponseSettings,
+  projectName: consultation.projectName,
+  backLink: getConsultationDetailsLink(request.params.marineLicenceId)
+})
+
+const hasResponded = (consultation) =>
+  consultation.consultationStatus === CONSULTATION_STATUS_CODE.RESPONDED
 
 export const consultationResponseController = {
   options: {
     pre: [validateConsulteeUserSession]
   },
   async handler(request, h) {
+    const consultation = await getConsultation(request)
+
+    if (hasResponded(consultation)) {
+      return h.redirect(routes.CONSULTATIONS)
+    }
+
     return h.view(
       CONSULTATION_RESPONSE_VIEW_ROUTE,
-      await getViewContext(request)
+      getViewContext(request, consultation)
     )
   }
 }
@@ -69,7 +84,7 @@ export const consultationResponseSubmitController = {
 
         return h
           .view(CONSULTATION_RESPONSE_VIEW_ROUTE, {
-            ...(await getViewContext(request)),
+            ...getViewContext(request, await getConsultation(request)),
             payload: request.payload,
             errors: errorDescriptionByFieldName(errorSummary),
             errorSummary
@@ -81,6 +96,12 @@ export const consultationResponseSubmitController = {
   async handler(request, h) {
     const { marineLicenceId } = request.params
 
+    const consultation = await getConsultation(request)
+
+    if (hasResponded(consultation)) {
+      return h.redirect(routes.CONSULTATIONS)
+    }
+
     await authenticatedPatchRequest(
       request,
       apiRoutes.UPDATE_CONSULTATION_REQUEST,
@@ -90,6 +111,6 @@ export const consultationResponseSubmitController = {
       }
     )
 
-    return h.redirect(getConsultationDetailsLink(marineLicenceId))
+    return h.redirect(routes.CONSULTATIONS)
   }
 }

@@ -6,7 +6,7 @@ import {
 } from './controller.js'
 import { fetchConsultation } from '#src/server/common/helpers/marine-licence/fetch-consultation.js'
 import { authenticatedPatchRequest } from '#src/server/common/helpers/authenticated-requests.js'
-import { apiRoutes } from '#src/server/common/constants/routes.js'
+import { apiRoutes, routes } from '#src/server/common/constants/routes.js'
 
 vi.mock('~/src/server/common/helpers/marine-licence/fetch-consultation.js')
 vi.mock('~/src/server/common/helpers/authenticated-requests.js')
@@ -41,6 +41,21 @@ describe('#consultation-response', () => {
       )
     })
 
+    test('Should redirect to the consultations dashboard when already responded', async () => {
+      vi.mocked(fetchConsultation).mockResolvedValueOnce({
+        consultationStatus: 'RESPONDED'
+      })
+      const h = { view: vi.fn(), redirect: vi.fn() }
+
+      await consultationResponseController.handler(
+        { params: { marineLicenceId } },
+        h
+      )
+
+      expect(h.redirect).toHaveBeenCalledWith(routes.CONSULTATIONS)
+      expect(h.view).not.toHaveBeenCalled()
+    })
+
     test('Should throw not found when no consultation is returned', async () => {
       vi.mocked(fetchConsultation).mockResolvedValueOnce(undefined)
 
@@ -54,7 +69,7 @@ describe('#consultation-response', () => {
   })
 
   describe('#consultationResponseSubmitController', () => {
-    test('Should send the response and redirect to the consultation details page', async () => {
+    test('Should send the response and redirect to the consultation dashboard page', async () => {
       const request = {
         params: { marineLicenceId },
         payload: { consultationResponse: 'No objections' }
@@ -68,7 +83,25 @@ describe('#consultation-response', () => {
         apiRoutes.UPDATE_CONSULTATION_REQUEST,
         { response: 'No objections', id: marineLicenceId }
       )
-      expect(h.redirect).toHaveBeenCalledWith(consultationDetailsLink)
+      expect(h.redirect).toHaveBeenCalledWith(routes.CONSULTATIONS)
+    })
+
+    test('Should redirect to the consultations dashboard without sending when already responded', async () => {
+      vi.mocked(fetchConsultation).mockResolvedValueOnce({
+        consultationStatus: 'RESPONDED'
+      })
+      const h = { redirect: vi.fn() }
+
+      await consultationResponseSubmitController.handler(
+        {
+          params: { marineLicenceId },
+          payload: { consultationResponse: 'No objections' }
+        },
+        h
+      )
+
+      expect(authenticatedPatchRequest).not.toHaveBeenCalled()
+      expect(h.redirect).toHaveBeenCalledWith(routes.CONSULTATIONS)
     })
 
     test('Should not redirect when the API request fails', async () => {

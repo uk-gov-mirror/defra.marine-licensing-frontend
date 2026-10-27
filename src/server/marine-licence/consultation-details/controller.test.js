@@ -70,6 +70,7 @@ describe('#consultation-details', () => {
         heading: 'Notification of a marine licence application',
         marineLicenceId,
         projectName: 'Test Project',
+        hasResponded: false,
         viewApplicationLink: `/marine-licence/view-details/${marineLicenceId}`,
         responseLink: `/marine-licence/consultation-response/${marineLicenceId}`,
         backLink: routes.CONSULTATIONS
@@ -96,6 +97,7 @@ describe('#consultation-details', () => {
         heading: 'Request for advice for a marine licence application',
         marineLicenceId,
         projectName: 'Test Project',
+        hasResponded: false,
         viewApplicationLink: `/marine-licence/view-details/${marineLicenceId}`,
         responseLink: `/marine-licence/consultation-response/${marineLicenceId}`,
         backLink: routes.CONSULTATIONS

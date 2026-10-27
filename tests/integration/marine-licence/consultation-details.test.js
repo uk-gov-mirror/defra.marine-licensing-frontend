@@ -1,4 +1,4 @@
-import { getByRole, getByText } from '@testing-library/dom'
+import { getByRole, getByText, queryByRole } from '@testing-library/dom'
 import {
   marineLicenceConsultationDetailsRoutes,
   marineLicenceRoutes,
@@ -32,12 +32,13 @@ describe('Consultation details', () => {
     marineLicenceConsultationDetailsRoutes.MARINE_LICENCE_CONSULTATION_RESPONSE
   )
 
-  const mockConsultation = (consultationType) =>
+  const mockConsultation = (consultationType, consultationStatus) =>
     mockMarineLicence({
       consultation: {
         id: marineLicenceId,
         projectName: 'Test Marine Project',
-        consultationType
+        consultationType,
+        consultationStatus
       }
     })
 
@@ -117,6 +118,22 @@ describe('Consultation details', () => {
       expect(document.querySelector('.govuk-summary-list')).toBeNull()
     })
 
+    test('hides the respond section when already responded', async () => {
+      mockConsultation('APPLICATION_NOTIFICATION', 'RESPONDED')
+
+      const document = await loadPage({
+        requestUrl: notificationOfApplicationUrl,
+        server: getServer()
+      })
+
+      expect(
+        queryByRole(document, 'heading', { name: 'If you need to respond' })
+      ).toBeNull()
+      expect(
+        queryByRole(document, 'link', { name: 'Respond to the notification' })
+      ).toBeNull()
+    })
+
     test('returns not found when no consultation is returned', async () => {
       mockMarineLicence({})
 
@@ -177,6 +194,24 @@ describe('Consultation details', () => {
       expect(
         getByRole(document, 'button', { name: 'Respond to the request' })
       ).toHaveAttribute('href', consultationResponseUrl)
+    })
+
+    test('hides the respond section when already responded', async () => {
+      mockConsultation('REQUEST_FOR_ADVICE', 'RESPONDED')
+
+      const document = await loadPage({
+        requestUrl: requestForAdviceUrl,
+        server: getServer()
+      })
+
+      expect(
+        queryByRole(document, 'heading', {
+          name: 'Advice requested by the MMO'
+        })
+      ).toBeNull()
+      expect(
+        queryByRole(document, 'button', { name: 'Respond to the request' })
+      ).toBeNull()
     })
 
     test('returns not found when no consultation is returned', async () => {
