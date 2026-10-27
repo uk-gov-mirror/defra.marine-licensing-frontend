@@ -9,6 +9,7 @@ import {
   mockConsultations,
   mockManualCoordinatesMarineLicence,
   mockMarineLicenceApplication,
+  mockMarineLicenceWithConsultationApplication,
   mockMarineLicenceWithMarinePlanPolicies,
   mockSubmittedMarineLicenceApplication,
   mockWithdrawnMarineLicenceApplication,
@@ -59,15 +60,10 @@ const marineLicencePages = [
   {
     url: marineLicenceConsultationDetailsRoutes.MARINE_LICENCE_CONSULTATION_RESPONSE.replace(
       '{marineLicenceId}',
-      'test-consultation-id'
+      mockMarineLicenceWithConsultationApplication.consultation.id
     ),
     title: 'Your response',
-    marineLicence: {
-      consultation: {
-        projectName: 'Test Marine Project',
-        consultationType: 'REQUEST_FOR_ADVICE'
-      }
-    },
+    marineLicence: mockMarineLicenceWithConsultationApplication,
     session: { ...consulteeSession, shouldShowOrgOrUserName: false }
   },
   {

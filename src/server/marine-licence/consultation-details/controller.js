@@ -5,8 +5,8 @@ import {
   routes
 } from '#src/server/common/constants/routes.js'
 import { validateConsulteeUserSession } from '#src/server/common/helpers/user-session-validators.js'
-import { fetchConsultation } from '#src/server/common/helpers/marine-licence/fetch-consultation.js'
-import { CONSULTATION_STATUS_CODE } from '#src/server/common/constants/marine-licence.js'
+import { fetchConsultation } from '#src/server/common/helpers/marine-licence/consultation/fetch-consultation.js'
+import { hasResponded } from '#src/server/common/helpers/marine-licence/consultation/utils.js'
 
 export const notificationOfApplicationViewRoute =
   'marine-licence/consultation-details/notification-of-application/index'
@@ -59,8 +59,7 @@ const createConsultationPageController = (
       heading,
       marineLicenceId,
       projectName: consultation.projectName,
-      hasResponded:
-        consultation.consultationStatus === CONSULTATION_STATUS_CODE.RESPONDED,
+      hasResponded: hasResponded(consultation),
       viewApplicationLink: `${marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS}/${marineLicenceId}`,
       responseLink:
         marineLicenceConsultationDetailsRoutes.MARINE_LICENCE_CONSULTATION_RESPONSE.replace(

@@ -6,8 +6,8 @@ import {
 } from '#src/server/common/constants/routes.js'
 import { authenticatedPatchRequest } from '#src/server/common/helpers/authenticated-requests.js'
 import { validateConsulteeUserSession } from '#src/server/common/helpers/user-session-validators.js'
-import { fetchConsultation } from '#src/server/common/helpers/marine-licence/fetch-consultation.js'
-import { CONSULTATION_STATUS_CODE } from '#src/server/common/constants/marine-licence.js'
+import { fetchConsultation } from '#src/server/common/helpers/marine-licence/consultation/fetch-consultation.js'
+import { hasResponded } from '#src/server/common/helpers/marine-licence/consultation/utils.js'
 import {
   errorDescriptionByFieldName,
   mapErrorsForDisplay
@@ -52,9 +52,6 @@ const getViewContext = (request, consultation) => ({
   projectName: consultation.projectName,
   backLink: getConsultationDetailsLink(request.params.marineLicenceId)
 })
-
-const hasResponded = (consultation) =>
-  consultation.consultationStatus === CONSULTATION_STATUS_CODE.RESPONDED
 
 export const consultationResponseController = {
   options: {

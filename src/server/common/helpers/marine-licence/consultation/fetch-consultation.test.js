@@ -2,15 +2,16 @@ import { vi } from 'vitest'
 import { fetchConsultation } from './fetch-consultation.js'
 import { authenticatedGetRequest } from '#src/server/common/helpers/authenticated-requests.js'
 import { apiRoutes } from '#src/server/common/constants/routes.js'
+import { mockMarineLicenceWithConsultationApplication } from '#src/server/test-helpers/mocks/marine-licence-mocks.js'
 
 vi.mock('~/src/server/common/helpers/authenticated-requests.js')
 
 describe('#fetchConsultation', () => {
-  const marineLicenceId = 'test-consultation-id'
+  const { consultation } = mockMarineLicenceWithConsultationApplication
+  const marineLicenceId = consultation.id
   const request = { params: { marineLicenceId } }
 
   test('Should fetch and return the consultation', async () => {
-    const consultation = { projectName: 'Test Project' }
     vi.mocked(authenticatedGetRequest).mockResolvedValueOnce({
       payload: { value: { consultation } }
     })

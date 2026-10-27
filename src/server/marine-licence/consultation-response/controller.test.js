@@ -4,27 +4,34 @@ import {
   consultationResponseSubmitController,
   CONSULTATION_RESPONSE_VIEW_ROUTE
 } from './controller.js'
-import { fetchConsultation } from '#src/server/common/helpers/marine-licence/fetch-consultation.js'
+import { fetchConsultation } from '#src/server/common/helpers/marine-licence/consultation/fetch-consultation.js'
 import { authenticatedPatchRequest } from '#src/server/common/helpers/authenticated-requests.js'
 import { apiRoutes, routes } from '#src/server/common/constants/routes.js'
+import { CONSULTATION_STATUS_CODE } from '#src/server/common/constants/marine-licence.js'
+import { mockMarineLicenceWithConsultationApplication } from '#src/server/test-helpers/mocks/marine-licence-mocks.js'
 
-vi.mock('~/src/server/common/helpers/marine-licence/fetch-consultation.js')
+vi.mock(
+  '~/src/server/common/helpers/marine-licence/consultation/fetch-consultation.js'
+)
 vi.mock('~/src/server/common/helpers/authenticated-requests.js')
 
 describe('#consultation-response', () => {
-  const marineLicenceId = 'test-consultation-id'
+  const { consultation } = mockMarineLicenceWithConsultationApplication
+  const marineLicenceId = consultation.id
+  const respondedConsultation = {
+    ...consultation,
+    consultationStatus: CONSULTATION_STATUS_CODE.RESPONDED
+  }
   const consultationDetailsLink = `/marine-licence/consultation-details/${marineLicenceId}`
   const viewContext = {
     pageTitle: 'Your response',
     heading: 'Your response',
-    projectName: 'Test Project',
+    projectName: consultation.projectName,
     backLink: consultationDetailsLink
   }
 
   beforeEach(() => {
-    vi.mocked(fetchConsultation).mockResolvedValue({
-      projectName: 'Test Project'
-    })
+    vi.mocked(fetchConsultation).mockResolvedValue(consultation)
   })
 
   describe('#consultationResponseController', () => {
@@ -42,9 +49,7 @@ describe('#consultation-response', () => {
     })
 
     test('Should redirect to the consultations dashboard when already responded', async () => {
-      vi.mocked(fetchConsultation).mockResolvedValueOnce({
-        consultationStatus: 'RESPONDED'
-      })
+      vi.mocked(fetchConsultation).mockResolvedValueOnce(respondedConsultation)
       const h = { view: vi.fn(), redirect: vi.fn() }
 
       await consultationResponseController.handler(
@@ -87,9 +92,7 @@ describe('#consultation-response', () => {
     })
 
     test('Should redirect to the consultations dashboard without sending when already responded', async () => {
-      vi.mocked(fetchConsultation).mockResolvedValueOnce({
-        consultationStatus: 'RESPONDED'
-      })
+      vi.mocked(fetchConsultation).mockResolvedValueOnce(respondedConsultation)
       const h = { redirect: vi.fn() }
 
       await consultationResponseSubmitController.handler(
