@@ -54,12 +54,15 @@ const createConsultationPageController = (
       throw Boom.notFound('Consultation not found')
     }
 
+    const { response } = consultation
+
     return h.view(viewRoute, {
       pageTitle: heading,
       heading,
       marineLicenceId,
       projectName: consultation.projectName,
       hasResponded: hasResponded(consultation),
+      consulteeResponse: response,
       viewApplicationLink: `${marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS}/${marineLicenceId}`,
       responseLink:
         marineLicenceConsultationDetailsRoutes.MARINE_LICENCE_CONSULTATION_RESPONSE.replace(

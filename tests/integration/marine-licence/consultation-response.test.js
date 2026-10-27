@@ -15,6 +15,7 @@ import { statusCodes } from '~/src/server/common/constants/status-codes.js'
 import { expectInputError } from '~/tests/integration/shared/expect-utils.js'
 import { vi } from 'vitest'
 import { routes } from '#src/server/common/constants/routes.js'
+import { mockMarineLicenceWithConsultationApplication } from '~/src/server/test-helpers/mocks/marine-licence-mocks.js'
 
 vi.mock('~/src/server/common/plugins/auth/utils.js')
 
@@ -33,13 +34,7 @@ describe('Consultation response', () => {
 
   beforeEach(() => {
     vi.mocked(getUserSession).mockResolvedValue(consulteeSession)
-    mockMarineLicence({
-      consultation: {
-        id: marineLicenceId,
-        projectName: 'Test Marine Project',
-        consultationType: 'REQUEST_FOR_ADVICE'
-      }
-    })
+    mockMarineLicence(mockMarineLicenceWithConsultationApplication)
   })
 
   test('page elements', async () => {

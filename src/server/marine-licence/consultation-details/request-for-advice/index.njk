@@ -30,6 +30,13 @@
       href: responseLink
     }) }}
     {% endif %}
+
+    {% if hasResponded %}
+      <h2 class="govuk-heading-m">Your response</h2>
+
+      <p class="govuk-body">{{ consulteeResponse | safe }}</p>
+    {% endif %}
+
   </div>
 </div>
 {% endblock %}
