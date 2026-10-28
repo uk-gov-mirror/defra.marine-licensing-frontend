@@ -28,15 +28,20 @@ describe('Task List', () => {
 
   test('should render task list page elements', () => {
     expect(getByRole(document, 'heading', { level: 1 })).toHaveTextContent(
-      'Marine licence start page'
+      mockMarineLicenceApplication.projectName
     )
+    expect(document.querySelector('.govuk-caption-l')).toHaveTextContent(
+      'Marine licence'
+    )
+    expect(document.title).toContain('Marine licence start page')
 
-    expect(
-      getByText(
-        document,
-        'You need to complete all sections before sending your application. Your progress will be saved as you go if you need to come back later.'
-      )
-    ).toBeInTheDocument()
+    for (const paragraph of [
+      "When you provide your information you'll need to complete all sections before you can send your application.",
+      "You'll be able to start the Marine plan policy considerations once you have completed Site and activity details.",
+      'Your progress will be saved as you go if you need to come back later.'
+    ]) {
+      expect(getByText(document, paragraph)).toBeInTheDocument()
+    }
 
     expect(
       getByRole(document, 'heading', { level: 2, name: 'Application details' })
@@ -45,14 +50,29 @@ describe('Task List', () => {
     expect(
       getByRole(document, 'heading', {
         level: 2,
-        name: 'Site details and activities'
+        name: 'Site and activity details'
       })
     ).toBeInTheDocument()
   })
 
-  test('should render site details link in Site Details task list', () => {
+  test('should escape the project name in the page heading', async () => {
+    mockMarineLicence({
+      ...mockMarineLicenceApplication,
+      projectName: '<b>Exmouth</b> oyster farm'
+    })
+    const escapedDocument = await loadPage({
+      requestUrl: marineLicenceRoutes.MARINE_LICENCE_TASK_LIST,
+      server: getServer()
+    })
+
+    const heading = getByRole(escapedDocument, 'heading', { level: 1 })
+    expect(heading).toHaveTextContent('<b>Exmouth</b> oyster farm')
+    expect(heading.querySelector('b')).toBeNull()
+  })
+
+  test('should render sites and activities link in the site and activity details task list', () => {
     expect(
-      getByRole(document, 'link', { name: 'Site details' })
+      getByRole(document, 'link', { name: 'Sites and activities' })
     ).toBeInTheDocument()
   })
 
@@ -78,11 +98,11 @@ describe('Task List', () => {
 
     expect(
       getByRole(completedDocument, 'heading', { level: 1 })
-    ).toHaveTextContent('Marine licence start page')
+    ).toHaveTextContent(mockMarineLicenceApplication.projectName)
 
     expect(
       getByRole(completedDocument, 'button', {
-        name: 'Review and send your information'
+        name: 'Check and send your application'
       })
     ).toBeInTheDocument()
   })
@@ -101,7 +121,7 @@ describe('Task List', () => {
 
     expect(
       queryByRole(incompleteDocument, 'button', {
-        name: 'Review and send your information'
+        name: 'Check and send your application'
       })
     ).not.toBeInTheDocument()
   })
