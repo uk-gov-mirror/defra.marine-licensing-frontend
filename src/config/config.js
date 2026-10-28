@@ -308,6 +308,14 @@ export const config = convict({
       env: 'ENABLE_MARINE_LICENCE'
     }
   },
+  payments: {
+    enabled: {
+      doc: 'Take the marine licence application fee through GOV.UK Pay before submitting',
+      format: Boolean,
+      default: false,
+      env: 'PAYMENTS_ENABLED'
+    }
+  },
   dashboard: {
     userCacheTtl: {
       doc: 'TTL for the cached owner name lookups',
