@@ -135,7 +135,7 @@ describe('Public register', () => {
       fieldsetLabel:
         'Sharing your application information on the public register',
       errorMessage:
-        'Select whether you want to request that information is withheld',
+        'Select if you want to request that information is withheld',
       findByHeading: true
     })
   })
