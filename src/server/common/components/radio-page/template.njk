@@ -54,7 +54,7 @@
             }) }}
         {% endif %}
 
-        {% if params.isPageHeading and params.contentHtml %}
+        {% if params.contentHtml %}
             {{ headingWithCaption | safe }}
             <div class="govuk-!-margin-top-6">
                 {{ params.contentHtml | safe }}
