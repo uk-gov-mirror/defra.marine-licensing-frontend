@@ -113,7 +113,9 @@ export const renderFileUploadReview = (h, options) => {
     ...reviewSiteDetailsPageData,
     backLink: getFileUploadBackLink(previousPage, returnToCheckYourAnswers),
     projectName: marineLicence.projectName,
-    hasIncompleteFields: hasIncompleteFields(siteDetails),
+    hasIncompleteFields:
+      hasIncompleteFields(siteDetails) ||
+      hasIncompleteActivityDetails(summaryData),
     summaryData,
     showMarinePlanPoliciesQuestion,
     errors,
@@ -152,7 +154,9 @@ export const renderManualEntryReview = (h, options) => {
     ...reviewSiteDetailsPageData,
     backLink: getManualEntryBackLink(previousPage, returnToCheckYourAnswers),
     projectName: marineLicence.projectName,
-    hasIncompleteFields: hasIncompleteFields(siteDetails),
+    hasIncompleteFields:
+      hasIncompleteFields(siteDetails) ||
+      hasIncompleteActivityDetails(summaryData),
     summaryData,
     showMarinePlanPoliciesQuestion,
     errors,
@@ -165,9 +169,16 @@ const siteRequiresConstructionDrawing = (site) =>
     SUBTYPES_REQUIRING_CONSTRUCTION_DRAWING.includes(activity.activitySubType)
   )
 
+const hasEmptyDrawingSlot = (site) => {
+  const drawings = site.constructionDrawings ?? []
+  const slotCount = Math.max(drawings.length, 1)
+  return Array.from({ length: slotCount }, (_, index) => drawings[index]).some(
+    (drawing) => !drawing?.filename
+  )
+}
+
 const isMissingConstructionDrawing = (site) =>
-  siteRequiresConstructionDrawing(site) &&
-  !site.constructionDrawings?.[0]?.s3Location
+  siteRequiresConstructionDrawing(site) && hasEmptyDrawingSlot(site)
 
 const hasMissingRequiredFields = (site) => {
   const isSiteNameMissing = !site.siteName || site.siteName.trim() === ''
@@ -181,3 +192,20 @@ export const hasIncompleteFields = (siteDetails) => {
 
   return siteDetails.some((site) => hasMissingRequiredFields(site))
 }
+
+const ACTIVITY_FIELDS_SHOWN_AS_INCOMPLETE = [
+  'activitySubType',
+  'activityDescription',
+  'activityDuration',
+  'completionDate',
+  'activityMonths',
+  'workingHours'
+]
+
+const isActivityIncomplete = (activity) =>
+  ACTIVITY_FIELDS_SHOWN_AS_INCOMPLETE.some((field) => !activity[field])
+
+export const hasIncompleteActivityDetails = (summaryData) =>
+  (summaryData ?? []).some((site) =>
+    (site.activityDetails ?? []).some(isActivityIncomplete)
+  )

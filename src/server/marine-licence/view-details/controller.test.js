@@ -15,6 +15,7 @@ import {
 } from '#src/server/test-helpers/mocks/marine-licence-mocks.js'
 import { buildSiteData } from '#src/server/common/helpers/marine-licence/site-data.js'
 import { buildMarinePlanPoliciesData } from '#src/server/common/helpers/marine-licence/marine-plan-policies-data.js'
+import { USER_ROLE_TYPES } from '#src/server/common/constants/user-types.js'
 
 vi.mock('#src/server/common/helpers/marine-licence/site-data.js', () => ({
   buildSiteData: vi
@@ -136,7 +137,7 @@ describe('marine-licence view details controller', () => {
           VIEW_DETAILS_VIEW_ROUTE,
           expect.objectContaining({
             pageTitle: marineLicence.projectName,
-            pageCaption: `${marineLicence.applicationReference} - Marine licence`,
+            pageCaption: marineLicence.applicationReference,
             backLink: routes.DASHBOARD,
             coordinatesType: 'coordinates',
             summaryData: [{ siteNumber: 1, siteName: 'Test Site' }],
@@ -264,7 +265,7 @@ describe('marine-licence view details controller', () => {
     })
 
     describe('controller unit tests', () => {
-      test('should call view with backLink null and short pageCaption for public view', async () => {
+      test('should call view with backLink null and the application reference caption for public view', async () => {
         const marineLicence = createSubmittedMarineLicence()
         const mockServiceInstance = {
           getPublicMarineLicenceById: vi.fn().mockResolvedValue(marineLicence)
@@ -325,6 +326,43 @@ describe('marine-licence view details controller', () => {
         expect(mockH.view).toHaveBeenCalledWith(
           VIEW_DETAILS_VIEW_ROUTE,
           expect.objectContaining({ marinePlanPolicySections: mockPolicies })
+        )
+      })
+    })
+
+    describe('consultee view', () => {
+      test('should call getConsultationMarineLicenceById and render the non-applicant view', async () => {
+        const marineLicence = createSubmittedMarineLicence()
+        const mockServiceInstance = {
+          getConsultationMarineLicenceById: vi
+            .fn()
+            .mockResolvedValue(marineLicence)
+        }
+
+        vi.mocked(getMarineLicenceService).mockReturnValue(mockServiceInstance)
+
+        const mockRequest = {
+          path: `${marineLicenceRoutes.MARINE_LICENCE_VIEW_DETAILS}/${mockMarineLicenceApplication.id}`,
+          params: { marineLicenceId: mockMarineLicenceApplication.id },
+          auth: {
+            credentials: { userRoleType: USER_ROLE_TYPES.CONSULTEE }
+          },
+          logger: { error: vi.fn() }
+        }
+        const mockH = { view: vi.fn() }
+
+        await viewDetailsController.handler(mockRequest, mockH)
+
+        expect(
+          mockServiceInstance.getConsultationMarineLicenceById
+        ).toHaveBeenCalledWith(mockMarineLicenceApplication.id)
+        expect(mockH.view).toHaveBeenCalledWith(
+          VIEW_DETAILS_VIEW_ROUTE,
+          expect.objectContaining({
+            pageCaption: marineLicence.applicationReference,
+            backLink: null,
+            isApplicantView: false
+          })
         )
       })
     })
