@@ -314,6 +314,12 @@ export const config = convict({
       format: Boolean,
       default: false,
       env: 'PAYMENTS_ENABLED'
+    },
+    formActionHosts: {
+      doc: 'The GOV.UK Pay hosts that the declaration form redirects to, for CSP form-action',
+      format: Array,
+      default: ['https://card.payments.service.gov.uk'],
+      env: 'PAYMENTS_FORM_ACTION_HOSTS'
     }
   },
   dashboard: {
